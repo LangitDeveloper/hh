@@ -36,13 +36,30 @@ if not Success then
 	warn("\nOrion Library - Failed to load Feather Icons. Error code: " .. Response .. "\n")
 end	
 
+-- GANTI FUNCTION GetIcon() MENJADI:
 local function GetIcon(IconName)
-	if Icons[IconName] ~= nil then
-		return Icons[IconName]
-	else
-		return nil
-	end
-end   
+    -- Jika IconName adalah Asset ID langsung (rbxassetid://...)
+    if typeof(IconName) == "string" and IconName:sub(1, 13) == "rbxassetid://9433703094" then
+        return IconName  -- Langsung return Asset ID
+    end
+    
+    -- Jika IconName adalah nama icon (dari feather icons)
+    if Icons[IconName] ~= nil then
+        return Icons[IconName]
+    else
+        -- Fallback ke icon default
+        return "rbxassetid://9433703094"  -- Check icon
+    end
+end
+
+-- DAN PERBAIKI CreateElement("Image"):
+CreateElement("Image", function(ImageID)
+    local ImageNew = Create("ImageLabel", {
+        Image = GetIcon(ImageID),  -- Langsung pakai GetIcon
+        BackgroundTransparency = 1
+    })
+    return ImageNew
+end)
 
 local Orion = Instance.new("ScreenGui")
 Orion.Name = "Orion"
@@ -778,7 +795,7 @@ function OrionLib:MakeWindow(WindowConfig)
 			AddThemeObject(SetProps(MakeElement("Image", TabConfig.Icon), {
 				AnchorPoint = Vector2.new(0, 0.5),
 				Size = UDim2.new(0, 18, 0, 18),
-				Position = UDim2.new(0, 10, 10, 0),
+				Position = UDim2.new(0, 10, 0, 10),
 				ImageTransparency = 0.4,
 				Name = "Ico"
 			}), "Text"),
