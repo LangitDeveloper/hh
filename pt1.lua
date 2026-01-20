@@ -7,9 +7,9 @@ local Window = library:MakeWindow({
     ConfigFolder = "MahiruConfig",
     IntroEnabled = true,
     IntroText = "Welcome to Mahiru Script",
-    Icon = "rbxassetid://1676486355", 
-    MinimizedIcon = "rbxassetid://1676486355", 
-    IntroIcon = "rbxassetid://1676486355", 
+    Icon = "rbxassetid://9433703094", 
+    MinimizedIcon = "rbxassetid://9433703094", 
+    IntroIcon = "rbxassetid://9433703094", 
     ShowIcon = true
 })
 
