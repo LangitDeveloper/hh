@@ -6,8 +6,8 @@ local Window = OrionLib:MakeWindow({
     ConfigFolder = "MahiruConfig",
     IntroEnabled = true,
     IntroText = "Welcome to Mahiru Script",
-    Icon = "https://iili.io/frH9JiN.jpg", 
-    MinimizedIcon = "https://freeimage.host/i/frH9JiN", 
+    Icon = "rbxassetid://4483345998", 
+    MinimizedIcon = "rbxassetid://4483345998", 
     ShowIcon = true
 })
 
