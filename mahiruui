@@ -500,9 +500,6 @@ function OrionLib:MakeWindow(WindowConfig)
 		TabHolder.CanvasSize = UDim2.new(0, 0, 0, TabHolder.UIListLayout.AbsoluteContentSize.Y + 16)
 	end)
 
-	-- Create minimized icon (akan diatur nanti)
-	local MinimizedIcon = nil
-
 	local CloseBtn = SetChildren(SetProps(MakeElement("Button"), {
 		Size = UDim2.new(0.5, 0, 1, 0),
 		Position = UDim2.new(0.5, 0, 0, 0),
@@ -600,6 +597,42 @@ function OrionLib:MakeWindow(WindowConfig)
 		Position = UDim2.new(0, 0, 1, -1)
 	}), "Stroke")
 
+	-- **PERBAIKAN BESAR: BUAT MINIMIZED ICON DULU**
+	-- Buat icon minimized sebagai frame dengan background, BUKAN ImageButton biasa
+	local MinimizedIcon = Create("Frame", {
+		Name = "MinimizedIcon",
+		Size = UDim2.new(0, 50, 0, 50),
+		Position = UDim2.new(0.5, -25, 0.5, -25),
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		BackgroundColor3 = Color3.fromRGB(25, 25, 25),
+		BackgroundTransparency = 0,
+		BorderSizePixel = 0,
+		Visible = false,
+		Parent = Orion
+	})
+	
+	-- Tambahkan corner
+	local MinimizedIconCorner = Create("UICorner", {
+		CornerRadius = UDim.new(0, 10),
+		Parent = MinimizedIcon
+	})
+	
+	-- Tambahkan stroke
+	local MinimizedIconStroke = Create("UIStroke", {
+		Color = Color3.fromRGB(60, 60, 60),
+		Thickness = 2,
+		Parent = MinimizedIcon
+	})
+	
+	-- Tambahkan image di dalam frame
+	local MinimizedIconImage = Create("ImageButton", {
+		Image = WindowConfig.MinimizedIcon,
+		Size = UDim2.new(0.7, 0, 0.7, 0),
+		Position = UDim2.new(0.15, 0, 0.15, 0),
+		BackgroundTransparency = 1,
+		Parent = MinimizedIcon
+	})
+
 	local MainWindow = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 10), {
 		Parent = Orion,
 		Position = UDim2.new(0.5, -307, 0.5, -172),
@@ -638,52 +671,59 @@ function OrionLib:MakeWindow(WindowConfig)
 		WindowIcon.Parent = MainWindow.TopBar
 	end	
 
-	-- Create minimized icon setelah MainWindow dibuat
-	MinimizedIcon = SetProps(MakeElement("ImageButton"), {
-		Image = WindowConfig.MinimizedIcon,
-		Size = UDim2.new(0, 40, 0, 40),
-		Position = UDim2.new(1, -50, 1, -50),
-		AnchorPoint = Vector2.new(1, 1),
-		BackgroundTransparency = 1,
-		Visible = false,
-		Parent = Orion,
-		Name = "MinimizedIcon"
-	})
-
-	-- Tambahkan stroke dan corner untuk icon minimized
-	local MinimizedIconStroke = AddThemeObject(MakeElement("Stroke", Color3.fromRGB(93, 93, 93), 1), "Stroke")
-	MinimizedIconStroke.Parent = MinimizedIcon
-	
-	local MinimizedIconCorner = MakeElement("Corner", 1, 8)
-	MinimizedIconCorner.Parent = MinimizedIcon
-
 	AddDraggingFunctionality(DragPoint, MainWindow)
-	AddDraggingFunctionality(MinimizedIcon, MinimizedIcon)
+	AddDraggingFunctionality(MinimizedIcon, MinimizedIcon) -- Bisa drag icon juga
 
 	local function minimizeToIcon()
-		Minimized = true
-		MainWindow.Visible = false
-		MinimizedIcon.Visible = true
-		MinimizedIcon.Position = MainWindow.Position
+		if Minimized then return end
 		
-		-- Animate icon muncul
-		TweenService:Create(MinimizedIcon, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Minimized = true
+		
+		-- Simpan posisi window saat ini
+		local windowPos = MainWindow.Position
+		
+		-- Set posisi icon ke posisi window
+		MinimizedIcon.Position = windowPos
+		MinimizedIcon.Visible = true
+		
+		-- Animate window shrink ke icon
+		TweenService:Create(MainWindow, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
 			Size = UDim2.new(0, 50, 0, 50),
-			Position = MainWindow.Position
+			Position = windowPos
 		}):Play()
+		
+		wait(0.15)
+		
+		-- Sembunyikan window, tampilkan icon
+		MainWindow.Visible = false
+		
+		-- Reset size window untuk nanti
+		MainWindow.Size = UDim2.new(0, 615, 0, 344)
 		
 		library:MakeNotification({
 			Name = "Window Minimized",
-			Content = "Click the icon to restore window",
+			Content = "Click the icon to restore",
 			Time = 3
 		})
 	end
 
 	local function restoreFromIcon()
+		if not Minimized then return end
+		
 		Minimized = false
-		MinimizedIcon.Visible = false
+		
+		-- Simpan posisi icon
+		local iconPos = MinimizedIcon.Position
+		
+		-- Set window ke posisi icon
+		MainWindow.Position = iconPos
 		MainWindow.Visible = true
-		MainWindow.Position = MinimizedIcon.Position
+		MinimizedIcon.Visible = false
+		
+		-- Animate window kembali ke size normal
+		TweenService:Create(MainWindow, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			Size = UDim2.new(0, 615, 0, 344)
+		}):Play()
 		
 		library:MakeNotification({
 			Name = "Window Restored",
@@ -714,7 +754,7 @@ function OrionLib:MakeWindow(WindowConfig)
 		end
 	end)
 
-	AddConnection(MinimizedIcon.MouseButton1Click, function()
+	AddConnection(MinimizedIconImage.MouseButton1Click, function()
 		if Minimized then
 			restoreFromIcon()
 		end
@@ -1397,7 +1437,7 @@ function OrionLib:MakeWindow(WindowConfig)
 					Bind.Binding = false
 					Bind.Value = Key or Bind.Value
 					Bind.Value = Bind.Value.Name or Bind.Value
-					BindBox.Value.Text = Bind.Value
+						BindBox.Value.Text = Bind.Value
 				end
 
 				Bind:Set(BindConfig.Default)
@@ -1494,7 +1534,7 @@ function OrionLib:MakeWindow(WindowConfig)
 
 				local ColorH, ColorS, ColorV = 1, 1, 1
 				local Colorpicker = {Value = ColorpickerConfig.Default, Toggled = false, Type = "Colorpicker", Save = ColorpickerConfig.Save}
-				local ColorInput, HueInput -- FIX: Deklarasi variabel di luar scope
+				local ColorInput, HueInput
 
 				local ColorSelection = Create("ImageLabel", {
 					Size = UDim2.new(0, 18, 0, 18),
