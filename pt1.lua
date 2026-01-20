@@ -1,6 +1,6 @@
 local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/LangitDeveloper/hh/main/mahiruui"))()
 
-local Window = libary:MakeWindow({
+local Window = library:MakeWindow({
     Name = "Mahiru Script",
     HidePremium = false,
     SaveConfig = true,
