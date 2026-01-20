@@ -9,8 +9,6 @@ local Window = library:MakeWindow({
     IntroText = "Welcome to Mahiru Script",
     Icon = "rbxassetid://9433703094", 
     MinimizedIcon = "rbxassetid://9433703094", 
-    IntroIcon = "rbxassetid://9433703094", 
-    ShowIcon = true
 })
 
 local Players = game:GetService("Players")
