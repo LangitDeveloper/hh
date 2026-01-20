@@ -597,48 +597,34 @@ function OrionLib:MakeWindow(WindowConfig)
 		Position = UDim2.new(0, 0, 1, -1)
 	}), "Stroke")
 
-	-- ============ PERBAIKAN DISINI: MINIMIZED ICON ============
-	local MinimizedIcon = Create("Frame", {
+	-- ============ PERBAIKAN TOTAL: MINIMIZED ICON ============
+	-- 1. Buat ImageButton langsung (bukan Frame dengan ImageLabel di dalam)
+	local MinimizedIcon = Create("ImageButton", {
 		Name = "MinimizedIcon",
 		Size = UDim2.new(0, 50, 0, 50),
-		Position = UDim2.new(0.5, -25, 0.5, -25),
-		AnchorPoint = Vector2.new(0.5, 0.5),
-		BackgroundColor3 = Color3.fromRGB(35, 35, 35),
-		BackgroundTransparency = 0,
+		Position = UDim2.new(1, -60, 1, -60),  -- Pojok kanan bawah
+		AnchorPoint = Vector2.new(1, 1),
+		Image = WindowConfig.MinimizedIcon or "rbxassetid://1676486355",
+		BackgroundColor3 = Color3.fromRGB(70, 70, 70),  -- Background abu-abu TERANG
+		BackgroundTransparency = 0,  -- TIDAK transparan!
 		BorderSizePixel = 0,
 		Visible = false,
 		Parent = Orion,
-		Active = true
+		Active = true,
+		AutoButtonColor = false  -- Penting agar tidak berubah warna saat hover
 	})
 	
+	-- 2. Tambahkan corner untuk rounded
 	local MinimizedIconCorner = Create("UICorner", {
 		CornerRadius = UDim.new(0, 10),
 		Parent = MinimizedIcon
 	})
 	
+	-- 3. Tambahkan stroke (outline)
 	local MinimizedIconStroke = Create("UIStroke", {
-		Color = Color3.fromRGB(80, 80, 80),
+		Color = Color3.fromRGB(100, 100, 100),
 		Thickness = 2,
 		Parent = MinimizedIcon
-	})
-	
-	-- Image dengan warna putih
-	local MinimizedIconImage = Create("ImageLabel", {
-		Image = "rbxassetid://1676486355",
-		ImageColor3 = Color3.fromRGB(255, 255, 255),  -- PUTIH
-		Size = UDim2.new(0.7, 0, 0.7, 0),
-		Position = UDim2.new(0.15, 0, 0.15, 0),
-		BackgroundTransparency = 1,
-		Parent = MinimizedIcon
-	})
-	
-	-- Button untuk click (full frame)
-	local MinimizedIconButton = Create("TextButton", {
-		Size = UDim2.new(1, 0, 1, 0),
-		BackgroundTransparency = 1,
-		Text = "",
-		Parent = MinimizedIcon,
-		ZIndex = 10
 	})
 
 	local MainWindow = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 10), {
@@ -682,69 +668,65 @@ function OrionLib:MakeWindow(WindowConfig)
 
 	AddDraggingFunctionality(DragPoint, MainWindow)
 	
-	-- ============ DRAG FUNCTION UNTUK ICON ============
-	local function AddIconDraggingFunctionality()
-		local Dragging = false
-		local DragInput, MousePos, FramePos
-		
-		MinimizedIconButton.InputBegan:Connect(function(Input)
-			if Input.UserInputType == Enum.UserInputType.MouseButton1 then
-				Dragging = true
-				MousePos = Input.Position
-				FramePos = MinimizedIcon.Position
-				
-				Input.Changed:Connect(function()
-					if Input.UserInputState == Enum.UserInputState.End then
-						Dragging = false
-					end
-				end)
-			end
-		end)
-		
-		MinimizedIconButton.InputChanged:Connect(function(Input)
-			if Input.UserInputType == Enum.UserInputType.MouseMovement then
-				DragInput = Input
-			end
-		end)
-		
-		UserInputService.InputChanged:Connect(function(Input)
-			if Input == DragInput and Dragging then
-				local Delta = Input.Position - MousePos
-				MinimizedIcon.Position = UDim2.new(
-					FramePos.X.Scale, 
-					FramePos.X.Offset + Delta.X,
-					FramePos.Y.Scale, 
-					FramePos.Y.Offset + Delta.Y
-				)
-			end
-		end)
-	end
+	-- ============ DRAG FUNCTION UNTUK ICON (FIXED) ============
+	local IconDragging = false
+	local IconDragInput, IconMousePos, IconFramePos
 	
-	AddIconDraggingFunctionality()
+	MinimizedIcon.InputBegan:Connect(function(Input)
+		if Input.UserInputType == Enum.UserInputType.MouseButton1 then
+			IconDragging = true
+			IconMousePos = Input.Position
+			IconFramePos = MinimizedIcon.Position
+			
+			Input.Changed:Connect(function()
+				if Input.UserInputState == Enum.UserInputState.End then
+					IconDragging = false
+				end
+			end)
+		end
+	end)
+	
+	MinimizedIcon.InputChanged:Connect(function(Input)
+		if Input.UserInputType == Enum.UserInputType.MouseMovement then
+			IconDragInput = Input
+		end
+	end)
+	
+	UserInputService.InputChanged:Connect(function(Input)
+		if Input == IconDragInput and IconDragging then
+			local Delta = Input.Position - IconMousePos
+			MinimizedIcon.Position = UDim2.new(
+				IconFramePos.X.Scale, 
+				IconFramePos.X.Offset + Delta.X,
+				IconFramePos.Y.Scale, 
+				IconFramePos.Y.Offset + Delta.Y
+			)
+		end
+	end)
 
 	local function minimizeToIcon()
 		if Minimized then return end
 		
 		Minimized = true
 		
-		-- Simpan posisi window
+		-- Simpan posisi window saat ini
 		local windowPos = MainWindow.Position
 		
-		-- Set icon ke posisi window (di pojok kanan atas)
+		-- Set posisi icon di pojok kanan atas window
 		MinimizedIcon.Position = UDim2.new(
 			windowPos.X.Scale, 
-			windowPos.X.Offset + 615 - 60,  -- Pojok kanan
+			windowPos.X.Offset + 615 - 60,
 			windowPos.Y.Scale, 
-			windowPos.Y.Offset + 10  -- Sedikit dari atas
+			windowPos.Y.Offset + 10
 		)
 		
-		-- Animate window shrink
+		-- Animate window shrink ke icon
 		TweenService:Create(MainWindow, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
 			Size = UDim2.new(0, 50, 0, 50),
 			Position = MinimizedIcon.Position
 		}):Play()
 		
-		task.wait(0.15)
+		task.wait(0.2)
 		
 		-- Tampilkan icon, sembunyikan window
 		MainWindow.Visible = false
@@ -807,7 +789,7 @@ function OrionLib:MakeWindow(WindowConfig)
 		end
 	end)
 
-	AddConnection(MinimizedIconButton.MouseButton1Click, function()
+	AddConnection(MinimizedIcon.MouseButton1Click, function()
 		if Minimized then
 			restoreFromIcon()
 		end
@@ -932,6 +914,7 @@ function OrionLib:MakeWindow(WindowConfig)
 
 		local function GetElements(ItemParent)
 			local ElementFunction = {}
+			
 			function ElementFunction:AddLabel(Text)
 				local LabelFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
 					Size = UDim2.new(1, 0, 0, 30),
@@ -953,6 +936,7 @@ function OrionLib:MakeWindow(WindowConfig)
 				end
 				return LabelFunction
 			end
+			
 			function ElementFunction:AddParagraph(Text, Content)
 				Text = Text or "Text"
 				Content = Content or "Content"
@@ -991,6 +975,7 @@ function OrionLib:MakeWindow(WindowConfig)
 				end
 				return ParagraphFunction
 			end    
+			
 			function ElementFunction:AddButton(ButtonConfig)
 				ButtonConfig = ButtonConfig or {}
 				ButtonConfig.Name = ButtonConfig.Name or "Button"
@@ -1046,6 +1031,7 @@ function OrionLib:MakeWindow(WindowConfig)
 
 				return Button
 			end    
+			
 			function ElementFunction:AddToggle(ToggleConfig)
 				ToggleConfig = ToggleConfig or {}
 				ToggleConfig.Name = ToggleConfig.Name or "Toggle"
@@ -1128,6 +1114,187 @@ function OrionLib:MakeWindow(WindowConfig)
 				end	
 				return Toggle
 			end  
+			
+			-- ============ NEW: MULTI-SELECT DROPDOWN ============
+			function ElementFunction:AddMultiDropdown(MultiConfig)
+				MultiConfig = MultiConfig or {}
+				MultiConfig.Name = MultiConfig.Name or "Multi Select"
+				MultiConfig.Options = MultiConfig.Options or {}
+				MultiConfig.Default = MultiConfig.Default or {}
+				MultiConfig.Callback = MultiConfig.Callback or function() end
+				MultiConfig.Flag = MultiConfig.Flag or nil
+				MultiConfig.Save = MultiConfig.Save or false
+
+				local Multi = {Value = MultiConfig.Default, Options = MultiConfig.Options, Buttons = {}, Toggled = false, Type = "MultiDropdown", Save = MultiConfig.Save}
+				local MaxElements = 5
+
+				local MultiList = MakeElement("List")
+
+				local MultiContainer = AddThemeObject(SetProps(SetChildren(MakeElement("ScrollFrame", Color3.fromRGB(40, 40, 40), 4), {
+					MultiList
+				}), {
+					Parent = ItemParent,
+					Position = UDim2.new(0, 0, 0, 38),
+					Size = UDim2.new(1, 0, 1, -38),
+					ClipsDescendants = true
+				}), "Divider")
+
+				local Click = SetProps(MakeElement("Button"), {
+					Size = UDim2.new(1, 0, 1, 0)
+				})
+
+				local MultiFrame = AddThemeObject(SetChildren(SetProps(MakeElement("RoundFrame", Color3.fromRGB(255, 255, 255), 0, 5), {
+					Size = UDim2.new(1, 0, 0, 38),
+					Parent = ItemParent,
+					ClipsDescendants = true
+				}), {
+					MultiContainer,
+					SetProps(SetChildren(MakeElement("TFrame"), {
+						AddThemeObject(SetProps(MakeElement("Label", MultiConfig.Name, 15), {
+							Size = UDim2.new(1, -12, 1, 0),
+							Position = UDim2.new(0, 12, 0, 0),
+							Font = Enum.Font.GothamBold,
+							Name = "Content"
+						}), "Text"),
+						AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://7072706796"), {
+							Size = UDim2.new(0, 20, 0, 20),
+							AnchorPoint = Vector2.new(0, 0.5),
+							Position = UDim2.new(1, -30, 0.5, 0),
+							ImageColor3 = Color3.fromRGB(240, 240, 240),
+							Name = "Ico"
+						}), "TextDark"),
+						AddThemeObject(SetProps(MakeElement("Label", "...", 13), {
+							Size = UDim2.new(1, -40, 1, 0),
+							Font = Enum.Font.Gotham,
+							Name = "Selected",
+							TextXAlignment = Enum.TextXAlignment.Right
+						}), "TextDark"),
+						AddThemeObject(SetProps(MakeElement("Frame"), {
+							Size = UDim2.new(1, 0, 0, 1),
+							Position = UDim2.new(0, 0, 1, -1),
+							Name = "Line",
+							Visible = false
+						}), "Stroke"), 
+						Click
+					}), {
+						Size = UDim2.new(1, 0, 0, 38),
+						ClipsDescendants = true,
+						Name = "F"
+					}),
+					AddThemeObject(MakeElement("Stroke"), "Stroke"),
+					MakeElement("Corner")
+				}), "Second")
+
+				AddConnection(MultiList:GetPropertyChangedSignal("AbsoluteContentSize"), function()
+					MultiContainer.CanvasSize = UDim2.new(0, 0, 0, MultiList.AbsoluteContentSize.Y)
+				end)  
+
+				local function AddOptions(Options)
+					for _, Option in pairs(Options) do
+						local isSelected = table.find(Multi.Value, Option) ~= nil
+						
+						local OptionBtn = AddThemeObject(SetProps(SetChildren(MakeElement("Button", Color3.fromRGB(40, 40, 40)), {
+							MakeElement("Corner", 0, 6),
+							AddThemeObject(SetProps(MakeElement("Label", Option, 13, 0.4), {
+								Position = UDim2.new(0, 8, 0, 0),
+								Size = UDim2.new(1, -8, 1, 0),
+								Name = "Title"
+							}), "Text"),
+							SetProps(MakeElement("Image", "rbxassetid://3944680095"), {
+								Size = UDim2.new(0, 16, 0, 16),
+								Position = UDim2.new(1, -20, 0.5, 0),
+								AnchorPoint = Vector2.new(0, 0.5),
+								ImageTransparency = isSelected and 0 or 1,
+								Name = "Check"
+							})
+						}), {
+							Parent = MultiContainer,
+							Size = UDim2.new(1, 0, 0, 28),
+							BackgroundTransparency = isSelected and 0.5 or 1,
+							ClipsDescendants = true
+						}), "Divider")
+
+						AddConnection(OptionBtn.MouseButton1Click, function()
+							local index = table.find(Multi.Value, Option)
+							if index then
+								table.remove(Multi.Value, index)
+							else
+								table.insert(Multi.Value, Option)
+							end
+							Multi:RefreshSelectedText()
+							SaveCfg(game.GameId)
+							MultiConfig.Callback(Multi.Value)
+						end)
+
+						Multi.Buttons[Option] = OptionBtn
+					end
+				end	
+
+				function Multi:RefreshSelectedText()
+					local selectedCount = #self.Value
+					if selectedCount == 0 then
+						MultiFrame.F.Selected.Text = "..."
+					elseif selectedCount == 1 then
+						MultiFrame.F.Selected.Text = self.Value[1]
+					else
+						MultiFrame.F.Selected.Text = selectedCount .. " selected"
+					end
+					
+					-- Update checkmarks
+					for option, button in pairs(self.Buttons) do
+						local isSelected = table.find(self.Value, option) ~= nil
+						TweenService:Create(button, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+							BackgroundTransparency = isSelected and 0.5 or 1
+						}):Play()
+						TweenService:Create(button.Check, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+							ImageTransparency = isSelected and 0 or 1
+						}):Play()
+					end
+				end
+
+				function Multi:Refresh(Options, Delete)
+					if Delete then
+						for _,v in pairs(Multi.Buttons) do
+							v:Destroy()
+						end    
+						table.clear(Multi.Options)
+						table.clear(Multi.Buttons)
+					end
+					Multi.Options = Options
+					AddOptions(Multi.Options)
+					self:RefreshSelectedText()
+				end  
+
+				function Multi:Set(Value)
+					if type(Value) == "table" then
+						Multi.Value = Value
+					elseif type(Value) == "string" then
+						Multi.Value = {Value}
+					end
+					self:RefreshSelectedText()
+					MultiConfig.Callback(Multi.Value)
+				end
+
+				AddConnection(Click.MouseButton1Click, function()
+					Multi.Toggled = not Multi.Toggled
+					MultiFrame.F.Line.Visible = Multi.Toggled
+					TweenService:Create(MultiFrame.F.Ico,TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),{Rotation = Multi.Toggled and 180 or 0}):Play()
+					if #Multi.Options > MaxElements then
+						TweenService:Create(MultiFrame,TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),{Size = Multi.Toggled and UDim2.new(1, 0, 0, 38 + (MaxElements * 28)) or UDim2.new(1, 0, 0, 38)}):Play()
+					else
+						TweenService:Create(MultiFrame,TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),{Size = Multi.Toggled and UDim2.new(1, 0, 0, MultiList.AbsoluteContentSize.Y + 38) or UDim2.new(1, 0, 0, 38)}):Play()
+					end
+				end)
+
+				Multi:Refresh(Multi.Options, false)
+				Multi:RefreshSelectedText()
+				if MultiConfig.Flag then				
+					OrionLib.Flags[MultiConfig.Flag] = Multi
+				end
+				return Multi
+			end
+			-- ============ END MULTI-SELECT ============
+			
 			function ElementFunction:AddSlider(SliderConfig)
 				SliderConfig = SliderConfig or {}
 				SliderConfig.Name = SliderConfig.Name or "Slider"
@@ -1223,6 +1390,7 @@ function OrionLib:MakeWindow(WindowConfig)
 				end
 				return Slider
 			end  
+			
 			function ElementFunction:AddDropdown(DropdownConfig)
 				DropdownConfig = DropdownConfig or {}
 				DropdownConfig.Name = DropdownConfig.Name or "Dropdown"
@@ -1378,6 +1546,7 @@ function OrionLib:MakeWindow(WindowConfig)
 				end
 				return Dropdown
 			end
+			
 			function ElementFunction:AddBind(BindConfig)
 				BindConfig.Name = BindConfig.Name or "Bind"
 				BindConfig.Default = BindConfig.Default or Enum.KeyCode.Unknown
@@ -1499,6 +1668,7 @@ function OrionLib:MakeWindow(WindowConfig)
 				end
 				return Bind
 			end  
+			
 			function ElementFunction:AddTextbox(TextboxConfig)
 				TextboxConfig = TextboxConfig or {}
 				TextboxConfig.Name = TextboxConfig.Name or "Textbox"
@@ -1577,6 +1747,7 @@ function OrionLib:MakeWindow(WindowConfig)
 					TweenService:Create(TextboxFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(OrionLib.Themes[OrionLib.SelectedTheme].Second.R * 255 + 6, OrionLib.Themes[OrionLib.SelectedTheme].Second.G * 255 + 6, OrionLib.Themes[OrionLib.SelectedTheme].Second.B * 255 + 6)}):Play()
 				end)
 			end 
+			
 			function ElementFunction:AddColorpicker(ColorpickerConfig)
 				ColorpickerConfig = ColorpickerConfig or {}
 				ColorpickerConfig.Name = ColorpickerConfig.Name or "Colorpicker"
