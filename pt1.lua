@@ -1,13 +1,15 @@
 local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/LangitDeveloper/hh/main/mahiruui"))()
-local Window = OrionLib:MakeWindow({
+
+local Window = libary:MakeWindow({
     Name = "Mahiru Script",
     HidePremium = false,
     SaveConfig = true,
     ConfigFolder = "MahiruConfig",
     IntroEnabled = true,
     IntroText = "Welcome to Mahiru Script",
-    Icon = "rbxassetid://4483345998", 
-    MinimizedIcon = "rbxassetid://4483345998", 
+    Icon = "rbxassetid://1676486355", 
+    MinimizedIcon = "rbxassetid://1676486355", 
+    IntroIcon = "rbxassetid://1676486355", 
     ShowIcon = true
 })
 
