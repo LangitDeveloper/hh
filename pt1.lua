@@ -8,7 +8,6 @@ local Window = OrionLib:MakeWindow({
     IntroText = "Welcome to Mahiru Script",
     Icon = "https://iili.io/frH9JiN.jpg", 
     MinimizedIcon = "https://freeimage.host/i/frH9JiN", 
-    IntroIcon = "https://iili.io/frH9JiN.jpg", 
     ShowIcon = true
 })
 
