@@ -73,7 +73,6 @@ function OrionLib:IsRunning()
 	else
 		return Orion.Parent == game:GetService("CoreGui")
 	end
-
 end
 
 local function AddConnection(Signal, Function)
@@ -97,7 +96,7 @@ end)
 
 local function AddDraggingFunctionality(DragPoint, Main)
 	pcall(function()
-		local Dragging, DragInput, MousePos, FramePos = false
+		local Dragging, DragInput, MousePos, FramePos = false, nil, nil, nil
 		DragPoint.InputBegan:Connect(function(Input)
 			if Input.UserInputType == Enum.UserInputType.MouseButton1 then
 				Dragging = true
@@ -119,7 +118,7 @@ local function AddDraggingFunctionality(DragPoint, Main)
 		UserInputService.InputChanged:Connect(function(Input)
 			if Input == DragInput and Dragging then
 				local Delta = Input.Position - MousePos
-				TweenService:Create(Main, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Position  = UDim2.new(FramePos.X.Scale,FramePos.X.Offset + Delta.X, FramePos.Y.Scale, FramePos.Y.Offset + Delta.Y)}):Play()
+				TweenService:Create(Main, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Position = UDim2.new(FramePos.X.Scale, FramePos.X.Offset + Delta.X, FramePos.Y.Scale, FramePos.Y.Offset + Delta.Y)}):Play()
 			end
 		end)
 	end)
@@ -480,7 +479,7 @@ function OrionLib:MakeWindow(WindowConfig)
 	WindowConfig.ShowIcon = WindowConfig.ShowIcon or false
 	WindowConfig.Icon = WindowConfig.Icon or "rbxassetid://8834748103"
 	WindowConfig.IntroIcon = WindowConfig.IntroIcon or "rbxassetid://8834748103"
-	WindowConfig.MinimizedIcon = WindowConfig.MinimizedIcon or "rbxassetid://8834748103" -- New config for minimized icon
+	WindowConfig.MinimizedIcon = WindowConfig.MinimizedIcon or "rbxassetid://8834748103"
 	OrionLib.Folder = WindowConfig.ConfigFolder
 	OrionLib.SaveCfg = WindowConfig.SaveConfig
 
@@ -501,25 +500,8 @@ function OrionLib:MakeWindow(WindowConfig)
 		TabHolder.CanvasSize = UDim2.new(0, 0, 0, TabHolder.UIListLayout.AbsoluteContentSize.Y + 16)
 	end)
 
-	-- Create minimized icon
-	local MinimizedIcon = SetProps(MakeElement("ImageButton"), {
-		Image = WindowConfig.MinimizedIcon,
-		Size = UDim2.new(0, 40, 0, 40),
-		Position = UDim2.new(1, -45, 0, 5),
-		AnchorPoint = Vector2.new(1, 0),
-		BackgroundTransparency = 1,
-		Visible = false,
-		Parent = Orion
-	})
-
-	-- Add dragging functionality to minimized icon
-	AddDraggingFunctionality(MinimizedIcon, MinimizedIcon)
-
-	AddConnection(MinimizedIcon.MouseButton1Click, function()
-		Minimized = true
-		MainWindow.Visible = false
-		MinimizedIcon.Visible = true
-	end)
+	-- Create minimized icon (akan diatur nanti)
+	local MinimizedIcon = nil
 
 	local CloseBtn = SetChildren(SetProps(MakeElement("Button"), {
 		Size = UDim2.new(0.5, 0, 1, 0),
@@ -656,61 +638,92 @@ function OrionLib:MakeWindow(WindowConfig)
 		WindowIcon.Parent = MainWindow.TopBar
 	end	
 
+	-- Create minimized icon setelah MainWindow dibuat
+	MinimizedIcon = SetProps(MakeElement("ImageButton"), {
+		Image = WindowConfig.MinimizedIcon,
+		Size = UDim2.new(0, 40, 0, 40),
+		Position = UDim2.new(1, -50, 1, -50),
+		AnchorPoint = Vector2.new(1, 1),
+		BackgroundTransparency = 1,
+		Visible = false,
+		Parent = Orion,
+		Name = "MinimizedIcon"
+	})
+
+	-- Tambahkan stroke dan corner untuk icon minimized
+	local MinimizedIconStroke = AddThemeObject(MakeElement("Stroke", Color3.fromRGB(93, 93, 93), 1), "Stroke")
+	MinimizedIconStroke.Parent = MinimizedIcon
+	
+	local MinimizedIconCorner = MakeElement("Corner", 1, 8)
+	MinimizedIconCorner.Parent = MinimizedIcon
+
 	AddDraggingFunctionality(DragPoint, MainWindow)
+	AddDraggingFunctionality(MinimizedIcon, MinimizedIcon)
+
+	local function minimizeToIcon()
+		Minimized = true
+		MainWindow.Visible = false
+		MinimizedIcon.Visible = true
+		MinimizedIcon.Position = MainWindow.Position
+		
+		-- Animate icon muncul
+		TweenService:Create(MinimizedIcon, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			Size = UDim2.new(0, 50, 0, 50),
+			Position = MainWindow.Position
+		}):Play()
+		
+		library:MakeNotification({
+			Name = "Window Minimized",
+			Content = "Click the icon to restore window",
+			Time = 3
+		})
+	end
+
+	local function restoreFromIcon()
+		Minimized = false
+		MinimizedIcon.Visible = false
+		MainWindow.Visible = true
+		MainWindow.Position = MinimizedIcon.Position
+		
+		library:MakeNotification({
+			Name = "Window Restored",
+			Content = "Window restored from minimized state",
+			Time = 2
+		})
+	end
 
 	AddConnection(CloseBtn.MouseButton1Up, function()
 		MainWindow.Visible = false
-		UIHidden = true
 		MinimizedIcon.Visible = false
-		OrionLib:MakeNotification({
+		UIHidden = true
+		library:MakeNotification({
 			Name = "Interface Hidden",
-			Content = "Tap RightShift to reopen the interface",
+			Content = "Press RightShift to reopen",
 			Time = 5
 		})
-		WindowConfig.CloseCallback()
-	end)
-
-	AddConnection(UserInputService.InputBegan, function(Input)
-		if Input.KeyCode == Enum.KeyCode.RightShift and UIHidden then
-			MainWindow.Visible = true
-			MinimizedIcon.Visible = false
+		if WindowConfig.CloseCallback then
+			WindowConfig.CloseCallback()
 		end
 	end)
 
 	AddConnection(MinimizeBtn.MouseButton1Up, function()
 		if Minimized then
-			-- Restore window
-			TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(0, 615, 0, 344)}):Play()
-			MinimizeBtn.Ico.Image = "rbxassetid://7072719338"
-			MinimizedIcon.Visible = false
-			MainWindow.Visible = true
-			MainWindow.ClipsDescendants = false
-			WindowStuff.Visible = true
-			WindowTopBarLine.Visible = true
-			Minimized = false
+			restoreFromIcon()
 		else
-			-- Minimize to icon
-			MainWindow.ClipsDescendants = true
-			WindowTopBarLine.Visible = false
-			MinimizeBtn.Ico.Image = "rbxassetid://7072720870"
+			minimizeToIcon()
+		end
+	end)
 
-			-- Store window position
-			local windowPos = MainWindow.Position
-			MinimizedIcon.Position = windowPos
-			
-			-- Animate to icon
-			TweenService:Create(MainWindow, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-				Size = UDim2.new(0, 40, 0, 40),
-				Position = windowPos + UDim2.new(0, 615-40, 0, 0)
-			}):Play()
-			
-			wait(0.3)
-			MainWindow.Visible = false
-			MinimizedIcon.Visible = true
-			Minimized = true
-			
-			-- Reset window size for when restored
-			MainWindow.Size = UDim2.new(0, 615, 0, 344)
+	AddConnection(MinimizedIcon.MouseButton1Click, function()
+		if Minimized then
+			restoreFromIcon()
+		end
+	end)
+
+	AddConnection(UserInputService.InputBegan, function(Input)
+		if Input.KeyCode == Enum.KeyCode.RightShift and UIHidden then
+			UIHidden = false
+			restoreFromIcon()
 		end
 	end)
 
@@ -1481,6 +1494,7 @@ function OrionLib:MakeWindow(WindowConfig)
 
 				local ColorH, ColorS, ColorV = 1, 1, 1
 				local Colorpicker = {Value = ColorpickerConfig.Default, Toggled = false, Type = "Colorpicker", Save = ColorpickerConfig.Save}
+				local ColorInput, HueInput -- FIX: Deklarasi variabel di luar scope
 
 				local ColorSelection = Create("ImageLabel", {
 					Size = UDim2.new(0, 18, 0, 18),
@@ -1623,7 +1637,7 @@ function OrionLib:MakeWindow(WindowConfig)
 					if input.UserInputType == Enum.UserInputType.MouseButton1 then
 						if HueInput then
 							HueInput:Disconnect()
-						end;
+						end
 
 						HueInput = AddConnection(RunService.RenderStepped, function()
 							local HueY = (math.clamp(Mouse.Y - Hue.AbsolutePosition.Y, 0, Hue.AbsoluteSize.Y) / Hue.AbsoluteSize.Y)
