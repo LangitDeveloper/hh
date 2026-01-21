@@ -481,10 +481,22 @@ local UtilitiesTab = Window:Tab({Title = "Utilities", Icon = "box"})
 local ShopTab = Window:Tab({Title = "Shop", Icon = "shopping-cart"})
 local TeleportTab = Window:Tab({Title = "Teleport", Icon = "map"})
 
-local info = InfoTab:Section({Title = "Info Player"})
-InfoTab:AddParagraph("Display Name", LocalPlayer.DisplayName)
-InfoTab:AddParagraph("Username", LoacalPlayer.Name)
-InfoTab:AddParagraph("UserID", tostring(LocalPlayer.UserId))
+local PlayerInfoSection = InfoTab:Section({Title = "Player Information"})
+
+PlayerInfoSection:Paragraph({
+    Title = "Display Name",
+    Content = LocalPlayer.DisplayName
+})
+
+PlayerInfoSection:Paragraph({
+    Title = "Username",
+    Content = LocalPlayer.Name
+})
+
+PlayerInfoSection:Paragraph({
+    Title = "UserID",
+    Content = tostring(LocalPlayer.UserId)
+})
 
 InfoTab:Space()
 
