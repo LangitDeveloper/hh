@@ -238,6 +238,7 @@ local Stats = { StartTime = os.time(), FishCaught = 0, LastSellTime = 0, TotalSo
 local FishingActive = false
 local AutoSellActive = false
 
+local AntiRagdollController = { Connection = nil }
 
 function AntiRagdollController:Enable()
     if self.Connection then return end
