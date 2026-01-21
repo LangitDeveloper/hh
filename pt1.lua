@@ -801,14 +801,14 @@ local MapLocations = {
     ["Pirate Cove"] = Vector3.new(3207.78, 9.10, 3546.13),
 }
 
-local PlayerTab = Window:MakeTab({Name = "Player Info", Icon = "rbxassetid://7072716975"})
+local PlayerTab = Window:MakeTab({Name = "Player Info", Icon = "rbxassetid://97167558235554"})
 PlayerTab:AddSection({Name = "Player Info"})
 PlayerTab:AddParagraph("Display Name", Player.DisplayName)
 PlayerTab:AddParagraph("Username", Player.Name)
 PlayerTab:AddParagraph("UserID", tostring(Player.UserId))
 local networkStatus = PlayerTab:AddLabel("Network: 🔄 Loading...")
 
-local FishingTab = Window:MakeTab({Name = "Fishing", Icon = "rbxassetid://7072722669"})
+local FishingTab = Window:MakeTab({Name = "Fishing", Icon = "rbxassetid://97167558235554"})
 FishingTab:AddSection({Name = "Fishing Features"})
 
 FishingTab:AddToggle({
@@ -1050,7 +1050,7 @@ local backpackInfoLabel = FishingTab:AddLabel("Backpack: Checking...")
 
 local statsLabel = FishingTab:AddLabel("Fish Caught: 0 | Total Sold: 0") 
 
-local FishV2Tab = Window:MakeTab({Name = "Fishing v2", Icon = "rbxassetid://7072722669"})
+local FishV2Tab = Window:MakeTab({Name = "Fishing v2", Icon = "rbxassetid://97167558235554"})
 FishV2Tab:AddSection({Name = "Fishing Features"})
 
 local function Fastest()
@@ -1118,7 +1118,7 @@ FishV2Tab:AddToggle({
     end
 })
 
-local CheatTab = Window:MakeTab({Name = "Tools", Icon = "rbxassetid://7072702798"})
+local CheatTab = Window:MakeTab({Name = "Tools", Icon = "rbxassetid://140165584241571"})
 CheatTab:AddSection({Name = "Movement"})
 
 CheatTab:AddToggle({
@@ -1214,7 +1214,7 @@ VisualTab:AddToggle({
     end
 })
 
-local TeleportTab = Window:MakeTab({Name = "Teleport", Icon = "rbxassetid://7072725342"})
+local TeleportTab = Window:MakeTab({Name = "Teleport", Icon = "rbxassetid://18648122722"})
 TeleportTab:AddSection({Name = "Map Teleport"})
 
 local MapNames = {}
