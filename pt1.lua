@@ -481,9 +481,36 @@ local UtilitiesTab = Window:Tab({Title = "Utilities", Icon = "box"})
 local ShopTab = Window:Tab({Title = "Shop", Icon = "shopping-cart"})
 local TeleportTab = Window:Tab({Title = "Teleport", Icon = "map"})
 
-InfoTab:Paragraph("Display Name", LocalPlayer.DisplayName)
-InfoTab:Paragraph("Username", LocalPlayer.Name)
-InfoTab:Paragraph("UserID", tostring(LocalPlayer.UserId))
+InfoTab:Paragraph({
+    Title = "MengHub Alert!",
+    Desc = "This script is still under development!\nThere is a possibility it may get detected if used in public servers!\nIf you have suggestions or found bugs, please report them to <font color=\"#00AAFF\">Discord Meng Hub</font>!\n<b>Use at your own risk!</b>",
+    Color = "Green",
+    Image = "rbxassetid://17313330026",
+    ImageSize = 30,
+})
+
+InfoTab:Button({
+    Title = "Need Help?",
+    Desc = "Click This To Copy Discord Link.\nJoin to <font color=\"#FF90E3\">Discord Meng Hub</font>!",
+    Callback = function()
+        if setclipboard then
+            setclipboard("discord.gg/menghub")
+            MengHubUI:Notify({
+                Title = "Success",
+                Content = "Discord link copied to clipboard!",
+                Duration = 3,
+                Icon = "laptop-minimal-check",
+            })
+        else
+            MengHubUI:Notify({
+                Title = "Error",
+                Content = "Executor doesn't support clipboard!",
+                Duration = 3,
+                Icon = "circle-x",
+            })
+        end
+    end,
+})
 
 InfoTab:Space()
 
