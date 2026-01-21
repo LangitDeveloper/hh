@@ -1,16 +1,3 @@
--- MengHub - Fish It! Roblox Script
--- Game: Fish It (Place ID: 121864768012064)
--- Version: 1.0.1
--- Author: Freemium
--- Discord: discord.gg/menghub
-
--- Security Check
-if game.PlaceId ~= 121864768012064 then
-    game:GetService("Players").LocalPlayer:Kick("MengHub only works on Fish It brahhhhh!")
-    return
-end
-
--- Services
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -22,7 +9,6 @@ local TeleportService = game:GetService("TeleportService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 
--- Remote Events and Functions
 local Net = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net
 local Remotes = {
     RE_FishCaught = Net:WaitForChild("RE/FishCaught"),
@@ -54,7 +40,6 @@ local Remotes = {
     RF_Trade = Net:WaitForChild("RF/InitiateTrade"),
 }
 
--- Modules
 local Replion = require(ReplicatedStorage.Packages.Replion)
 local FishingController = require(ReplicatedStorage.Controllers.FishingController)
 local ItemTradingController = require(ReplicatedStorage.Controllers.ItemTradingController)
@@ -62,12 +47,10 @@ local ItemUtility = require(ReplicatedStorage.Shared.ItemUtility)
 local VendorUtility = require(ReplicatedStorage.Shared.VendorUtility)
 local PlayerStatsUtility = require(ReplicatedStorage.Shared.PlayerStatsUtility)
 
--- Variables
 local PlayerData = Replion.Client:WaitReplion("Data")
 local ItemsFolder = ReplicatedStorage:WaitForChild("Items")
 local DivingGearData = ItemUtility.GetItemDataFromItemType("Gears", "Diving Gear")
 
--- UI References
 local PlayerGui = LocalPlayer.PlayerGui
 local MerchantUI = {
     MerchantRoot = PlayerGui.Merchant.Main.Background,
@@ -75,7 +58,6 @@ local MerchantUI = {
     RefreshMerchant = PlayerGui.Merchant.Main.Background.RefreshLabel,
 }
 
--- Fishing Variables
 local LegitFishingDelay = 0.2
 local ShakeDelay = 0.15
 local InstantFishingDelay = 0.1
@@ -87,13 +69,11 @@ local IsInstantFishing = false
 local IsBlatantFishing = false
 local CurrentFishCount = 0
 
--- Auto Sell Variables
-local AutoSellMode = "Delay" -- "Delay" or "Count"
+local AutoSellMode = "Delay" 
 local AutoSellValue = 60
 local IsAutoSell = false
 local LastSellTick = 0
 
--- Webhook Variables
 local WebhookConfig = {
     Enabled = false,
     URL = "",
@@ -103,7 +83,6 @@ local WebhookConfig = {
 }
 local FishData = {}
 
--- Player Variables
 local IsNoClip = false
 local IsInfiniteJump = false
 local IsFlyEnabled = false
@@ -116,30 +95,24 @@ local IsDisableVFX = false
 local IsDisableCutscene = false
 local IsDisableFishNotification = false
 
--- ESP Variables
 local ESPEnabled = false
 local ESPObjects = {}
 
--- Identity Changer
 local IdentityElements = {}
 local OriginalIdentity = {}
 local IsIdentityHidden = false
 
--- Event Farming
 local IsAutoEvent = false
 local SelectedEvent = nil
 local FarmPosition = nil
 local EventPart = nil
 
--- Quest Variables
 local IsAutoDeepSeaQuest = false
 local IsAutoElementQuest = false
 
--- Auto Weather
 local IsAutoWeather = false
 local SelectedWeathers = {}
 
--- Auto Favorite
 local AutoFavoriteConfig = {
     Enabled = false,
     FishNames = {},
@@ -148,7 +121,6 @@ local AutoFavoriteConfig = {
 }
 local FavoriteStates = {}
 
--- Merchant Variables
 local SelectedRod = nil
 local SelectedBait = nil
 local SelectedBoat = nil
@@ -156,12 +128,10 @@ local RodLookup = {}
 local BaitLookup = {}
 local BoatLookup = {}
 
--- Teleport Variables
 local SelectedLocation = nil
 local SelectedPlayer = nil
 local PlayerList = {}
 
--- Utility Functions
 function FormatNumber(num)
     if num >= 1000000 then
         return string.format("%.1fM", num / 1000000)
@@ -209,18 +179,15 @@ function SendWebhook(url, data)
     end)
 end
 
--- Fishing Functions
 function StartLegitFishing()
     IsLegitFishing = true
     FishingController._autoLoop = true
     
     task.spawn(function()
         while IsLegitFishing do
-            -- Charge fishing rod
             VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 1)
             task.wait(0.05)
             
-            -- Wait for charge bar
             local chargeBar = PlayerGui.Charge.Main.CanvasGroup.Bar
             local startTime = tick()
             
@@ -235,7 +202,6 @@ function StartLegitFishing()
             
             VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 1)
             
-            -- Wait for fish
             local fishCaught = false
             local waitStart = tick()
             
@@ -248,7 +214,6 @@ function StartLegitFishing()
             end
             
             if fishCaught then
-                -- Auto shake if enabled
                 if IsAutoShake then
                     while FishingController:GetCurrentGUID() do
                         pcall(function()
@@ -258,13 +223,11 @@ function StartLegitFishing()
                     end
                 end
                 
-                -- Complete fishing after delay
                 task.wait(LegitFishingDelay)
                 pcall(function()
                     Remotes.RE_Fishing:FireServer()
                 end)
                 
-                -- Wait for catch to register
                 task.wait(1.3)
             end
             
@@ -330,7 +293,6 @@ function StartBlatantFishing()
     end)
 end
 
--- Auto Sell Function
 function StartAutoSell()
     IsAutoSell = true
     
@@ -347,7 +309,7 @@ function StartAutoSell()
             
             if AutoSellMode == "Delay" then
                 Remotes.RF_Sell:InvokeServer()
-                task.wait(AutoSellValue * 60) -- Convert minutes to seconds
+                task.wait(AutoSellValue * 60) 
             elseif AutoSellMode == "Count" then
                 if current >= AutoSellValue then
                     Remotes.RF_Sell:InvokeServer()
@@ -358,7 +320,6 @@ function StartAutoSell()
     end)
 end
 
--- Webhook Function
 function SendFishWebhook(fishId, metadata)
     if not WebhookConfig.Enabled or not WebhookConfig.URL then return end
     
@@ -371,14 +332,14 @@ function SendFishWebhook(fishId, metadata)
     local price = fishInfo.SellPrice and "$" .. FormatNumber(fishInfo.SellPrice) or "N/A"
     
     local embed = {
-        username = "Meng Hub Notification!",
+        username = "Mahiru Notification!",
         avatar_url = "https://i.imgur.com/ly3iUKn.jpeg",
         embeds = {{
             description = string.format("Congratulations **%s**! You just caught a **%s** fish!", 
                 WebhookConfig.HideName ~= "" and WebhookConfig.HideName or LocalPlayer.Name, 
                 tierName),
             color = 16738740,
-            author = {name = "MengHub Webhook | Fish Caught"},
+            author = {name = "Mahiru Webhook | Fish Caught"},
             image = {url = GetThumbnailUrl(fishInfo.Icon) or "https://i.imgur.com/ly3iUKn.jpeg"},
             fields = {
                 {name = "🎣 Fish Name", value = "```❯ " .. fishInfo.Name .. "```"},
@@ -388,7 +349,7 @@ function SendFishWebhook(fishId, metadata)
                 {name = "💰 Sell Price", value = "```❯ " .. price .. "```"},
                 {name = "🕒 Caught At", value = "```❯ " .. os.date("%Y-%m-%d %H:%M:%S") .. "```"}
             },
-            footer = {text = "Powered by MengHub", icon_url = "https://i.imgur.com/ly3iUKn.jpeg"},
+            footer = {text = "Powered by mahiru", icon_url = "https://i.imgur.com/ly3iUKn.jpeg"},
             timestamp = os.date("!%Y-%m-%dT%H:%M:%S.000Z")
         }}
     }
@@ -396,7 +357,6 @@ function SendFishWebhook(fishId, metadata)
     SendWebhook(WebhookConfig.URL, embed)
 end
 
--- Load Fish Data
 task.spawn(function()
     if not ItemsFolder then return end
     
@@ -415,7 +375,6 @@ task.spawn(function()
     end
 end)
 
--- Connect to fish caught notification
 task.spawn(function()
     repeat task.wait(1) until Remotes.RE_ObtainedNewFishNotification
     Remotes.RE_ObtainedNewFishNotification.OnClientEvent:Connect(function(fishId, metadata)
@@ -425,20 +384,19 @@ task.spawn(function()
     end)
 end)
 
--- Anti-AFK
+
 local VirtualUserRef = cloneref(game:GetService("VirtualUser")) or game:GetService("VirtualUser")
 LocalPlayer.Idled:Connect(function()
     VirtualUserRef:CaptureController()
     VirtualUserRef:ClickButton2(Vector2.new())
 end)
 
--- UI Creation
 local MengHubUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/zhidanptrsyh/MengHub/refs/heads/main/main.lua"))()
 local Window = MengHubUI:CreateWindow({
-    Title = "MengHub - Fish It",
+    Title = "Mahiru",
     Icon = "rbxassetid://78018573702743",
     Author = "Freemium",
-    Folder = "MengHub",
+    Folder = "Mahiru",
     Size = UDim2.fromOffset(380, 260),
     MinSize = Vector2.new(560, 350),
     MaxSize = Vector2.new(850, 560),
@@ -451,7 +409,7 @@ local Window = MengHubUI:CreateWindow({
     ScrollBarEnabled = false,
 })
 
--- Add version tag
+
 Window:Tag({
     Title = "v1.0.1",
     Icon = "cone",
@@ -459,10 +417,8 @@ Window:Tag({
     Radius = 12,
 })
 
--- Configuration Manager
 local ConfigManager = Window.ConfigManager:CreateConfig("MengXHubConfig")
 
--- Toggle UI Button
 local function CreateToggleButton()
     local screenGui = Instance.new("ScreenGui")
     screenGui.Parent = game:GetService("CoreGui")
@@ -485,7 +441,6 @@ local function CreateToggleButton()
         Window:Toggle()
     end)
     
-    -- Draggable functionality
     local dragging = false
     local dragStart, startPos
     
@@ -513,11 +468,9 @@ end
 
 CreateToggleButton()
 
--- Set toggle key
 Window:SetToggleKey(Enum.KeyCode.F3)
 Window:IsResizable(true)
 
--- Create Tabs
 local InfoTab = Window:Tab({Title = "Info", Icon = "info"})
 local PlayerTab = Window:Tab({Title = "Player", Icon = "users"})
 local FishingTab = Window:Tab({Title = "Fishing", Icon = "rbxassetid://103247953194129"})
@@ -528,41 +481,13 @@ local UtilitiesTab = Window:Tab({Title = "Utilities", Icon = "box"})
 local ShopTab = Window:Tab({Title = "Shop", Icon = "shopping-cart"})
 local TeleportTab = Window:Tab({Title = "Teleport", Icon = "map"})
 
--- Info Tab
-InfoTab:Paragraph({
-    Title = "MengHub Alert!",
-    Desc = "This script is still under development!\nThere is a possibility it may get detected if used in public servers!\nIf you have suggestions or found bugs, please report them to <font color=\"#00AAFF\">Discord Meng Hub</font>!\n<b>Use at your own risk!</b>",
-    Color = "Green",
-    Image = "rbxassetid://17313330026",
-    ImageSize = 30,
-})
-
-InfoTab:Button({
-    Title = "Need Help?",
-    Desc = "Click This To Copy Discord Link.\nJoin to <font color=\"#FF90E3\">Discord Meng Hub</font>!",
-    Callback = function()
-        if setclipboard then
-            setclipboard("discord.gg/menghub")
-            MengHubUI:Notify({
-                Title = "Success",
-                Content = "Discord link copied to clipboard!",
-                Duration = 3,
-                Icon = "laptop-minimal-check",
-            })
-        else
-            MengHubUI:Notify({
-                Title = "Error",
-                Content = "Executor doesn't support clipboard!",
-                Duration = 3,
-                Icon = "circle-x",
-            })
-        end
-    end,
-})
+local info = InfoTab:Section({Title = "Info Player"})
+InfoTab:AddParagraph("Display Name", LocalPlayer.DisplayName)
+InfoTab:AddParagraph("Username", LoacalPlayer.Name)
+InfoTab:AddParagraph("UserID", tostring(LocalPlayer.UserId))
 
 InfoTab:Space()
 
--- Rejoin and Server Hop functions
 local function RejoinServer()
     TeleportService:Teleport(game.PlaceId, LocalPlayer)
 end
@@ -617,7 +542,6 @@ InfoTab:Button({
     Callback = ServerHop
 })
 
--- Player Tab - Interface Section
 local InterfaceSection = PlayerTab:Section({Title = "User Interface"})
 local ThemeToggle = InterfaceSection:Toggle({
     Title = "Change Theme",
@@ -633,7 +557,6 @@ local ThemeToggle = InterfaceSection:Toggle({
 })
 ConfigManager:Register("themeToggle", ThemeToggle)
 
--- Player Tab - Movement Section
 local MovementSection = PlayerTab:Section({Title = "Movement"})
 local WalkSpeedSlider = MovementSection:Slider({
     Title = "WalkSpeed",
@@ -677,7 +600,6 @@ MovementSection:Button({
 
 MovementSection:Divider()
 
--- Fly system
 local FlySpeedSlider = MovementSection:Slider({
     Title = "Fly Speed",
     Step = 1,
@@ -692,7 +614,6 @@ local FlyToggle = MovementSection:Toggle({
     Value = false,
     Callback = function(value)
         if value then
-            -- Fly implementation
             local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
             local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
             local humanoid = character:FindFirstChildOfClass("Humanoid")
@@ -764,7 +685,6 @@ local FlyToggle = MovementSection:Toggle({
     end,
 })
 
--- Player Tab - Modes Section
 local ModesSection = PlayerTab:Section({Title = "Modes"})
 
 local NoAnimationToggle = ModesSection:Toggle({
@@ -884,7 +804,6 @@ local WalkOnWaterToggle = ModesSection:Toggle({
                 end
             end)
         else
-            -- Clean up
             local waterPart = workspace:FindFirstChild("WW_Part")
             if waterPart then waterPart:Destroy() end
         end
@@ -912,7 +831,6 @@ local MaxZoomToggle = ModesSection:Toggle({
     end,
 })
 
--- Player Tab - Boost Section
 local BoostSection = PlayerTab:Section({Title = "Boost Player"})
 
 local DisableVFXToggle = BoostSection:Toggle({
@@ -921,7 +839,6 @@ local DisableVFXToggle = BoostSection:Toggle({
     Callback = function(value)
         IsDisableVFX = value
         if value then
-            -- Disable VFX by hooking VFXController functions
             local success, vfxController = pcall(function()
                 return require(ReplicatedStorage.Controllers.VFXController)
             end)
@@ -943,7 +860,6 @@ local DisableCutsceneToggle = BoostSection:Toggle({
     Callback = function(value)
         IsDisableCutscene = value
         if value then
-            -- Hook cutscene events
             if Remotes.RE_Cutscene then
                 Remotes.RE_Cutscene.OnClientEvent:Connect(function() end)
             end
@@ -968,7 +884,6 @@ local DisableFishNotificationToggle = BoostSection:Toggle({
 })
 ConfigManager:Register("obtainedFishToggle", DisableFishNotificationToggle)
 
--- Player Tab - Rendering Section
 local RenderSection = PlayerTab:Section({Title = "Rendering"})
 
 RenderSection:Toggle({
@@ -1054,7 +969,7 @@ local ESPToggle = RenderSection:Toggle({
                                     ESPObjects[player] = billboard
                                 end
                                 
-                                -- Update distance
+                                
                                 local esp = ESPObjects[player]
                                 if esp then
                                     local label = esp:FindFirstChild("LBL")
@@ -1073,7 +988,7 @@ local ESPToggle = RenderSection:Toggle({
                     task.wait(0.2)
                 end
                 
-                -- Clean up
+                
                 for player, esp in pairs(ESPObjects) do
                     if esp then esp:Destroy() end
                 end
@@ -1083,7 +998,6 @@ local ESPToggle = RenderSection:Toggle({
     end,
 })
 
--- Player Tab - Identity Section
 local HideIdentSection = PlayerTab:Section({Title = "Identity"})
 
 local function SetupIdentity()
@@ -1174,7 +1088,6 @@ local IdentityToggle = HideIdentSection:Toggle({
         OriginalIdentity.ToggleState = value
         if value then
             HideIdentity()
-            -- Start update loop
             task.spawn(function()
                 while OriginalIdentity.ToggleState do
                     HideIdentity()
@@ -1221,10 +1134,8 @@ HideIdentSection:Button({
     end,
 })
 
--- Initialize identity
 SetupIdentity()
 
--- Fishing Tab - Auto Fishing Section
 local FishingSection = FishingTab:Section({Title = "Auto Fishing"})
 
 local LegitDelayInput = FishingSection:Input({
@@ -1293,7 +1204,6 @@ local AutoShakeToggle = FishingSection:Toggle({
 })
 ConfigManager:Register("autoShakeToggle", AutoShakeToggle)
 
--- Fishing Tab - Instant Fishing Section
 FishingTab:Section({Title = "Instant Fishing"})
 
 FishingTab:Paragraph({
@@ -1359,7 +1269,6 @@ FishingTab:Toggle({
     end,
 })
 
--- Fishing Tab - Blatant Features
 FishingTab:Section({Title = "Blatant Features"})
 
 local BlatantReelInput = FishingTab:Input({
@@ -1413,7 +1322,6 @@ FishingTab:Button({
     end,
 })
 
--- Automatic Tab - Auto Sell Section
 local SellSection = AutomaticTab:Section({Title = "Auto Sell"})
 
 SellSection:Dropdown({
@@ -1451,7 +1359,6 @@ SellSection:Toggle({
     end,
 })
 
--- Automatic Tab - Auto Weather Section
 local WeatherSection = AutomaticTab:Section({Title = "Auto Buy Weather"})
 
 local WeatherDropdown = WeatherSection:Dropdown({
@@ -1513,7 +1420,6 @@ local WeatherToggle = WeatherSection:Toggle({
 })
 ConfigManager:Register("weatherToggle", WeatherToggle)
 
--- Automatic Tab - Event Features
 local EventSection = AutomaticTab:Section({Title = "Event Features"})
 
 local function GetActiveEvents()
@@ -1636,7 +1542,6 @@ local EventToggle = EventSection:Toggle({
     end,
 })
 
--- Automatic Tab - Favorite Features
 local FavoriteSection = AutomaticTab:Section({Title = "Favorite Features"})
 
 local FishNames = {}
@@ -1711,7 +1616,6 @@ local AutoFavoriteToggle = FavoriteSection:Toggle({
     Callback = function(value)
         AutoFavoriteConfig.Enabled = value
         if value then
-            -- Scan current inventory
             local inventory = PlayerData:GetExpect({"Inventory", "Items"}) or {}
             for _, item in ipairs(inventory) do
                 local itemData = ItemUtility.GetItemDataFromItemType("Items", item.Id)
@@ -1734,7 +1638,6 @@ local AutoFavoriteToggle = FavoriteSection:Toggle({
                 end
             end
             
-            -- Listen for new items
             PlayerData:OnChange({"Inventory", "Items"}, function(inventory)
                 if AutoFavoriteConfig.Enabled then
                     for _, item in ipairs(inventory) do
@@ -1776,7 +1679,6 @@ FavoriteSection:Button({
     end,
 })
 
--- Automatic Tab - Save Position Features
 local SPSection = AutomaticTab:Section({Title = "Save Position Features"})
 
 SPSection:Paragraph({
@@ -1855,13 +1757,11 @@ SPSection:Button({
     end,
 })
 
--- Auto teleport on character spawn
 LocalPlayer.CharacterAdded:Connect(TeleportToLastPosition)
 if LocalPlayer.Character then
     TeleportToLastPosition()
 end
 
--- Automatic Tab - Enchant Features
 local EnchantSection = AutomaticTab:Section({Title = "Enchant Features"})
 
 local EnchantStatus = EnchantSection:Paragraph({
@@ -1878,7 +1778,6 @@ local function GetEnchantInfo(stoneId)
     local equippedItems = PlayerData:Get("EquippedItems") or {}
     local fishingRods = PlayerData:Get({"Inventory", "Fishing Rods"}) or {}
     
-    -- Find equipped rod
     for slot, uuid in pairs(equippedItems) do
         for _, rod in ipairs(fishingRods) do
             if rod.UUID == uuid then
@@ -1898,7 +1797,6 @@ local function GetEnchantInfo(stoneId)
         end
     end
     
-    -- Count enchant stones
     local inventory = PlayerData:GetExpect({"Inventory", "Items"}) or {}
     for _, item in ipairs(inventory) do
         local itemData = ItemUtility:GetItemData(item.Id)
@@ -1923,7 +1821,6 @@ EnchantSection:Button({
                 return
             end
             
-            -- Equip enchant stone
             local slot = nil
             local startTime = tick()
             
@@ -1946,13 +1843,11 @@ EnchantSection:Button({
             
             if not slot then return end
             
-            -- Use altar
             Remotes.RE_Equip:FireServer(slot)
             task.wait(0.2)
             Remotes.RE_Altar:FireServer()
             task.wait(1.5)
             
-            -- Update status
             local newRodName, newEnchantName = GetEnchantInfo(10)
             EnchantStatus:SetDesc(string.format("Current Rod : <font color='rgb(0,170,255)'>%s</font>\nCurrent Enchant : <font color='rgb(0,170,255)'>%s</font>\nEnchant Stones Left : <font color='rgb(0,170,255)'>%d</font>", 
                 rodName, newEnchantName, stoneCount - 1))
@@ -1991,7 +1886,6 @@ EnchantSection:Button({
                 return
             end
             
-            -- Equip enchant stone
             local slot = nil
             local startTime = tick()
             
@@ -2014,13 +1908,11 @@ EnchantSection:Button({
             
             if not slot then return end
             
-            -- Use second altar
             Remotes.RE_Equip:FireServer(slot)
             task.wait(0.2)
             Remotes.RE_Altar2:FireServer()
             task.wait(1.5)
             
-            -- Update status
             local newRodName, newEnchantName = GetEnchantInfo(246)
             EnchantStatus:SetDesc(string.format("Current Rod : <font color='rgb(0,170,255)'>%s</font>\nCurrent Enchant : <font color='rgb(0,170,255)'>%s</font>\nEnchant Stones Left : <font color='rgb(0,170,255)'>%d</font>", 
                 rodName, newEnchantName, stoneCount - 1))
@@ -2044,7 +1936,6 @@ EnchantSection:Button({
     end,
 })
 
--- Webhook Tab
 WebhookTab:Section({Title = "Webhook Fish Caught"})
 
 local WebhookURLInput = WebhookTab:Input({
@@ -2158,7 +2049,6 @@ WebhookTab:Button({
     end,
 })
 
--- Quest Tab - Sisyphus Quest
 local SisyphusSection = QuestTab:Section({Title = "Sisyphus State Quest"})
 
 local DeepSeaPanel = SisyphusSection:Paragraph({
@@ -2236,7 +2126,6 @@ SisyphusSection:Button({
     end,
 })
 
--- Quest Tab - Element Quest
 local ElementSection = QuestTab:Section({Title = "Element Quest"})
 
 local ElementPanel = ElementSection:Paragraph({
@@ -2301,7 +2190,6 @@ ElementSection:Button({
     end,
 })
 
--- Update quest panels
 task.spawn(function()
     while task.wait(2) do
         DeepSeaPanel:SetDesc(GetQuestInfo("Deep Sea Tracker"))
@@ -2309,7 +2197,6 @@ task.spawn(function()
     end
 end)
 
--- Utilities Tab - Server Utility
 local ServerUtilitySection = UtilitiesTab:Section({Title = "Server Utility"})
 
 local AntiStaffToggle = ServerUtilitySection:Toggle({
@@ -2428,7 +2315,6 @@ local DivingGearToggle = UtilitiesTab:Toggle({
 })
 ConfigManager:Register("divingGearToggle", DivingGearToggle)
 
--- Shop Tab - Merchant Shop
 local MerchantShopSection = ShopTab:Section({Title = "Merchant Shop"})
 
 local MerchantPanel = MerchantShopSection:Paragraph({
@@ -2493,42 +2379,26 @@ MerchantShopSection:Button({
     end,
 })
 
--- Shop Tab - Purchase Rod
 local RodSection = ShopTab:Section({Title = "Purchase Rod"})
 
--- Rod data
 local Rods = {
     ["Chrome Rod (43.7K)"] = {Id = 7, Price = 43700},
     ["Lucky Rod (15K)"] = {Id = 4, Price = 15000},
-    ["Magma Rod (0)"] = {Id = 3, Price = 0},
     ["Starter Rod (50)"] = {Id = 1, Price = 50},
     ["Steampunk Rod (215K)"] = {Id = 6, Price = 215000},
-    ["Hyper Rod (0)"] = {Id = 9, Price = 0},
-    ["Gold Rod (0)"] = {Id = 8, Price = 0},
-    ["Lava Rod (0)"] = {Id = 2, Price = 0},
     ["Carbon Rod (750)"] = {Id = 76, Price = 750},
-    ["Gingerbread Rod (0)"] = {Id = 103, Price = 0},
     ["Ice Rod (5K)"] = {Id = 78, Price = 5000},
     ["Luck Rod (325)"] = {Id = 79, Price = 325},
     ["Midnight Rod (50K)"] = {Id = 80, Price = 50000},
-    ["Toy Rod (0)"] = {Id = 84, Price = 0},
     ["Grass Rod (1.5K)"] = {Id = 85, Price = 1500},
-    ["Candy Cane Rod (0)"] = {Id = 100, Price = 0},
-    ["Christmas Tree Rod (0)"] = {Id = 101, Price = 0},
     ["Demascus Rod (3K)"] = {Id = 77, Price = 3000},
-    ["Frozen Rod (0)"] = {Id = 102, Price = 0},
-    ["Cute Rod (0)"] = {Id = 123, Price = 0},
     ["Angelic Rod (75K)"] = {Id = 124, Price = 75000},
     ["Astral Rod (1M)"] = {Id = 5, Price = 1000000},
     ["Ares Rod (3M)"] = {Id = 126, Price = 3000000},
     ["Ghoul Rod (0)"] = {Id = 129, Price = 0},
     ["Angler Rod (8M)"] = {Id = 168, Price = 8000000},
-    ["Ghostfinn Rod (0)"] = {Id = 169, Price = 0},
-    ["Element Rod (0)"] = {Id = 257, Price = 0},
-    ["Hazmat Rod (0)"] = {Id = 256, Price = 0},
     ["Fluorescent Rod (715K)"] = {Id = 255, Price = 715000},
     ["Bamboo Rod (12M)"] = {Id = 258, Price = 12000000},
-    ["Studded Rod (0)"] = {Id = 400, Price = 0},
 }
 
 local RodOptions = {}
@@ -2575,39 +2445,19 @@ RodSection:Button({
     end,
 })
 
--- Shop Tab - Purchase Bait
 local BaitSection = ShopTab:Section({Title = "Purchase Bait"})
 
 local Baits = {
     ["Starter Bait (0)"] = {Id = 1, Price = 0},
     ["Chroma Bait (290K)"] = {Id = 6, Price = 290000},
-    ["Gold Bait (0)"] = {Id = 4, Price = 0},
-    ["Hyper Bait (0)"] = {Id = 5, Price = 0},
     ["Luck Bait (1K)"] = {Id = 2, Price = 1000},
     ["Midnight Bait (3K)"] = {Id = 3, Price = 3000},
-    ["Bag-O-Gold Bait (0)"] = {Id = 7, Price = 0},
-    ["Beach Ball Bait (0)"] = {Id = 9, Price = 0},
     ["Topwater Bait (100)"] = {Id = 10, Price = 100},
-    ["Anchor Bait (0)"] = {Id = 11, Price = 0},
-    ["Ornament Bait (0)"] = {Id = 12, Price = 0},
-    ["Jolly Bait (0)"] = {Id = 13, Price = 0},
-    ["Frozen Bait (0)"] = {Id = 14, Price = 0},
     ["Dark Matter Bait (630K)"] = {Id = 8, Price = 630000},
     ["Nature Bait (83.5K)"] = {Id = 17, Price = 83500},
     ["Aether Bait (3.7M)"] = {Id = 16, Price = 3700000},
     ["Corrupt Bait (1.1M)"] = {Id = 15, Price = 1148484},
-    ["Singularity Bait (0)"] = {Id = 18, Price = 0},
-    ["Royal Bait (0)"] = {Id = 19, Price = 0},
     ["Floral Bait (4M)"] = {Id = 20, Price = 4000000},
-    ["Radioactive Bait (0)"] = {Id = 21, Price = 0},
-    ["Root Bait (0)"] = {Id = 22, Price = 0},
-    ["Delayed Orb Bait (0)"] = {Id = 23, Price = 0},
-    ["Pumpkin Bait (0)"] = {Id = 24, Price = 0},
-    ["Purple Moon Bait (0)"] = {Id = 25, Price = 0},
-    ["Corruption Crystal (0)"] = {Id = 27, Price = 0},
-    ["Matrix Hologram (0)"] = {Id = 26, Price = 0},
-    ["Binary Crystal (0)"] = {Id = 28, Price = 0},
-    ["Wyvern Artifact (0)"] = {Id = 29, Price = 0},
 }
 
 local BaitOptions = {}
@@ -2654,7 +2504,6 @@ BaitSection:Button({
     end,
 })
 
--- Shop Tab - Purchase Boat
 local BoatSection = ShopTab:Section({Title = "Purchase Boat"})
 
 local Boats = {
@@ -2710,15 +2559,12 @@ BoatSection:Button({
     end,
 })
 
--- Teleport Tab - Location
 local LocationSection = TeleportTab:Section({Title = "Location"})
 
 local Locations = {
     "Ancient Jungle",
     "Ancient Jungle Outside",
     "Ancient Ruin",
-    "Classic Event",
-    "Classic Event River",
     "Coral Reefs SPOT 1",
     "Coral Reefs SPOT 2",
     "Coral Reefs SPOT 3",
@@ -2727,9 +2573,6 @@ local Locations = {
     "Crystaline Pessage",
     "Esotoric Deep",
     "Fishermand Island",
-    "Iron Cafe",
-    "Iron Cavern Left",
-    "Iron Cavern Right",
     "Kohana",
     "Kohana SPOT 1",
     "Kohana SPOT 2",
@@ -2751,8 +2594,6 @@ local LocationCoordinates = {
     ["Ancient Jungle"] = Vector3.new(1272.5, 7.8, -191.5),
     ["Ancient Jungle Outside"] = Vector3.new(1488, 7.6, -392),
     ["Ancient Ruin"] = Vector3.new(6090, -585.9, 4634),
-    ["Classic Event"] = Vector3.new(1173, 4, 2839),
-    ["Classic Event River"] = Vector3.new(1439, 46, 2779),
     ["Coral Reefs SPOT 1"] = Vector3.new(-3031.9, 2.5, 2276.4),
     ["Coral Reefs SPOT 2"] = Vector3.new(-3270.9, 2.5, 2228.1),
     ["Coral Reefs SPOT 3"] = Vector3.new(-3136.1, 2.6, 2126.1),
@@ -2761,9 +2602,6 @@ local LocationCoordinates = {
     ["Crystaline Pessage"] = Vector3.new(6051, -538.9, 4386),
     ["Esotoric Deep"] = Vector3.new(3181, -1302.7, 1425),
     ["Fishermand Island"] = Vector3.new(33, 3.3, 2764),
-    ["Iron Cafe"] = Vector3.new(-8642, -547.5, 162),
-    ["Iron Cavern Left"] = Vector3.new(-8795, -585, 89),
-    ["Iron Cavern Right"] = Vector3.new(-8792, -585, 223),
     ["Kohana"] = Vector3.new(-684.1, 3, 800.8),
     ["Kohana SPOT 1"] = Vector3.new(-367.8, 6.8, 521.9),
     ["Kohana SPOT 2"] = Vector3.new(-624, 19.3, 419.4),
@@ -2814,7 +2652,6 @@ LocationSection:Button({
     end,
 })
 
--- Teleport Tab - Player
 local PlayerSection = TeleportTab:Section({Title = "Player"})
 
 local function GetPlayerList()
@@ -2877,11 +2714,9 @@ PlayerSection:Button({
     end,
 })
 
--- Cleanup on script destruction
 Window:OnDestroy(function()
     ConfigManager:Save()
     
-    -- Turn off all features
     if LegitFishingToggle then LegitFishingToggle:Set(false) end
     if AutoShakeToggle then AutoShakeToggle:Set(false) end
     if InstantFishingToggle then InstantFishingToggle:Set(false) end
@@ -2891,7 +2726,6 @@ Window:OnDestroy(function()
     if RadarToggle then RadarToggle:Set(false) end
     if DivingGearToggle then DivingGearToggle:Set(false) end
     
-    -- Reset movement
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
         LocalPlayer.Character.Humanoid.WalkSpeed = 16
         LocalPlayer.Character.Humanoid.JumpPower = 50
@@ -2901,17 +2735,14 @@ Window:OnDestroy(function()
     
     IdentityToggle:Set(false)
     
-    -- Turn off noclip
     if IsNoClip then
         NoClipToggle:Set(false)
     end
     
-    -- Turn off anti-staff
     if AntiStaffToggle then
         AntiStaffToggle:Set(false)
     end
     
-    -- Turn off auto event
     if IsAutoEvent then
         EventToggle:Set(false)
         if FarmPosition and LocalPlayer.Character then
@@ -2919,21 +2750,15 @@ Window:OnDestroy(function()
         end
     end
     
-    -- Reset camera
     LocalPlayer.CameraMaxZoomDistance = 128
     LocalPlayer.CameraMinZoomDistance = 0.5
     
-    -- Restore cutscenes
     if IsDisableCutscene then
-        -- Restore original cutscene functions
     end
     
-    -- Restore VFX
     if IsDisableVFX then
-        -- Restore original VFX functions
     end
     
-    -- Restore fish notifications
     if IsDisableFishNotification then
         local notification = PlayerGui:FindFirstChild("Small Notification")
         if notification and notification:FindFirstChild("Display") then
@@ -2941,27 +2766,21 @@ Window:OnDestroy(function()
         end
     end
     
-    -- Disable ESP
     if ESPEnabled then
         ESPToggle:Set(false)
     end
     
-    -- Reset fly
     FlySpeed = 1
     FlySpeedSlider:Set(1)
     IsFlyEnabled = false
     
-    -- Disable no animation
     if IsNoAnimation then
         NoAnimationToggle:Set(false)
     end
     
-    -- Disable hide rod
     if IsHideRod then
-        -- Rod visibility will be restored automatically
     end
     
-    -- Remove toggle button
     local toggleButton = game.CoreGui:FindFirstChild("ToggleUIButton")
     if toggleButton then
         toggleButton:Destroy()
@@ -2970,8 +2789,7 @@ Window:OnDestroy(function()
     print("MengHub cleaned up successfully!")
 end)
 
--- Load configuration
 ConfigManager:Load()
 
-print("✅ MengHub Loaded Successfully...")
-print("✅ Happy Fishing Brotherrrrr...")
+print("Mahiru Loaded Successfully...")
+print("By LangitDev")
