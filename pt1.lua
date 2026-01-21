@@ -239,7 +239,6 @@ local FishingActive = false
 local AutoSellActive = false
 
 
-local AntiRagdollController = { Connection = nil }
 function AntiRagdollController:Enable()
     if self.Connection then return end
     
@@ -249,20 +248,20 @@ function AntiRagdollController:Enable()
         local char = Player.Character
         if char then
             local humanoid = char:FindFirstChild("Humanoid")
-            if humanoid then
-                -- Cegah ragdoll dengan reset state
-                if humanoid:GetState() == Enum.HumanoidStateType.FallingDown or
-                   humanoid:GetState() == Enum.HumanoidStateType.Ragdoll then
+            local root = char:FindFirstChild("HumanoidRootPart")
+            
+            if humanoid and root then
+                
+                if humanoid:GetState() == Enum.HumanoidStateType.Ragdoll then
                     humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
                 end
                 
-                -- Lock character position
-                local root = char:FindFirstChild("HumanoidRootPart")
-                if root then
-                    -- Reset velocity untuk cegah pental
-                    root.Velocity = Vector3.new(0, 0, 0)
-                    root.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-                    root.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+                if root.Velocity.Y > 100 then  
+                    root.Velocity = Vector3.new(
+                        root.Velocity.X * 0.9,
+                        math.min(root.Velocity.Y, 50),
+                        root.Velocity.Z * 0.9
+                    )
                 end
             end
         end
@@ -582,17 +581,27 @@ local function toggleNoAnimation(state)
         if char then
             local humanoid = char:FindFirstChildOfClass("Humanoid")
             if humanoid then
-                for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do track:Stop() end
-                if AnimationController.Connection then AnimationController.Connection:Disconnect() end
+                
+                if AnimationController.Connection then 
+                    AnimationController.Connection:Disconnect() 
+                end
+                
                 AnimationController.Connection = humanoid.AnimationPlayed:Connect(function(track)
-                    if Config.NoAnimation then track:Stop() end
+                    
+                    if Config.NoAnimation and track.Animation then
+                        local animName = track.Animation.Name:lower()
+                        if animName:find("fish") or animName:find("rod") or animName:find("cast") then
+                            track:Stop()
+                        end
+                    end
                 end)
             end
         end
-        library:MakeNotification({Name = "No Animation", Content = "✅ Enabled", Time = 3})
     else
-        if AnimationController.Connection then AnimationController.Connection:Disconnect() AnimationController.Connection = nil end
-        library:MakeNotification({Name = "No Animation", Content = "❌ Disabled", Time = 3})
+        if AnimationController.Connection then 
+            AnimationController.Connection:Disconnect() 
+            AnimationController.Connection = nil 
+        end
     end
 end
 
@@ -627,9 +636,26 @@ function FlyController:Enable()
 end
 
 function FlyController:Disable()
-    if self.BodyVelocity then self.BodyVelocity:Destroy() self.BodyVelocity = nil end
-    if self.BodyGyro then self.BodyGyro:Destroy() self.BodyGyro = nil end
-    if self.Connection then self.Connection:Disconnect() self.Connection = nil end
+    if self.BodyVelocity then 
+        self.BodyVelocity:Destroy() 
+        self.BodyVelocity = nil 
+    end
+    if self.BodyGyro then 
+        self.BodyGyro:Destroy() 
+        self.BodyGyro = nil 
+    end
+    if self.Connection then 
+        self.Connection:Disconnect() 
+        self.Connection = nil 
+    end
+    
+    local char = Player.Character
+    if char then
+        local root = char:FindFirstChild("HumanoidRootPart")
+        if root then
+            root.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+        end
+    end
 end
 
 local function updateSpeed()
@@ -1201,45 +1227,44 @@ FishingV3Tab:AddToggle({
                 while Config.FishingV3Enabled do
                     cycleCount = cycleCount + 1
                     
-                    -- ⚡ SINGLE CAST DULU (GAK MULTI-CAST)
-                    -- 1. CANCEL STATE DULU
+                   
                     pcall(function()
                         Network.Functions.CancelFish:InvokeServer()
                     end)
                     task.wait(0.05)
                     
-                    -- 2. CHARGE
+                    
                     pcall(function()
                         Network.Functions.ChargeRod:InvokeServer()
                     end)
                     
-                    -- 3. CAST DELAY
+                    
                     local castDelay = Config.FishingV3CastDelay or 0.7
                     if castDelay > 0 then
                         task.wait(castDelay)
                     end
                     
-                    -- 4. CAST
+                    
                     pcall(function()
-                        -- Pakai angle dari config (bukan -1 kayak V2)
+                   
                         local angle = Config.CastAngleMin + ((Config.CastAngleMax - Config.CastAngleMin) / 2)
                         Network.Functions.StartMini:InvokeServer(angle, Config.CastPower, os.clock())
                     end)
                     
-                    -- 5. BAIT DELAY
+                    
                     local baitDelay = Config.FishingV3BaitDelay or 0.3
                     if baitDelay > 0 then
                         task.wait(baitDelay)
                     end
                     
-                    -- 6. REEL DELAY (INI YANG BIKIN NARIK!)
+                   
                     if Fish.Reel > 0 then
                         task.wait(Fish.Reel)
                     end
                     
-                    -- 7. COMPLETE FISHING (FIXED!)
+                    
                     pcall(function()
-                        -- Urutan yang bener: ShakeFish dulu baru FishComplete
+                        
                         if Network.Events.ShakeFish then
                             Network.Events.ShakeFish:FireServer()
                             task.wait(0.05)
@@ -1250,7 +1275,7 @@ FishingV3Tab:AddToggle({
                             task.wait(0.05)
                         end
                         
-                        -- Backup kalo masih ga work
+                   
                         if Net and Net["RE/ShakeFish"] then
                             Net["RE/ShakeFish"]:FireServer()
                         end
@@ -1260,10 +1285,10 @@ FishingV3Tab:AddToggle({
                         end
                     end)
                     
-                    -- 8. UPDATE STATS
+                    
                     Stats.FishCaught = Stats.FishCaught + 1
                     
-                    -- 9. CYCLE DELAY (dikurangi waktu yang udah dipake)
+                   
                     local totalUsedTime = castDelay + baitDelay + (Fish.Reel or 0) + 0.2
                     local remainingDelay = math.max(0.1, (Fish.FishingDelay or 1) - totalUsedTime)
                     
@@ -1735,6 +1760,24 @@ end)
 
 library:Init()
 library:MakeNotification({Name = "Welcome to Mahiru Script!", Content = "By LangitDev!", Time = 5})
+
+task.spawn(function()
+    task.wait(1)  
+    
+    local char = Player.Character
+    if char then
+        local humanoid = char:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid:ChangeState(Enum.HumanoidStateType.Running)
+            
+            for _, child in pairs(char:GetDescendants()) do
+                if child:IsA("BodyMover") then
+                    child:Destroy()
+                end
+            end
+        end
+    end
+end)
 
 task.wait(10)
 if not Network.Loaded then
