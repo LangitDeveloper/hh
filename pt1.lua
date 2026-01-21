@@ -1161,7 +1161,7 @@ local function Fastest()
         task.wait(Fish.FishingDelay)
         
         pcall(function()
-            Network.Events.FishingComplete:FireServer()
+            Network.Events.FishComplete:FireServer()
         end)
     end)
 end
