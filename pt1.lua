@@ -888,7 +888,7 @@ local FishingTab = Window:MakeTab({Name = "Fishing", Icon = "rbxassetid://971675
 FishingTab:AddSection({Name = "Fishing Features"})
 
 FishingTab:AddToggle({
-    Title = "No Fishing Animations",
+    Name = "No Fishing Animations",
     Default = false,
     Callback = function(enabled)
         local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
