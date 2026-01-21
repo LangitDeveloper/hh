@@ -1179,30 +1179,28 @@ FishingV3Tab:AddToggle({
                             -- 4. BAIT DELAY (0.30)
                             task.wait(Config.FishingV3BaitDelay or 0.3)
                             
-                            -- 5. COMPLETE (COBA SEMUA EVENT)
+                            -- 5. 🎯 COMPLETE FISHING (PAKE YANG SAMA KAYA V2)
                             pcall(function()
-                                -- Coba event ShakeFish
-                                if Network.Events.ShakeFish then
-                                    Network.Events.ShakeFish:FireServer()
-                                    Network.Events.ShakeFish:FireServer()
-                                end
-                                
-                                -- Coba event FishingCompleted
+                                -- 🔥 PAKE Network.Events.FishComplete KAYA V2
                                 if Network.Events.FishComplete then
                                     Network.Events.FishComplete:FireServer()
-                                    Network.Events.FishComplete:FireServer()
+                                    Network.Events.FishComplete:FireServer() -- 2x biar work
                                 end
                                 
-                                -- Coba event PlayFishingEffect
-                                if Network.Events.PlayEffect then
-                                    Network.Events.PlayEffect:FireServer()
+                                -- 🔥 PAKE Network.Events.ShakeFish KAYA V2  
+                                if Network.Events.ShakeFish then
+                                    Network.Events.ShakeFish:FireServer()
+                                    Network.Events.ShakeFish:FireServer() -- 2x biar work
                                 end
                                 
-                                -- Coba semua remote event yang ada "Fish" atau "Fishing"
-                                for name, event in pairs(Network.Events) do
-                                    if name:lower():find("fish") or name:lower():find("fishing") then
-                                        event:FireServer()
-                                    end
+                                -- 🔥 PAKE Net["RE/FishingCompleted"] kalo ada
+                                if Net and Net["RE/FishingCompleted"] then
+                                    Net["RE/FishingCompleted"]:FireServer()
+                                end
+                                
+                                -- 🔥 PAKE Net["RE/ShakeFish"] kalo ada
+                                if Net and Net["RE/ShakeFish"] then
+                                    Net["RE/ShakeFish"]:FireServer()
                                 end
                             end)
                             
@@ -1225,6 +1223,8 @@ FishingV3Tab:AddToggle({
         end
     end
 })
+
+
 FishingV3Tab:AddSection({Name = "Settings"})
 
 FishingV3Tab:AddTextbox({
