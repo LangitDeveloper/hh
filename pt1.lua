@@ -219,7 +219,19 @@ local Config = {
     AutoRejoinDelay = 5, 
     AntiLagEnabled = false,
     FullBright = false,
-    XRayWater = false
+    XRayWater = false,
+    FishingV3Enabled = false,
+    FishingV3BaitDelay = 0.5,
+    FishingV3ReelDelay = 1.5,
+    FishingV3CycleDelay = 1.0,
+    FishingV3ChargeTime = 0.3,
+    FishingV3CastPower = 0.8,
+    FishingV3CastAngle = 0,
+    FishingV3RandomAngle = true,
+    FishingV3MinAngle = -0.5,
+    FishingV3MaxAngle = 0.5,
+    FishingV3AutoEquip = true,
+    FishingV3InstantReel = false
 }
 
 local EventList = { "Wind", "Cloudy", "Snow", "Storm", "Radiant", "Shark Hunt" }
@@ -801,7 +813,7 @@ local MapLocations = {
     ["Pirate Cove"] = Vector3.new(3207.78, 9.10, 3546.13),
 }
 
-local PlayerTab = Window:MakeTab({Name = "Player Info", Icon = "rbxassetid://97167558235554"})
+local PlayerTab = Window:MakeTab({Name = "Player Info", Icon = "player"})
 PlayerTab:AddSection({Name = "Player Info"})
 PlayerTab:AddParagraph("Display Name", Player.DisplayName)
 PlayerTab:AddParagraph("Username", Player.Name)
@@ -1115,6 +1127,230 @@ FishV2Tab:AddToggle({
         else
             Player:SetAttribute("Loading", false)
         end
+    end
+})
+
+local FishingV3Tab = Window:MakeTab({
+    Name = "Fishing v3", 
+    Icon = "rbxassetid://97167558235554"
+})
+
+FishingV3Tab:AddToggle({
+    Name = "Enable Fishing V3",
+    Default = Config.FishingV3Enabled,
+    Callback = function(enabled)
+        Config.FishingV3Enabled = enabled
+        if enabled then
+            if not ensureNetworkLoaded() then
+                library:MakeNotification({
+                    Name = "❌ Network Error",
+                    Content = "Cannot start fishing",
+                    Time = 3
+                })
+                Config.FishingV3Enabled = false
+                return
+            end
+            
+            library:MakeNotification({
+                Name = "🎣 Fishing V3",
+                Content = "Advanced fishing started!",
+                Time = 3
+            })
+            
+            task.spawn(function()
+                while Config.FishingV3Enabled do
+                  
+                    pcall(function()
+                        if Network.Functions.CancelFish then
+                            Network.Functions.CancelFish:InvokeServer()
+                        end
+                    end)
+                    
+                    
+                    if Config.FishingV3AutoEquip then
+                        equipFishingRod()
+                        task.wait(0.5)
+                    end
+                    
+                    
+                    pcall(function()
+                        if Network.Functions.ChargeRod then
+                            Network.Functions.ChargeRod:InvokeServer()
+                        end
+                    end)
+                    
+                  
+                    if Config.FishingV3ChargeTime > 0 then
+                        task.wait(Config.FishingV3ChargeTime)
+                    end
+                    
+                
+                    local angle
+                    if Config.FishingV3RandomAngle then
+                        angle = Config.FishingV3MinAngle + (math.random() * (Config.FishingV3MaxAngle - Config.FishingV3MinAngle))
+                    else
+                        angle = Config.FishingV3CastAngle
+                    end
+                    
+                    
+                    pcall(function()
+                        if Network.Functions.StartMini then
+                            Network.Functions.StartMini:InvokeServer(angle, Config.FishingV3CastPower, os.clock())
+                        end
+                    end)
+                   
+                   
+                    if Config.FishingV3BaitDelay > 0 then
+                        task.wait(Config.FishingV3BaitDelay)
+                    end
+                    
+               
+                    if not Config.FishingV3InstantReel and Config.FishingV3ReelDelay > 0 then
+                        task.wait(Config.FishingV3ReelDelay)
+                    end
+                    
+                    
+                    pcall(function()
+                        if Network.Events.ShakeFish then
+                            Network.Events.ShakeFish:FireServer()
+                        end
+                        if Network.Events.FishComplete then
+                            Network.Events.FishComplete:FireServer()
+                        end
+                    end)
+                    
+                    
+                    Stats.FishCaught = Stats.FishCaught + 1
+                    
+                     
+                    if Config.FishingV3CycleDelay > 0 then
+                        task.wait(Config.FishingV3CycleDelay)
+                    end
+                end
+            end)
+            
+        else
+            library:MakeNotification({
+                Name = "Fishing V3",
+                Content = "Disabled",
+                Time = 3
+            })
+        end
+    end
+})
+
+FishingV3Tab:AddSection({Name = "⏱️ Delay Settings"})
+
+FishingV3Tab:AddTextbox({
+    Name = "Bait Delay (seconds)",
+    Default = tostring(Config.FishingV3BaitDelay),
+    Callback = function(input)
+        local value = tonumber(input)
+        if value and value >= 0 then
+            Config.FishingV3BaitDelay = value
+        end
+    end
+})
+
+FishingV3Tab:AddTextbox({
+    Name = "Reel Delay (seconds)",
+    Default = tostring(Config.FishingV3ReelDelay),
+    Callback = function(input)
+        local value = tonumber(input)
+        if value and value >= 0 then
+            Config.FishingV3ReelDelay = value
+        end
+    end
+})
+
+FishingV3Tab:AddTextbox({
+    Name = "Cycle Delay (seconds)",
+    Default = tostring(Config.FishingV3CycleDelay),
+    Callback = function(input)
+        local value = tonumber(input)
+        if value and value >= 0 then
+            Config.FishingV3CycleDelay = value
+        end
+    end
+})
+
+FishingV3Tab:AddTextbox({
+    Name = "Charge Time (seconds)",
+    Default = tostring(Config.FishingV3ChargeTime),
+    Callback = function(input)
+        local value = tonumber(input)
+        if value and value >= 0 then
+            Config.FishingV3ChargeTime = value
+        end
+    end
+})
+
+FishingV3Tab:AddSection({Name = "🎯 Cast Settings"})
+
+FishingV3Tab:AddTextbox({
+    Name = "Cast Power (0.1-1.0)",
+    Default = tostring(Config.FishingV3CastPower),
+    Callback = function(input)
+        local value = tonumber(input)
+        if value and value >= 0.1 and value <= 1.0 then
+            Config.FishingV3CastPower = value
+        end
+    end
+})
+
+FishingV3Tab:AddToggle({
+    Name = "Use Random Angle",
+    Default = Config.FishingV3RandomAngle,
+    Callback = function(enabled)
+        Config.FishingV3RandomAngle = enabled
+    end
+})
+
+if not Config.FishingV3RandomAngle then
+    FishingV3Tab:AddTextbox({
+        Name = "Fixed Angle (-1.0 to 1.0)",
+        Default = tostring(Config.FishingV3CastAngle),
+        Callback = function(input)
+            local value = tonumber(input)
+            if value and value >= -1.0 and value <= 1.0 then
+                Config.FishingV3CastAngle = value
+            end
+        end
+    })
+end
+
+
+if Config.FishingV3RandomAngle then
+    FishingV3Tab:AddTextbox({
+        Name = "Min Angle (-1.0 to 0)",
+        Default = tostring(Config.FishingV3MinAngle),
+        Callback = function(input)
+            local value = tonumber(input)
+            if value and value >= -1.0 and value <= 0 then
+                Config.FishingV3MinAngle = value
+            end
+        end
+    })
+    
+    FishingV3Tab:AddTextbox({
+        Name = "Max Angle (0 to 1.0)",
+        Default = tostring(Config.FishingV3MaxAngle),
+        Callback = function(input)
+            local value = tonumber(input)
+            if value and value >= 0 and value <= 1.0 then
+                Config.FishingV3MaxAngle = value
+            end
+        end
+    })
+end
+
+FishingV3Tab:AddSection({Name = "Utility"})
+
+FishingV3Tab:AddToggle({
+    Name = "Instant Reel",
+    Default = Config.FishingV3InstantReel,
+    Callback = function(enabled)
+        Config.FishingV3InstantReel = enabled
     end
 })
 
