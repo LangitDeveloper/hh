@@ -7,8 +7,8 @@ local Window = library:MakeWindow({
     ConfigFolder = "MahiruConfig",
     IntroEnabled = true,
     IntroText = "Welcome to Mahiru Script",
-    Icon = "rbxassetid://9433703094", 
-    MinimizedIcon = "rbxassetid://9433703094", 
+    Icon = "M", 
+    MinimizedIcon = "M", 
 })
 
 local Players = game:GetService("Players")
