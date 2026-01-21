@@ -483,21 +483,9 @@ local TeleportTab = Window:Tab({Title = "Teleport", Icon = "map"})
 
 local PlayerInfoSection = InfoTab:Section({Title = "Player Information"})
 
-
-PlayerInfoSection:Paragraph({
-    Title = "Display Name",
-    Content = LocalPlayer.DisplayName
-})
-
-PlayerInfoSection:Paragraph({
-    Title = "Username", 
-    Content = LocalPlayer.Name  
-})
-
-PlayerInfoSection:Paragraph({
-    Title = "UserID",
-    Content = tostring(LocalPlayer.UserId)
-})
+PlayerInfoSection:AddParagraph("Display Name", Player.DisplayName)
+PlayerInfoSection:AddParagraph("Username", Player.Name)
+PlayerInfoSection:AddParagraph("UserID", tostring(Player.UserId))
 
 InfoTab:Space()
 
