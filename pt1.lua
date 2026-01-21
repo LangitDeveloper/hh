@@ -1152,7 +1152,7 @@ FishingV3Tab:AddToggle({
             
             library:MakeNotification({
                 Name = "⚡ Fishing V3",
-                Content = "Activated!",
+                Content = "Activated with Reel Delay!",
                 Time = 2
             })
             
@@ -1179,38 +1179,33 @@ FishingV3Tab:AddToggle({
                             -- 4. BAIT DELAY (0.30)
                             task.wait(Config.FishingV3BaitDelay or 0.3)
                             
-                            -- 5. 🎯 COMPLETE FISHING (PAKE YANG SAMA KAYA V2)
+                            -- 5. 🎣 REEL DELAY (INILAH YANG BIKIN NARIK!)
+                            if Fish.Reel > 0 then
+                                task.wait(Fish.Reel)
+                            end
+                            
+                            -- 6. COMPLETE FISHING
                             pcall(function()
-                                -- 🔥 PAKE Network.Events.FishComplete KAYA V2
-                                if Network.Events.FishComplete then
-                                    Network.Events.FishComplete:FireServer()
-                                    Network.Events.FishComplete:FireServer() -- 2x biar work
-                                end
-                                
-                                -- 🔥 PAKE Network.Events.ShakeFish KAYA V2  
+                                -- Shake fish dulu
                                 if Network.Events.ShakeFish then
                                     Network.Events.ShakeFish:FireServer()
-                                    Network.Events.ShakeFish:FireServer() -- 2x biar work
+                                    Network.Events.ShakeFish:FireServer()
                                 end
                                 
-                                -- 🔥 PAKE Net["RE/FishingCompleted"] kalo ada
-                                if Net and Net["RE/FishingCompleted"] then
-                                    Net["RE/FishingCompleted"]:FireServer()
-                                end
-                                
-                                -- 🔥 PAKE Net["RE/ShakeFish"] kalo ada
-                                if Net and Net["RE/ShakeFish"] then
-                                    Net["RE/ShakeFish"]:FireServer()
+                                -- Complete fishing
+                                if Network.Events.FishComplete then
+                                    Network.Events.FishComplete:FireServer()
+                                    Network.Events.FishComplete:FireServer()
                                 end
                             end)
                             
-                            -- 6. UPDATE STATS
+                            -- 7. UPDATE STATS
                             Stats.FishCaught = Stats.FishCaught + 1
                         end)
                     end
                     
-                    -- ⚡ CYCLE DELAY SINGKAT
-                    task.wait(0.5) -- Setengah detik aja
+                    -- ⚡ CYCLE DELAY
+                    task.wait(0.8)
                 end
             end)
             
