@@ -582,32 +582,42 @@ if Config.AntiAFKEnabled then AntiAFKController:Enable() end
 local AnimationController = { Connection = nil }
 local function toggleNoAnimation(state)
     Config.NoAnimation = state
+    
     if state then
         local char = Player.Character
         if char then
             local humanoid = char:FindFirstChildOfClass("Humanoid")
             if humanoid then
+                for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
+                    track:Stop()
+                end
                 
-                if AnimationController.Connection then 
-                    AnimationController.Connection:Disconnect() 
+                if AnimationController.Connection then
+                    AnimationController.Connection:Disconnect()
                 end
                 
                 AnimationController.Connection = humanoid.AnimationPlayed:Connect(function(track)
-                    
-                    if Config.NoAnimation and track.Animation then
-                        local animName = track.Animation.Name:lower()
-                        if animName:find("fish") or animName:find("rod") or animName:find("cast") then
-                            track:Stop()
-                        end
+                    if Config.NoAnimation then
+                        track:Stop()
                     end
                 end)
             end
         end
+        library:MakeNotification({
+            Name = "No Animation",
+            Content = "✅ Enabled - All animations stopped",
+            Time = 3
+        })
     else
-        if AnimationController.Connection then 
-            AnimationController.Connection:Disconnect() 
-            AnimationController.Connection = nil 
+        if AnimationController.Connection then
+            AnimationController.Connection:Disconnect()
+            AnimationController.Connection = nil
         end
+        library:MakeNotification({
+            Name = "No Animation",
+            Content = "❌ Disabled",
+            Time = 3
+        })
     end
 end
 
@@ -893,40 +903,12 @@ local FishingTab = Window:MakeTab({Name = "Fishing", Icon = "rbxassetid://971675
 FishingTab:AddSection({Name = "Fishing Features"})
 
 FishingTab:AddToggle({
-    Name = "No Fishing Animations",
+    Name = "No Animation",
     Default = false,
-    Callback = function(enabled)
-        local character = LocalPlayer.Character or Player.CharacterAdded:Wait()
-        local animator = character:WaitForChild("Humanoid"):FindFirstChildOfClass("Animator")
-        
-        if not animator then
-            return
-        end
-        
-        if enabled then
-            Settings.stopAnimHookEnabled = true
-            
-            for _, animationTrack in ipairs(animator:GetPlayingAnimationTracks()) do
-                animationTrack:Stop(0)
-            end
-            
-            Settings.stopAnimConn = animator.AnimationPlayed:Connect(function(animationTrack)
-                if Settings.stopAnimHookEnabled then
-                    task.defer(function()
-                        pcall(function()
-                            animationTrack:Stop(0)
-                        end)
-                    end)
-                end
-            end)
-        else
-            Settings.stopAnimHookEnabled = false
-            if Settings.stopAnimConn then
-                Settings.stopAnimConn:Disconnect()
-                Settings.stopAnimConn = nil
-            end
-        end
-    end,
+    Callback = function(v)
+        Config.NoAnimation = v
+        toggleNoAnimation(v)
+    end
 })
 
 FishingTab:AddToggle({
