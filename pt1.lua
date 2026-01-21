@@ -179,6 +179,11 @@ task.spawn(function()
     end
 end)
 
+local Settings = {
+    stopAnimHookEnabled = false,
+    stopAnimConn = nil
+}
+
 local Fish = {
     Reel = 1.9,
     FishingDelay = 1.1,
@@ -891,7 +896,7 @@ FishingTab:AddToggle({
     Name = "No Fishing Animations",
     Default = false,
     Callback = function(enabled)
-        local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+        local character = LocalPlayer.Character or Player.CharacterAdded:Wait()
         local animator = character:WaitForChild("Humanoid"):FindFirstChildOfClass("Animator")
         
         if not animator then
