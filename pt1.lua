@@ -1147,7 +1147,7 @@ FishV2Tab:AddSection({Name = "Fishing Features"})
 local function Fastest()
     task.spawn(function()
         pcall(function()
-            Network.Functions.CancelFish:InvokeServer()
+            Network.Functions.CancelFishing:InvokeServer()
         end)
         
         pcall(function()
@@ -1161,7 +1161,7 @@ local function Fastest()
         task.wait(Fish.FishingDelay)
         
         pcall(function()
-            Network.Events.FishComplete:FireServer()
+            Network.Events.FishingComplete:FireServer()
         end)
     end)
 end
