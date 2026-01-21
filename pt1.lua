@@ -222,16 +222,14 @@ local Config = {
     XRayWater = false,
     FishingV3Enabled = false,
     FishingV3BaitDelay = 0.5,
-    FishingV3ReelDelay = 1.5,
-    FishingV3CycleDelay = 1.0,
+    FishingV3CastDelay = 0.2,
     FishingV3ChargeTime = 0.3,
     FishingV3CastPower = 0.8,
     FishingV3CastAngle = 0,
     FishingV3RandomAngle = true,
     FishingV3MinAngle = -0.5,
     FishingV3MaxAngle = 0.5,
-    FishingV3AutoEquip = true,
-    FishingV3InstantReel = false
+    FishingV3AutoEquip = true
 }
 
 local EventList = { "Wind", "Cloudy", "Snow", "Storm", "Radiant", "Shark Hunt" }
@@ -1153,21 +1151,21 @@ FishingV3Tab:AddToggle({
             
             library:MakeNotification({
                 Name = "🎣 Fishing V3",
-                Content = "Advanced fishing started!",
+                Content = "Simple fishing started!",
                 Time = 3
             })
             
             task.spawn(function()
                 while Config.FishingV3Enabled do
-                  
+                   
                     pcall(function()
                         if Network.Functions.CancelFish then
                             Network.Functions.CancelFish:InvokeServer()
                         end
                     end)
                     
-                    
-                    if Config.FishingV3AutoEquip then
+                   
+                    if Fish.FAutoEquip then
                         equipFishingRod()
                         task.wait(0.5)
                     end
@@ -1180,33 +1178,33 @@ FishingV3Tab:AddToggle({
                     end)
                     
                   
-                    if Config.FishingV3ChargeTime > 0 then
-                        task.wait(Config.FishingV3ChargeTime)
+                    if Config.ChargeTime > 0 then
+                        task.wait(Config.ChargeTime)
                     end
                     
-                
-                    local angle
-                    if Config.FishingV3RandomAngle then
-                        angle = Config.FishingV3MinAngle + (math.random() * (Config.FishingV3MaxAngle - Config.FishingV3MinAngle))
-                    else
-                        angle = Config.FishingV3CastAngle
+                    
+                    if Config.FishingV3CastDelay > 0 then
+                        task.wait(Config.FishingV3CastDelay)
                     end
+                    
+                    
+                    local angle = Config.CastAngleMin + (math.random() * (Config.CastAngleMax - Config.CastAngleMin))
                     
                     
                     pcall(function()
                         if Network.Functions.StartMini then
-                            Network.Functions.StartMini:InvokeServer(angle, Config.FishingV3CastPower, os.clock())
+                            Network.Functions.StartMini:InvokeServer(angle, Config.CastPower, os.clock())
                         end
                     end)
-                   
-                   
+                    
+                    
                     if Config.FishingV3BaitDelay > 0 then
                         task.wait(Config.FishingV3BaitDelay)
                     end
                     
                
-                    if not Config.FishingV3InstantReel and Config.FishingV3ReelDelay > 0 then
-                        task.wait(Config.FishingV3ReelDelay)
+                    if Fish.Reel > 0 then
+                        task.wait(Fish.Reel)
                     end
                     
                     
@@ -1222,9 +1220,9 @@ FishingV3Tab:AddToggle({
                     
                     Stats.FishCaught = Stats.FishCaught + 1
                     
-                     
-                    if Config.FishingV3CycleDelay > 0 then
-                        task.wait(Config.FishingV3CycleDelay)
+                   
+                    if Fish.FishingDelay > 0 then
+                        task.wait(Fish.FishingDelay)
                     end
                 end
             end)
@@ -1239,120 +1237,45 @@ FishingV3Tab:AddToggle({
     end
 })
 
-FishingV3Tab:AddSection({Name = "⏱️ Delay Settings"})
+
+FishingV3Tab:AddSection({Name = "Settings"})
+
+FishingV3Tab:AddTextbox({
+    Name = "Cast Delay (seconds)",
+    Default = tostring(Config.FishingV3CastDelay),
+    TextDisappear = false,
+    PlaceholderText = "Delay before casting",
+    Callback = function(input)
+        local value = tonumber(input)
+        if value and value >= 0 then
+            Config.FishingV3CastDelay = value
+            library:MakeNotification({
+                Name = "Cast Delay",
+                Content = "Set to " .. value .. "s",
+                Time = 2
+            })
+        end
+    end
+})
 
 FishingV3Tab:AddTextbox({
     Name = "Bait Delay (seconds)",
     Default = tostring(Config.FishingV3BaitDelay),
+    TextDisappear = false,
+    PlaceholderText = "Delay after bait",
     Callback = function(input)
         local value = tonumber(input)
         if value and value >= 0 then
             Config.FishingV3BaitDelay = value
+            library:MakeNotification({
+                Name = "Bait Delay",
+                Content = "Set to " .. value .. "s",
+                Time = 2
+            })
         end
     end
 })
 
-FishingV3Tab:AddTextbox({
-    Name = "Reel Delay (seconds)",
-    Default = tostring(Config.FishingV3ReelDelay),
-    Callback = function(input)
-        local value = tonumber(input)
-        if value and value >= 0 then
-            Config.FishingV3ReelDelay = value
-        end
-    end
-})
-
-FishingV3Tab:AddTextbox({
-    Name = "Cycle Delay (seconds)",
-    Default = tostring(Config.FishingV3CycleDelay),
-    Callback = function(input)
-        local value = tonumber(input)
-        if value and value >= 0 then
-            Config.FishingV3CycleDelay = value
-        end
-    end
-})
-
-FishingV3Tab:AddTextbox({
-    Name = "Charge Time (seconds)",
-    Default = tostring(Config.FishingV3ChargeTime),
-    Callback = function(input)
-        local value = tonumber(input)
-        if value and value >= 0 then
-            Config.FishingV3ChargeTime = value
-        end
-    end
-})
-
-FishingV3Tab:AddSection({Name = "🎯 Cast Settings"})
-
-FishingV3Tab:AddTextbox({
-    Name = "Cast Power (0.1-1.0)",
-    Default = tostring(Config.FishingV3CastPower),
-    Callback = function(input)
-        local value = tonumber(input)
-        if value and value >= 0.1 and value <= 1.0 then
-            Config.FishingV3CastPower = value
-        end
-    end
-})
-
-FishingV3Tab:AddToggle({
-    Name = "Use Random Angle",
-    Default = Config.FishingV3RandomAngle,
-    Callback = function(enabled)
-        Config.FishingV3RandomAngle = enabled
-    end
-})
-
-if not Config.FishingV3RandomAngle then
-    FishingV3Tab:AddTextbox({
-        Name = "Fixed Angle (-1.0 to 1.0)",
-        Default = tostring(Config.FishingV3CastAngle),
-        Callback = function(input)
-            local value = tonumber(input)
-            if value and value >= -1.0 and value <= 1.0 then
-                Config.FishingV3CastAngle = value
-            end
-        end
-    })
-end
-
-
-if Config.FishingV3RandomAngle then
-    FishingV3Tab:AddTextbox({
-        Name = "Min Angle (-1.0 to 0)",
-        Default = tostring(Config.FishingV3MinAngle),
-        Callback = function(input)
-            local value = tonumber(input)
-            if value and value >= -1.0 and value <= 0 then
-                Config.FishingV3MinAngle = value
-            end
-        end
-    })
-    
-    FishingV3Tab:AddTextbox({
-        Name = "Max Angle (0 to 1.0)",
-        Default = tostring(Config.FishingV3MaxAngle),
-        Callback = function(input)
-            local value = tonumber(input)
-            if value and value >= 0 and value <= 1.0 then
-                Config.FishingV3MaxAngle = value
-            end
-        end
-    })
-end
-
-FishingV3Tab:AddSection({Name = "Utility"})
-
-FishingV3Tab:AddToggle({
-    Name = "Instant Reel",
-    Default = Config.FishingV3InstantReel,
-    Callback = function(enabled)
-        Config.FishingV3InstantReel = enabled
-    end
-})
 
 local CheatTab = Window:MakeTab({Name = "Tools", Icon = "rbxassetid://140165584241571"})
 CheatTab:AddSection({Name = "Movement"})
