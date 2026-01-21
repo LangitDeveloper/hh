@@ -229,13 +229,52 @@ local Config = {
     FishingV3RandomAngle = true,
     FishingV3MinAngle = -0.5,
     FishingV3MaxAngle = 0.5,
-    FishingV3AutoEquip = true
+    FishingV3AutoEquip = true,
+    AntiRagdoll = false
 }
 
 local EventList = { "Wind", "Cloudy", "Snow", "Storm", "Radiant", "Shark Hunt" }
 local Stats = { StartTime = os.time(), FishCaught = 0, LastSellTime = 0, TotalSold = 0 }
 local FishingActive = false
 local AutoSellActive = false
+
+
+local AntiRagdollController = { Connection = nil }
+function AntiRagdollController:Enable()
+    if self.Connection then return end
+    
+    self.Connection = RunService.Heartbeat:Connect(function()
+        if not Config.AntiRagdoll then return end
+        
+        local char = Player.Character
+        if char then
+            local humanoid = char:FindFirstChild("Humanoid")
+            if humanoid then
+                -- Cegah ragdoll dengan reset state
+                if humanoid:GetState() == Enum.HumanoidStateType.FallingDown or
+                   humanoid:GetState() == Enum.HumanoidStateType.Ragdoll then
+                    humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+                end
+                
+                -- Lock character position
+                local root = char:FindFirstChild("HumanoidRootPart")
+                if root then
+                    -- Reset velocity untuk cegah pental
+                    root.Velocity = Vector3.new(0, 0, 0)
+                    root.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                    root.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+                end
+            end
+        end
+    end)
+end
+
+function AntiRagdollController:Disable()
+    if self.Connection then
+        self.Connection:Disconnect()
+        self.Connection = nil
+    end
+end
 
 local function getBackpackInfo()
     local currentCount = 0
@@ -1353,6 +1392,29 @@ CheatTab:AddTextbox({
     Callback = function(v)
         local num = tonumber(v)
         if num and num > 0 then Config.WalkSpeed = num; if Config.SpeedEnabled then updateSpeed() end; library:MakeNotification({Name = "Walk Speed", Content = "Set to " .. num, Time = 2}) end
+    end
+})
+
+CheatTab:AddToggle({
+    Name = "Anti Ragdoll/Knockback",
+    Default = false,
+    Callback = function(v)
+        Config.AntiRagdoll = v
+        if v then
+            AntiRagdollController:Enable()
+            library:MakeNotification({
+                Name = "Anti Ragdoll",
+                Content = "✅ Enabled - No more shaking!",
+                Time = 3
+            })
+        else
+            AntiRagdollController:Disable()
+            library:MakeNotification({
+                Name = "Anti Ragdoll",
+                Content = "❌ Disabled",
+                Time = 3
+            })
+        end
     end
 })
 
