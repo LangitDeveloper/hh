@@ -1133,12 +1133,12 @@ local FishingV3Tab = Window:MakeTab({
     Icon = "rbxassetid://97167558235554"
 })
 
--- Main toggle untuk Fishing V3 (Simple & Fast)
 FishingV3Tab:AddToggle({
     Name = "Enable Fishing V3",
     Default = Config.FishingV3Enabled,
     Callback = function(enabled)
         Config.FishingV3Enabled = enabled
+        
         if enabled then
             if not ensureNetworkLoaded() then
                 library:MakeNotification({
@@ -1152,86 +1152,48 @@ FishingV3Tab:AddToggle({
             
             library:MakeNotification({
                 Name = "⚡ Fishing V3",
-                Content = "Simple & Fast fishing started!",
-                Time = 3
+                Content = "Activated!",
+                Time = 2
             })
             
             task.spawn(function()
                 while Config.FishingV3Enabled do
-                    -- 1. Cancel fishing jika ada yang sedang berjalan
+                    -- ⚡ STEP 1: CHARGE (sangat cepat)
                     pcall(function()
-                        if Network.Functions.CancelFish then
-                            Network.Functions.CancelFish:InvokeServer()
-                        end
+                        Network.Functions.ChargeRod:InvokeServer()
                     end)
                     
-                    -- 2. Auto equip rod
-                    if Config.FishingV3AutoEquip then
-                        equipFishingRod()
-                        task.wait(0.3)
-                    end
-                    
-                    -- 3. Charge fishing rod
-                    pcall(function()
-                        if Network.Functions.ChargeRod then
-                            Network.Functions.ChargeRod:InvokeServer()
-                        end
-                    end)
-                    
-                    -- 4. Charge time
-                    if Config.FishingV3ChargeTime > 0 then
-                        task.wait(Config.FishingV3ChargeTime)
-                    end
-                    
-                    -- 5. CAST DELAY (dari V3)
+                    -- ⚡ CAST DELAY (optional)
                     if Config.FishingV3CastDelay > 0 then
                         task.wait(Config.FishingV3CastDelay)
                     end
                     
-                    -- 6. Cast dengan angle dan power dari CONFIG UTAMA (TANPA RANDOM)
-                    local angle = Config.CastAngle  -- Pakai fixed angle dari config
-                    if not angle then
-                        angle = Config.CastAngleMin  -- Fallback ke min angle
-                    end
-                    
-                    local power = Config.CastPower  -- Pakai power dari config utama
-                    
+                    -- ⚡ STEP 2: CAST (pakai angle dari config utama)
                     pcall(function()
-                        if Network.Functions.StartMini then
-                            Network.Functions.StartMini:InvokeServer(angle, power, os.clock())
-                        end
+                        local angle = Config.CastAngleMin + ((Config.CastAngleMax - Config.CastAngleMin) / 2)
+                        Network.Functions.StartMini:InvokeServer(angle, Config.CastPower, os.clock())
                     end)
                     
-                    -- 7. BAIT DELAY (dari V3)
+                    -- ⚡ BAIT DELAY (optional)
                     if Config.FishingV3BaitDelay > 0 then
                         task.wait(Config.FishingV3BaitDelay)
                     end
                     
-                    -- 8. Reel delay dari Fish.Reel
-                    if Fish.Reel > 0 then
-                        task.wait(Fish.Reel)
-                    end
-                    
-                    -- 9. Complete fishing
+                    -- ⚡ STEP 3: COMPLETE (langsung tanpa delay reel)
                     pcall(function()
-                        if Network.Events.ShakeFish then
-                            Network.Events.ShakeFish:FireServer()
-                        end
-                        if Network.Events.FishComplete then
-                            Network.Events.FishComplete:FireServer()
-                        end
+                        Network.Events.ShakeFish:FireServer()
+                        Network.Events.FishComplete:FireServer()
                     end)
                     
-                    -- 10. Update stats
+                    -- ⚡ UPDATE STATS
                     Stats.FishCaught = Stats.FishCaught + 1
                     
-                    -- 11. Cycle delay (dikurangi waktu yang udah dipake)
-                    local totalUsedTime = (Config.FishingV3ChargeTime or 0) + 
-                                         (Config.FishingV3CastDelay or 0) + 
-                                         (Config.FishingV3BaitDelay or 0) + 
-                                         (Fish.Reel or 0)
+                    -- ⚡ CYCLE DELAY (dikurangi waktu yang udah dipake)
+                    local totalUsedTime = 
+                        (Config.FishingV3CastDelay or 0) + 
+                        (Config.FishingV3BaitDelay or 0)
                     
-                    local remainingDelay = math.max(0.1, Fish.FishingDelay - totalUsedTime)
+                    local remainingDelay = math.max(0.05, (Fish.FishingDelay or 1) - totalUsedTime)
                     task.wait(remainingDelay)
                 end
             end)
@@ -1239,8 +1201,8 @@ FishingV3Tab:AddToggle({
         else
             library:MakeNotification({
                 Name = "Fishing V3",
-                Content = "Disabled",
-                Time = 3
+                Content = "Stopped",
+                Time = 2
             })
         end
     end
