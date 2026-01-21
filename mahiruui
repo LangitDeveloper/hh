@@ -1,5 +1,3 @@
-[file name]: mahiruuiaaaa_fixed.lua
-[file content begin]
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
@@ -36,76 +34,32 @@ end)
 
 if not Success then
 	warn("\nOrion Library - Failed to load Feather Icons. Error code: " .. Response .. "\n")
-	Icons = {} -- Inisialisasi empty table
 end	
 
--- FUNGSI GETICON YANG DIPERBAIKI: Support Asset ID + Emoji + Huruf
+-- GANTI FUNCTION GetIcon() MENJADI:
 local function GetIcon(IconName)
-    -- Jika input kosong atau bukan string
-    if typeof(IconName) ~= "string" or IconName == "" then
-        return nil
-    end
-    
-    -- Jika emoji/huruf (1-3 karakter)
-    if #IconName <= 3 then
-        -- Cek jika karakter adalah emoji/huruf biasa
-        local isLikelyTextOrEmoji = true
-        -- Cek jika string dimulai dengan rbxassetid://
-        if IconName:sub(1, 13) == "rbxassetid://" then
-            isLikelyTextOrEmoji = false
-        end
-        -- Cek jika string adalah nama feather icon
-        if Icons[IconName] ~= nil then
-            isLikelyTextOrEmoji = false
-        end
-        
-        if isLikelyTextOrEmoji then
-            return nil -- Return nil untuk menandakan pakai TextLabel
-        end
-    end
-    
-    -- Jika Asset ID langsung (rbxassetid://...)
-    if IconName:sub(1, 13) == "rbxassetid://" then
-        return IconName
+    -- Jika IconName adalah Asset ID langsung (rbxassetid://...)
+    if typeof(IconName) == "string" and IconName:sub(1, 13) == "rbxassetid://9433703094" then
+        return IconName  -- Langsung return Asset ID
     end
     
     -- Jika IconName adalah nama icon (dari feather icons)
     if Icons[IconName] ~= nil then
         return Icons[IconName]
+    else
+        -- Fallback ke icon default
+        return "rbxassetid://9433703094"  -- Check icon
     end
-    
-    -- Default fallback ke asset ID yang valid
-    return "rbxassetid://7072722669"
 end
 
--- FUNGSI CREATE SMART ICON ELEMENT
-local function CreateSmartIconElement(IconName, SizeOverride)
-    local iconAsset = GetIcon(IconName)
-    local size = SizeOverride or UDim2.new(0, 20, 0, 20)
-    
-    if iconAsset == nil then
-        -- Jika nil, berarti pakai TextLabel untuk emoji/huruf
-        local TextIcon = Create("TextLabel", {
-            Text = IconName,
-            TextColor3 = Color3.fromRGB(240, 240, 240),
-            TextSize = 16,
-            Font = Enum.Font.GothamBold,
-            BackgroundTransparency = 1,
-            Size = size,
-            TextScaled = true,
-            RichText = true
-        })
-        return TextIcon
-    else
-        -- Jika dapat asset, pakai ImageLabel
-        local ImageIcon = Create("ImageLabel", {
-            Image = iconAsset,
-            BackgroundTransparency = 1,
-            Size = size
-        })
-        return ImageIcon
-    end
-end
+-- DAN PERBAIKI CreateElement("Image"):
+CreateElement("Image", function(ImageID)
+    local ImageNew = Create("ImageLabel", {
+        Image = GetIcon(ImageID),  -- Langsung pakai GetIcon
+        BackgroundTransparency = 1
+    })
+    return ImageNew
+end)
 
 local Orion = Instance.new("ScreenGui")
 Orion.Name = "Orion"
@@ -398,9 +352,17 @@ CreateElement("ScrollFrame", function(Color, Width)
 	return ScrollFrame
 end)
 
--- ELEMENT IMAGE YANG DIPERBAIKI: Support Asset ID + Emoji + Huruf
-CreateElement("Image", function(IconName, SizeOverride)
-    return CreateSmartIconElement(IconName, SizeOverride)
+CreateElement("Image", function(ImageID)
+	local ImageNew = Create("ImageLabel", {
+		Image = ImageID,
+		BackgroundTransparency = 1
+	})
+
+	if GetIcon(ImageID) ~= nil then
+		ImageNew.Image = GetIcon(ImageID)
+	end	
+
+	return ImageNew
 end)
 
 CreateElement("ImageButton", function(ImageID)
@@ -461,7 +423,8 @@ function OrionLib:MakeNotification(NotificationConfig)
 		}), {
 			MakeElement("Stroke", Color3.fromRGB(93, 93, 93), 1.2),
 			MakeElement("Padding", 12, 12, 12, 12),
-			SetProps(CreateSmartIconElement(NotificationConfig.Image, UDim2.new(0, 20, 0, 20)), {
+			SetProps(MakeElement("Image", NotificationConfig.Image), {
+				Size = UDim2.new(0, 20, 0, 20),
 				ImageColor3 = Color3.fromRGB(240, 240, 240),
 				Name = "Icon"
 			}),
@@ -531,9 +494,9 @@ function OrionLib:MakeWindow(WindowConfig)
 	WindowConfig.IntroText = WindowConfig.IntroText or "Orion Library"
 	WindowConfig.CloseCallback = WindowConfig.CloseCallback or function() end
 	WindowConfig.ShowIcon = WindowConfig.ShowIcon or false
-	WindowConfig.Icon = WindowConfig.Icon or "rbxassetid://7072722669"
+	WindowConfig.Icon = WindowConfig.Icon or "rbxassetid://9433703094"
 	WindowConfig.IntroIcon = WindowConfig.IntroIcon or "rbxassetid://8834748103"
-	WindowConfig.MinimizedIcon = WindowConfig.MinimizedIcon or "rbxassetid://7072722669"
+	WindowConfig.MinimizedIcon = WindowConfig.MinimizedIcon or "rbxassetid://9433703094"
 	OrionLib.Folder = WindowConfig.ConfigFolder
 	OrionLib.SaveCfg = WindowConfig.SaveConfig
 
@@ -562,21 +525,21 @@ function OrionLib:MakeWindow(WindowConfig)
 		Position = UDim2.new(0.5, 0, 0, 0),
 		BackgroundTransparency = 1
 	}), {
-		AddThemeObject(CreateSmartIconElement("rbxassetid://7072725342", UDim2.new(0, 18, 0, 18)), {
+		AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://7072725342"), {
 			Position = UDim2.new(0, 9, 0, 6),
 			Size = UDim2.new(0, 18, 0, 18)
-		})
+		}), "Text")
 	})
 
 	local MinimizeBtn = SetChildren(SetProps(MakeElement("Button"), {
 		Size = UDim2.new(0.5, 0, 1, 0),
 		BackgroundTransparency = 1
 	}), {
-		AddThemeObject(CreateSmartIconElement("rbxassetid://7072719338", UDim2.new(0, 18, 0, 18)), {
+		AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://7072719338"), {
 			Position = UDim2.new(0, 9, 0, 6),
 			Size = UDim2.new(0, 18, 0, 18),
 			Name = "Ico"
-		})
+		}), "Text")
 	})
 
 	local DragPoint = SetProps(MakeElement("TFrame"), {
@@ -612,12 +575,12 @@ function OrionLib:MakeWindow(WindowConfig)
 				Size = UDim2.new(0, 32, 0, 32),
 				Position = UDim2.new(0, 10, 0.5, 0)
 			}), {
-				SetProps(CreateSmartIconElement("https://www.roblox.com/headshot-thumbnail/image?userId=".. LocalPlayer.UserId .."&width=420&height=420&format=png", UDim2.new(1, 0, 1, 0)), {
+				SetProps(MakeElement("Image", "https://www.roblox.com/headshot-thumbnail/image?userId=".. LocalPlayer.UserId .."&width=420&height=420&format=png"), {
 					Size = UDim2.new(1, 0, 1, 0)
 				}),
-				AddThemeObject(CreateSmartIconElement("rbxassetid://4031889928", UDim2.new(1, 0, 1, 0)), {
+				AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://4031889928"), {
 					Size = UDim2.new(1, 0, 1, 0),
-				}),
+				}), "Second"),
 				MakeElement("Corner", 1)
 			}), "Divider"),
 			SetChildren(SetProps(MakeElement("TFrame"), {
@@ -685,8 +648,7 @@ function OrionLib:MakeWindow(WindowConfig)
 
 	if WindowConfig.ShowIcon then
 		WindowName.Position = UDim2.new(0, 50, 0, -24)
-		local WindowIcon = CreateSmartIconElement(WindowConfig.Icon, UDim2.new(0, 20, 0, 20))
-		SetProps(WindowIcon, {
+		local WindowIcon = SetProps(MakeElement("Image", WindowConfig.Icon), {
 			Size = UDim2.new(0, 20, 0, 20),
 			Position = UDim2.new(0, 25, 0, 15)
 		})
@@ -694,25 +656,16 @@ function OrionLib:MakeWindow(WindowConfig)
 	end	
 
 	-- Create minimized icon setelah MainWindow dibuat
-	local minimizedIconElement = CreateSmartIconElement(WindowConfig.MinimizedIcon, UDim2.new(0, 40, 0, 40))
-	MinimizedIcon = SetProps(minimizedIconElement, {
+	MinimizedIcon = SetProps(MakeElement("ImageButton"), {
+		Image = WindowConfig.MinimizedIcon,
 		Size = UDim2.new(0, 40, 0, 40),
 		Position = UDim2.new(1, -50, 1, -50),
 		AnchorPoint = Vector2.new(1, 1),
 		BackgroundTransparency = 1,
 		Visible = false,
 		Parent = Orion,
-		Name = "MinimizedIcon",
-		Active = true,
-		Selectable = true
+		Name = "MinimizedIcon"
 	})
-
-	-- Jika minimized icon adalah TextLabel, tambahkan background
-	if MinimizedIcon:IsA("TextLabel") then
-		MinimizedIcon.BackgroundTransparency = 0.3
-		MinimizedIcon.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-		MinimizedIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
-	end
 
 	-- Tambahkan stroke dan corner untuk icon minimized
 	local MinimizedIconStroke = AddThemeObject(MakeElement("Stroke", Color3.fromRGB(93, 93, 93), 1), "Stroke")
@@ -736,7 +689,7 @@ function OrionLib:MakeWindow(WindowConfig)
 			Position = MainWindow.Position
 		}):Play()
 		
-		OrionLib:MakeNotification({
+		library:MakeNotification({
 			Name = "Window Minimized",
 			Content = "Click the icon to restore window",
 			Time = 3
@@ -749,7 +702,7 @@ function OrionLib:MakeWindow(WindowConfig)
 		MainWindow.Visible = true
 		MainWindow.Position = MinimizedIcon.Position
 		
-		OrionLib:MakeNotification({
+		library:MakeNotification({
 			Name = "Window Restored",
 			Content = "Window restored from minimized state",
 			Time = 2
@@ -760,7 +713,7 @@ function OrionLib:MakeWindow(WindowConfig)
 		MainWindow.Visible = false
 		MinimizedIcon.Visible = false
 		UIHidden = true
-		OrionLib:MakeNotification({
+		library:MakeNotification({
 			Name = "Interface Hidden",
 			Content = "Press RightShift to reopen",
 			Time = 5
@@ -793,8 +746,7 @@ function OrionLib:MakeWindow(WindowConfig)
 
 	local function LoadSequence()
 		MainWindow.Visible = false
-		local LoadSequenceLogo = CreateSmartIconElement(WindowConfig.IntroIcon, UDim2.new(0, 28, 0, 28))
-		SetProps(LoadSequenceLogo, {
+		local LoadSequenceLogo = SetProps(MakeElement("Image", WindowConfig.IntroIcon), {
 			Parent = Orion,
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			Position = UDim2.new(0.5, 0, 0.4, 0),
@@ -802,11 +754,6 @@ function OrionLib:MakeWindow(WindowConfig)
 			ImageColor3 = Color3.fromRGB(255, 255, 255),
 			ImageTransparency = 1
 		})
-
-		-- Jika LoadSequenceLogo adalah TextLabel, set TextColor3
-		if LoadSequenceLogo:IsA("TextLabel") then
-			LoadSequenceLogo.TextColor3 = Color3.fromRGB(255, 255, 255)
-		end
 
 		local LoadSequenceText = SetProps(MakeElement("Label", WindowConfig.IntroText, 14), {
 			Parent = Orion,
@@ -818,12 +765,7 @@ function OrionLib:MakeWindow(WindowConfig)
 			TextTransparency = 1
 		})
 
-		if LoadSequenceLogo:IsA("ImageLabel") then
-			TweenService:Create(LoadSequenceLogo, TweenInfo.new(.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {ImageTransparency = 0, Position = UDim2.new(0.5, 0, 0.5, 0)}):Play()
-		else
-			TweenService:Create(LoadSequenceLogo, TweenInfo.new(.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextTransparency = 0, Position = UDim2.new(0.5, 0, 0.5, 0)}):Play()
-		end
-		
+		TweenService:Create(LoadSequenceLogo, TweenInfo.new(.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {ImageTransparency = 0, Position = UDim2.new(0.5, 0, 0.5, 0)}):Play()
 		wait(0.8)
 		TweenService:Create(LoadSequenceLogo, TweenInfo.new(.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Position = UDim2.new(0.5, -(LoadSequenceText.TextBounds.X/2), 0.5, 0)}):Play()
 		wait(0.3)
@@ -850,14 +792,13 @@ function OrionLib:MakeWindow(WindowConfig)
 			Size = UDim2.new(1, 0, 0, 30),
 			Parent = TabHolder
 		}), {
-			-- Ganti dengan CreateSmartIconElement
-			SetProps(CreateSmartIconElement(TabConfig.Icon, UDim2.new(0, 18, 0, 18)), {
+			AddThemeObject(SetProps(MakeElement("Image", TabConfig.Icon), {
 				AnchorPoint = Vector2.new(0, 0.5),
 				Size = UDim2.new(0, 18, 0, 18),
 				Position = UDim2.new(0, 10, 0, 10),
 				ImageTransparency = 0.4,
 				Name = "Ico"
-			}),
+			}), "Text"),
 			AddThemeObject(SetProps(MakeElement("Label", TabConfig.Name, 14), {
 				Size = UDim2.new(1, -35, 1, 0),
 				Position = UDim2.new(0, 35, 0, 0),
@@ -867,15 +808,9 @@ function OrionLib:MakeWindow(WindowConfig)
 			}), "Text")
 		})
 
-		-- Set transparency untuk icon (baik ImageLabel maupun TextLabel)
-		local iconElement = TabFrame:FindFirstChild("Ico")
-		if iconElement then
-			if iconElement:IsA("ImageLabel") then
-				iconElement.ImageTransparency = 0.4
-			elseif iconElement:IsA("TextLabel") then
-				iconElement.TextTransparency = 0.4
-			end
-		end
+		if GetIcon(TabConfig.Icon) ~= nil then
+			TabFrame.Ico.Image = GetIcon(TabConfig.Icon)
+		end	
 
 		local Container = AddThemeObject(SetChildren(SetProps(MakeElement("ScrollFrame", Color3.fromRGB(255, 255, 255), 5), {
 			Size = UDim2.new(1, -150, 1, -50),
@@ -894,13 +829,7 @@ function OrionLib:MakeWindow(WindowConfig)
 
 		if FirstTab then
 			FirstTab = false
-			if iconElement then
-				if iconElement:IsA("ImageLabel") then
-					iconElement.ImageTransparency = 0
-				elseif iconElement:IsA("TextLabel") then
-					iconElement.TextTransparency = 0
-				end
-			end
+			TabFrame.Ico.ImageTransparency = 0
 			TabFrame.Title.TextTransparency = 0
 			TabFrame.Title.Font = Enum.Font.GothamBlack
 			Container.Visible = true
@@ -910,14 +839,7 @@ function OrionLib:MakeWindow(WindowConfig)
 			for _, Tab in next, TabHolder:GetChildren() do
 				if Tab:IsA("TextButton") then
 					Tab.Title.Font = Enum.Font.GothamSemibold
-					local tabIcon = Tab:FindFirstChild("Ico")
-					if tabIcon then
-						if tabIcon:IsA("ImageLabel") then
-							TweenService:Create(tabIcon, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {ImageTransparency = 0.4}):Play()
-						elseif tabIcon:IsA("TextLabel") then
-							TweenService:Create(tabIcon, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = 0.4}):Play()
-						end
-					end
+					TweenService:Create(Tab.Ico, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {ImageTransparency = 0.4}):Play()
 					TweenService:Create(Tab.Title, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = 0.4}):Play()
 				end    
 			end
@@ -926,15 +848,7 @@ function OrionLib:MakeWindow(WindowConfig)
 					ItemContainer.Visible = false
 				end    
 			end  
-			
-			if iconElement then
-				if iconElement:IsA("ImageLabel") then
-					TweenService:Create(iconElement, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {ImageTransparency = 0}):Play()
-				elseif iconElement:IsA("TextLabel") then
-					TweenService:Create(iconElement, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
-				end
-			end
-			
+			TweenService:Create(TabFrame.Ico, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {ImageTransparency = 0}):Play()
 			TweenService:Create(TabFrame.Title, TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = 0}):Play()
 			TabFrame.Title.Font = Enum.Font.GothamBlack
 			Container.Visible = true   
@@ -1023,10 +937,10 @@ function OrionLib:MakeWindow(WindowConfig)
 						Font = Enum.Font.GothamBold,
 						Name = "Content"
 					}), "Text"),
-					SetProps(CreateSmartIconElement(ButtonConfig.Icon, UDim2.new(0, 20, 0, 20)), {
+					AddThemeObject(SetProps(MakeElement("Image", ButtonConfig.Icon), {
 						Size = UDim2.new(0, 20, 0, 20),
 						Position = UDim2.new(1, -30, 0, 7),
-					}),
+					}), "TextDark"),
 					AddThemeObject(MakeElement("Stroke"), "Stroke"),
 					Click
 				}), "Second")
@@ -1081,7 +995,7 @@ function OrionLib:MakeWindow(WindowConfig)
 						Name = "Stroke",
 						Transparency = 0.5
 					}),
-					SetProps(CreateSmartIconElement("rbxassetid://3944680095", UDim2.new(0, 20, 0, 20)), {
+					SetProps(MakeElement("Image", "rbxassetid://3944680095"), {
 						Size = UDim2.new(0, 20, 0, 20),
 						AnchorPoint = Vector2.new(0.5, 0.5),
 						Position = UDim2.new(0.5, 0, 0.5, 0),
@@ -1109,14 +1023,7 @@ function OrionLib:MakeWindow(WindowConfig)
 					Toggle.Value = Value
 					TweenService:Create(ToggleBox, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {BackgroundColor3 = Toggle.Value and ToggleConfig.Color or OrionLib.Themes.Default.Divider}):Play()
 					TweenService:Create(ToggleBox.Stroke, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Color = Toggle.Value and ToggleConfig.Color or OrionLib.Themes.Default.Stroke}):Play()
-					local icoElement = ToggleBox:FindFirstChild("Ico")
-					if icoElement then
-						if icoElement:IsA("ImageLabel") then
-							TweenService:Create(icoElement, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {ImageTransparency = Toggle.Value and 0 or 1, Size = Toggle.Value and UDim2.new(0, 20, 0, 20) or UDim2.new(0, 8, 0, 8)}):Play()
-						elseif icoElement:IsA("TextLabel") then
-							TweenService:Create(icoElement, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {TextTransparency = Toggle.Value and 0 or 1, Size = Toggle.Value and UDim2.new(0, 20, 0, 20) or UDim2.new(0, 8, 0, 8)}):Play()
-						end
-					end
+					TweenService:Create(ToggleBox.Ico, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {ImageTransparency = Toggle.Value and 0 or 1, Size = Toggle.Value and UDim2.new(0, 20, 0, 20) or UDim2.new(0, 8, 0, 8)}):Play()
 					ToggleConfig.Callback(Toggle.Value)
 				end    
 
@@ -1284,13 +1191,13 @@ function OrionLib:MakeWindow(WindowConfig)
 							Font = Enum.Font.GothamBold,
 							Name = "Content"
 						}), "Text"),
-						SetProps(CreateSmartIconElement("rbxassetid://7072706796", UDim2.new(0, 20, 0, 20)), {
+						AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://7072706796"), {
 							Size = UDim2.new(0, 20, 0, 20),
 							AnchorPoint = Vector2.new(0, 0.5),
 							Position = UDim2.new(1, -30, 0.5, 0),
 							ImageColor3 = Color3.fromRGB(240, 240, 240),
 							Name = "Ico"
-						}),
+						}), "TextDark"),
 						AddThemeObject(SetProps(MakeElement("Label", "Selected", 13), {
 							Size = UDim2.new(1, -40, 1, 0),
 							Font = Enum.Font.Gotham,
@@ -1380,10 +1287,7 @@ function OrionLib:MakeWindow(WindowConfig)
 				AddConnection(Click.MouseButton1Click, function()
 					Dropdown.Toggled = not Dropdown.Toggled
 					DropdownFrame.F.Line.Visible = Dropdown.Toggled
-					local icoElement = DropdownFrame.F:FindFirstChild("Ico")
-					if icoElement then
-						TweenService:Create(icoElement,TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),{Rotation = Dropdown.Toggled and 180 or 0}):Play()
-					end
+					TweenService:Create(DropdownFrame.F.Ico,TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),{Rotation = Dropdown.Toggled and 180 or 0}):Play()
 					if #Dropdown.Options > MaxElements then
 						TweenService:Create(DropdownFrame,TweenInfo.new(.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),{Size = Dropdown.Toggled and UDim2.new(1, 0, 0, 38 + (MaxElements * 28)) or UDim2.new(1, 0, 0, 38)}):Play()
 					else
@@ -1836,7 +1740,7 @@ function OrionLib:MakeWindow(WindowConfig)
 				Size = UDim2.new(1, 0, 1, 0),
 				Parent = ItemParent
 			}), {
-				AddThemeObject(SetProps(CreateSmartIconElement("rbxassetid://3610239960", UDim2.new(0, 18, 0, 18)), {
+				AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://3610239960"), {
 					Size = UDim2.new(0, 18, 0, 18),
 					Position = UDim2.new(0, 15, 0, 15),
 					ImageTransparency = 0.4
@@ -1846,7 +1750,7 @@ function OrionLib:MakeWindow(WindowConfig)
 					Position = UDim2.new(0, 38, 0, 18),
 					TextTransparency = 0.4
 				}), "Text"),
-				AddThemeObject(SetProps(CreateSmartIconElement("rbxassetid://4483345875", UDim2.new(0, 56, 0, 56)), {
+				AddThemeObject(SetProps(MakeElement("Image", "rbxassetid://4483345875"), {
 					Size = UDim2.new(0, 56, 0, 56),
 					Position = UDim2.new(0, 84, 0, 110),
 				}), "Text"),
@@ -1873,4 +1777,3 @@ function OrionLib:Destroy()
 end
 
 return OrionLib
-[file content end]
