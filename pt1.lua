@@ -888,12 +888,40 @@ local FishingTab = Window:MakeTab({Name = "Fishing", Icon = "rbxassetid://971675
 FishingTab:AddSection({Name = "Fishing Features"})
 
 FishingTab:AddToggle({
-    Name = "No Animation",
+    Title = "No Fishing Animations",
     Default = false,
-    Callback = function(v)
-        Config.NoAnimation = v
-        toggleNoAnimation(v)
-    end
+    Callback = function(enabled)
+        local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+        local animator = character:WaitForChild("Humanoid"):FindFirstChildOfClass("Animator")
+        
+        if not animator then
+            return
+        end
+        
+        if enabled then
+            Settings.stopAnimHookEnabled = true
+            
+            for _, animationTrack in ipairs(animator:GetPlayingAnimationTracks()) do
+                animationTrack:Stop(0)
+            end
+            
+            Settings.stopAnimConn = animator.AnimationPlayed:Connect(function(animationTrack)
+                if Settings.stopAnimHookEnabled then
+                    task.defer(function()
+                        pcall(function()
+                            animationTrack:Stop(0)
+                        end)
+                    end)
+                end
+            end)
+        else
+            Settings.stopAnimHookEnabled = false
+            if Settings.stopAnimConn then
+                Settings.stopAnimConn:Disconnect()
+                Settings.stopAnimConn = nil
+            end
+        end
+    end,
 })
 
 FishingTab:AddToggle({
