@@ -221,8 +221,8 @@ local Config = {
     FullBright = false,
     XRayWater = false,
     FishingV3Enabled = false,
-    FishingV3BaitDelay = 0.5,
-    FishingV3CastDelay = 0.2,
+    FishingV3BaitDelay = 0.3,
+    FishingV3CastDelay = 0.70,
     FishingV3ChargeTime = 0.3,
     FishingV3CastPower = 0.8,
     FishingV3CastAngle = -1,
@@ -1157,43 +1157,76 @@ FishingV3Tab:AddToggle({
             })
             
             task.spawn(function()
+                -- Auto equip sekali di awal
+                if Config.FishingV3AutoEquip then
+                    equipFishingRod()
+                    task.wait(0.5)
+                end
+                
                 while Config.FishingV3Enabled do
-                    -- ⚡ STEP 1: CHARGE (sangat cepat)
+                    -- ⚡ STEP 1: CANCEL dulu (biar fresh)
+                    pcall(function()
+                        Network.Functions.CancelFish:InvokeServer()
+                    end)
+                    task.wait(0.05)
+                    
+                    -- ⚡ STEP 2: CHARGE ROD
                     pcall(function()
                         Network.Functions.ChargeRod:InvokeServer()
                     end)
                     
-                    -- ⚡ CAST DELAY (optional)
+                    -- ⚡ CHARGE TIME
+                    if Config.ChargeTime > 0 then
+                        task.wait(Config.ChargeTime)
+                    end
+                    
+                    -- ⚡ CAST DELAY
                     if Config.FishingV3CastDelay > 0 then
                         task.wait(Config.FishingV3CastDelay)
                     end
                     
-                    -- ⚡ STEP 2: CAST (pakai angle dari config utama)
+                    -- ⚡ STEP 3: CAST (pakai angle dari config)
                     pcall(function()
                         local angle = Config.CastAngleMin + ((Config.CastAngleMax - Config.CastAngleMin) / 2)
                         Network.Functions.StartMini:InvokeServer(angle, Config.CastPower, os.clock())
                     end)
                     
-                    -- ⚡ BAIT DELAY (optional)
+                    -- ⚡ BAIT DELAY
                     if Config.FishingV3BaitDelay > 0 then
                         task.wait(Config.FishingV3BaitDelay)
                     end
                     
-                    -- ⚡ STEP 3: COMPLETE (langsung tanpa delay reel)
+                    -- ⚡ STEP 4: REEL DELAY (INI YANG PENTING!)
+                    if Fish.Reel > 0 then
+                        task.wait(Fish.Reel)
+                    end
+                    
+                    -- ⚡ STEP 5: SHAKE FISH (2x biar work)
                     pcall(function()
                         Network.Events.ShakeFish:FireServer()
+                        task.wait(0.05)
+                        Network.Events.ShakeFish:FireServer()
+                    end)
+                    
+                    -- ⚡ STEP 6: COMPLETE (2x biar work)
+                    pcall(function()
+                        Network.Events.FishComplete:FireServer()
+                        task.wait(0.05)
                         Network.Events.FishComplete:FireServer()
                     end)
                     
                     -- ⚡ UPDATE STATS
                     Stats.FishCaught = Stats.FishCaught + 1
                     
-                    -- ⚡ CYCLE DELAY (dikurangi waktu yang udah dipake)
+                    -- ⚡ CYCLE DELAY
                     local totalUsedTime = 
+                        (Config.ChargeTime or 0) +
                         (Config.FishingV3CastDelay or 0) + 
-                        (Config.FishingV3BaitDelay or 0)
+                        (Config.FishingV3BaitDelay or 0) +
+                        (Fish.Reel or 0) +
+                        0.15  -- waktu untuk shake & complete
                     
-                    local remainingDelay = math.max(0.05, (Fish.FishingDelay or 1) - totalUsedTime)
+                    local remainingDelay = math.max(0.1, (Fish.FishingDelay or 1) - totalUsedTime)
                     task.wait(remainingDelay)
                 end
             end)
