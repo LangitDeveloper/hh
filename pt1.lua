@@ -278,10 +278,6 @@ function StartBlatantFishingV2()
     task.spawn(function()
         while IsBlatantFishing do
                 pcall(function()
-                    Remotes.RF_Cancel:InvokeServer()
-                end)
-                
-                pcall(function()
                     Remotes.RF_Charge:InvokeServer(workspace:GetServerTimeNow())
                 end)
                 
@@ -500,7 +496,7 @@ local function CreateToggleButton()
     end)
 end
 
---CreateToggleButton()
+CreateToggleButton()
 
 Window:SetToggleKey(Enum.KeyCode.F3)
 Window:IsResizable(true)
