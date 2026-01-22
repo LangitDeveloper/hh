@@ -66,7 +66,7 @@ local ShakeDelay = 0.15
 local InstantFishingDelay = 0.1
 local BlatantReelDelay = 1.9
 local BlatantFishingDelay = 1.1
-local BlatantBaitDelay = 0.05  
+local BlatantBaitDelay = 0.3 
 local BlatantCastDelay = 0.1     
 local IsLegitFishing = false
 local IsAutoShake = false
@@ -281,12 +281,12 @@ function StartBlatantFishingV2()
  
             pcall(Remotes.RF_Charge.InvokeServer, Remotes.RF_Charge, workspace:GetServerTimeNow())
             
-            task.wait(BlatantBaitDelay or 0.05)
+            task.wait(BlatantBaitDelay)
             
             pcall(Remotes.RF_Minigame.InvokeServer, Remotes.RF_Minigame, -1, 0.999)
             
-            task.wait(BlatantCastDelay or 0.1)
-            
+            task.wait(BlatantCastDelay)
+            task.wait(BlatantReelDelay)
             pcall(Remotes.RE_Fishing.FireServer, Remotes.RE_Fishing)
         end
     end)
