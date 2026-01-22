@@ -399,11 +399,11 @@ end)
 local MahiruUi = loadstring(game:HttpGet("https://raw.githubusercontent.com/LangitDeveloper/hh/refs/heads/main/mahiruui"))()
 local Window = MahiruUi:CreateWindow({
     Title = "Mahiru",
-    Icon = "rbxassetid://78018573702743",
+    Icon = "rbxassetid://12633176980",
     Author = "Freemium",
     Folder = "MengHub",
     Size = UDim2.fromOffset(380, 260),
-    MinSize = Vector2.new(560, 350),
+    MinSize = Vector2.new(560, 350), 
     MaxSize = Vector2.new(850, 560),
     Transparent = true,
     Theme = "Dark",
@@ -434,7 +434,7 @@ local function CreateToggleButton()
     button.Size = UDim2.new(0, 40, 0, 40)
     button.Position = UDim2.new(0, 20, 0, 100)
     button.BackgroundTransparency = 1
-    button.Image = "rbxassetid://78018573702743"
+    button.Image = "rbxassetid://12633176980"
     button.ScaleType = Enum.ScaleType.Fit
     
     local corner = Instance.new("UICorner")
