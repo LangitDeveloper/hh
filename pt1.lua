@@ -338,14 +338,14 @@ function SendFishWebhook(fishId, metadata)
     local price = fishInfo.SellPrice and "$" .. FormatNumber(fishInfo.SellPrice) or "N/A"
     
     local embed = {
-        username = "Mahiru Notification!",
+        username = "Meng Hub Notification!",
         avatar_url = "https://i.imgur.com/ly3iUKn.jpeg",
         embeds = {{
             description = string.format("Congratulations **%s**! You just caught a **%s** fish!", 
                 WebhookConfig.HideName ~= "" and WebhookConfig.HideName or LocalPlayer.Name, 
                 tierName),
             color = 16738740,
-            author = {name = "Mahiru Webhook | Fish Caught"},
+            author = {name = "MengHub Webhook | Fish Caught"},
             image = {url = GetThumbnailUrl(fishInfo.Icon) or "https://i.imgur.com/ly3iUKn.jpeg"},
             fields = {
                 {name = "🎣 Fish Name", value = "```❯ " .. fishInfo.Name .. "```"},
@@ -355,7 +355,7 @@ function SendFishWebhook(fishId, metadata)
                 {name = "💰 Sell Price", value = "```❯ " .. price .. "```"},
                 {name = "🕒 Caught At", value = "```❯ " .. os.date("%Y-%m-%d %H:%M:%S") .. "```"}
             },
-            footer = {text = "Powered By Mahiru", icon_url = "https://i.imgur.com/ly3iUKn.jpeg"},
+            footer = {text = "Powered by MengHub", icon_url = "https://i.imgur.com/ly3iUKn.jpeg"},
             timestamp = os.date("!%Y-%m-%dT%H:%M:%S.000Z")
         }}
     }
@@ -396,14 +396,14 @@ LocalPlayer.Idled:Connect(function()
     VirtualUserRef:ClickButton2(Vector2.new())
 end)
 
-local MahiruUi = loadstring(game:HttpGet("https://raw.githubusercontent.com/LangitDeveloper/hh/refs/heads/main/mahiruui"))()
-local Window = MahiruUi:CreateWindow({
-    Title = "Mahiru",
-    Icon = "rbxassetid://12633176980",
+local MengHubUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/zhidanptrsyh/MengHub/refs/heads/main/main.lua"))()
+local Window = MengHubUI:CreateWindow({
+    Title = "MengHub - Fish It",
+    Icon = "rbxassetid://78018573702743",
     Author = "Freemium",
     Folder = "MengHub",
     Size = UDim2.fromOffset(380, 260),
-    MinSize = Vector2.new(560, 350), 
+    MinSize = Vector2.new(560, 350),
     MaxSize = Vector2.new(850, 560),
     Transparent = true,
     Theme = "Dark",
@@ -415,7 +415,7 @@ local Window = MahiruUi:CreateWindow({
 })
 
 Window:Tag({
-    Title = "v1",
+    Title = "v1.0.1",
     Icon = "cone",
     Color = Color3.fromHex("#FF88E3"),
     Radius = 12,
@@ -434,7 +434,7 @@ local function CreateToggleButton()
     button.Size = UDim2.new(0, 40, 0, 40)
     button.Position = UDim2.new(0, 20, 0, 100)
     button.BackgroundTransparency = 1
-    button.Image = "rbxassetid://12633176980"
+    button.Image = "rbxassetid://78018573702743"
     button.ScaleType = Enum.ScaleType.Fit
     
     local corner = Instance.new("UICorner")
@@ -486,10 +486,10 @@ local ShopTab = Window:Tab({Title = "Shop", Icon = "shopping-cart"})
 local TeleportTab = Window:Tab({Title = "Teleport", Icon = "map"})
 
 InfoTab:Paragraph({
-    Title = "Mahiru Alert!",
+    Title = "MengHub Alert!",
     Desc = "This script is still under development!\nThere is a possibility it may get detected if used in public servers!\nIf you have suggestions or found bugs, please report them to <font color=\"#00AAFF\">Discord Meng Hub</font>!\n<b>Use at your own risk!</b>",
     Color = "Green",
-    Image = "rbxassetid://12633176980",
+    Image = "rbxassetid://17313330026",
     ImageSize = 30,
 })
 
@@ -498,15 +498,15 @@ InfoTab:Button({
     Desc = "Click This To Copy Discord Link.\nJoin to <font color=\"#FF90E3\">Discord Meng Hub</font>!",
     Callback = function()
         if setclipboard then
-            setclipboard("discord.gg/mahiruscript")
-            MahiruUi:Notify({
+            setclipboard("discord.gg/menghub")
+            MengHubUI:Notify({
                 Title = "Success",
                 Content = "Discord link copied to clipboard!",
                 Duration = 3,
                 Icon = "laptop-minimal-check",
             })
         else
-            MahiruUi:Notify({
+            MengHubUI:Notify({
                 Title = "Error",
                 Content = "Executor doesn't support clipboard!",
                 Duration = 3,
@@ -552,7 +552,7 @@ local function ServerHop()
     if #servers > 0 then
         TeleportService:TeleportToPlaceInstance(placeId, servers[math.random(1, #servers)], LocalPlayer)
     else
-        MahiruUi:Notify({
+        MengHubUI:Notify({
             Title = "Error",
             Content = "No servers available or all are full",
             Duration = 2.5,
@@ -579,9 +579,9 @@ local ThemeToggle = InterfaceSection:Toggle({
     Value = false,
     Callback = function(value)
         if value then
-            MahiruUi:SetTheme("Light Theme")
+            MengHubUI:SetTheme("Light Theme")
         else
-            MahiruUi:SetTheme("Dark Theme")
+            MengHubUI:SetTheme("Dark Theme")
         end
     end,
 })
@@ -618,7 +618,7 @@ MovementSection:Button({
             LocalPlayer.Character.Humanoid.JumpPower = 50
             WalkSpeedSlider:Set(16)
             JumpPowerSlider:Set(50)
-            MahiruUi:Notify({
+            MengHubUI:Notify({
                 Title = "Success",
                 Content = "Speed and jump reset successfully",
                 Duration = 2.5,
@@ -791,7 +791,7 @@ local NoClipToggle = ModesSection:Toggle({
     Callback = function(value)
         IsNoClip = value
         if value then
-            MahiruUi:Notify({
+            MengHubUI:Notify({
                 Title = "Success",
                 Content = "Noclip enabled",
                 Duration = 2.5,
@@ -955,7 +955,7 @@ RenderSection:Toggle({
     Value = false,
     Callback = function(value)
         RunService:Set3dRenderingEnabled(not value)
-        MahiruUi:Notify({
+        MengHubUI:Notify({
             Title = value and "Disabled" or "Enabled",
             Content = value and "3D Render disabled" or "3D Render enabled",
             Duration = 2.5,
@@ -1155,7 +1155,7 @@ HideIdentSection:Button({
         task.wait(0.2)
         LocalPlayer.Character:WaitForChild("HumanoidRootPart").CFrame = position
         
-        MahiruUi:Notify({
+        MengHubUI:Notify({
             Title = "Success",
             Content = "Character reset in same location!",
             Duration = 2.5,
@@ -1755,7 +1755,7 @@ local function TeleportToLastPosition()
     if savedPosition then
         task.wait(2)
         rootPart.CFrame = savedPosition
-        MahiruUi:Notify({
+        MengHubUI:Notify({
             Title = "Teleported to your last position...",
         })
     end
@@ -1768,7 +1768,7 @@ SPSection:Button({
         local rootPart = character and character:FindFirstChild("HumanoidRootPart")
         if rootPart then
             SavePosition(rootPart.CFrame)
-            MahiruUi:Notify({
+            MengHubUI:Notify({
                 Title = "Position saved successfully!",
             })
         end
@@ -1781,7 +1781,7 @@ SPSection:Button({
         if isfile("Meng Hub/FishIt/Position.json") then
             delfile("Meng Hub/FishIt/Position.json")
         end
-        MahiruUi:Notify({
+        MengHubUI:Notify({
             Title = "Last position has been reset!",
         })
     end,
@@ -2061,14 +2061,14 @@ WebhookTab:Button({
             end)
             
             if success then
-                MahiruUi:Notify({
+                MengHubUI:Notify({
                     Title = "Success",
                     Content = "Webhook test sent successfully!",
                     Duration = 3,
                     Icon = "laptop-minimal-check",
                 })
             else
-                MahiruUi:Notify({
+                MengHubUI:Notify({
                     Title = "Error",
                     Content = "Failed to send webhook: " .. tostring(errorMsg),
                     Duration = 3,
@@ -2463,7 +2463,7 @@ RodSection:Button({
     Title = "Purchase",
     Callback = function()
         if not SelectedRod then
-            MahiruUi:Notify({
+            MengHubUI:Notify({
                 Title = "Error",
                 Content = "Select Rod First!",
                 Duration = 2.5,
@@ -2474,7 +2474,7 @@ RodSection:Button({
         
         local rodData = Rods[SelectedRod]
         if not rodData then
-            MahiruUi:Notify({
+            MengHubUI:Notify({
                 Title = "Error",
                 Content = "Rod ID Not Found!",
                 Duration = 2.5,
@@ -2541,7 +2541,7 @@ BaitSection:Button({
     Title = "Purchase",
     Callback = function()
         if not SelectedBait then
-            MahiruUi:Notify({
+            MengHubUI:Notify({
                 Title = "Error",
                 Content = "Select Bait First!",
                 Duration = 2.5,
@@ -2552,7 +2552,7 @@ BaitSection:Button({
         
         local baitData = Baits[SelectedBait]
         if not baitData then
-            MahiruUi:Notify({
+            MengHubUI:Notify({
                 Title = "Error",
                 Content = "Bait ID Not Found!",
                 Duration = 2.5,
@@ -2596,7 +2596,7 @@ BoatSection:Button({
     Title = "Purchase",
     Callback = function()
         if not SelectedBoat then
-            MahiruUi:Notify({
+            MengHubUI:Notify({
                 Title = "Error",
                 Content = "Select Boat First!",
                 Duration = 2.5,
@@ -2607,7 +2607,7 @@ BoatSection:Button({
         
         local boatData = Boats[SelectedBoat]
         if not boatData then
-            MahiruUi:Notify({
+            MengHubUI:Notify({
                 Title = "Error",
                 Content = "Boat ID Not Found!",
                 Duration = 2.5,
@@ -2706,7 +2706,7 @@ LocationSection:Button({
     Title = "Teleport",
     Callback = function()
         if not SelectedLocation then
-            MahiruUi:Notify({
+            MengHubUI:Notify({
                 Title = "Error",
                 Content = "Select location first!",
                 Duration = 2.5,
@@ -2747,7 +2747,7 @@ PlayerSection:Button({
     Title = "Refresh",
     Callback = function()
         PlayerDropdown:Refresh(GetPlayerList())
-        MahiruUi:Notify({
+        MengHubUI:Notify({
             Title = "Success",
             Content = "Player list refreshed successfully",
             Duration = 2.5,
@@ -2760,7 +2760,7 @@ PlayerSection:Button({
     Title = "Go",
     Callback = function()
         if not SelectedPlayer then
-            MahiruUi:Notify({
+            MengHubUI:Notify({
                 Title = "Error",
                 Content = "Select player first!",
                 Duration = 2.5,
@@ -2771,7 +2771,7 @@ PlayerSection:Button({
         
         local targetPlayer = Players:FindFirstChild(SelectedPlayer)
         if not targetPlayer or not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            MahiruUi:Notify({
+            MengHubUI:Notify({
                 Title = "Error",
                 Content = "Invalid player!",
                 Duration = 2.5,
@@ -2864,5 +2864,5 @@ end)
 
 ConfigManager:Load()
 
-print("Mahiru Loaded Successfully...")
+print("MengHub Loaded Successfully...")
 print("Happy Fishing Brotherrrrr...")
