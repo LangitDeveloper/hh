@@ -399,9 +399,9 @@ end)
 local MahiruUi = loadstring(game:HttpGet("https://raw.githubusercontent.com/zhidanptrsyh/MengHub/refs/heads/main/main.lua"))()
 local Window = MahiruUi:CreateWindow({
     Title = "Mahiru",
-    Icon = "rbxassetid://12633176980",
-    Author = "Freemium",
-    Folder = "MengHub",
+    Icon = "rbxassetid://78018573702743",
+    Author = "LangitDev",
+    Folder = "Mahiru",
     Size = UDim2.fromOffset(380, 260),
     MinSize = Vector2.new(560, 350), 
     MaxSize = Vector2.new(850, 560),
@@ -421,7 +421,7 @@ Window:Tag({
     Radius = 12,
 })
 
-local ConfigManager = Window.ConfigManager:CreateConfig("MengXHubConfig")
+local ConfigManager = Window.ConfigManager:CreateConfig("mahiruconfig")
 
 local function CreateToggleButton()
     local screenGui = Instance.new("ScreenGui")
@@ -434,7 +434,7 @@ local function CreateToggleButton()
     button.Size = UDim2.new(0, 40, 0, 40)
     button.Position = UDim2.new(0, 20, 0, 100)
     button.BackgroundTransparency = 1
-    button.Image = "rbxassetid://12633176980"
+    button.Image = "rbxassetid://78018573702743"
     button.ScaleType = Enum.ScaleType.Fit
     
     local corner = Instance.new("UICorner")
@@ -487,7 +487,7 @@ local TeleportTab = Window:Tab({Title = "Teleport", Icon = "map"})
 
 InfoTab:Paragraph({
     Title = "Mahiru Alert!",
-    Desc = "This script is still under development!\nThere is a possibility it may get detected if used in public servers!\nIf you have suggestions or found bugs, please report them to <font color=\"#00AAFF\">Discord Meng Hub</font>!\n<b>Use at your own risk!</b>",
+    Desc = "Welcome To Script Mahiru, By LangitDev",
     Color = "Green",
     Image = "rbxassetid://12633176980",
     ImageSize = 30,
@@ -1039,14 +1039,14 @@ local function SetupIdentity()
         Header = overhead.Content:WaitForChild("Header"),
         Level = overhead.LevelContainer:WaitForChild("Label"),
         Grad = overhead.TitleContainer.Label:FindFirstChildOfClass("UIGradient") or Instance.new("UIGradient", overhead.TitleContainer.Label),
-        Watermark = overhead:FindFirstChild("MengHubWatermark")
+        Watermark = overhead:FindFirstChild("MahiruWatermark")
     }
     
     if not IdentityElements.Watermark then
         IdentityElements.Watermark = Instance.new("TextLabel")
-        IdentityElements.Watermark.Name = "MengHubWatermark"
+        IdentityElements.Watermark.Name = "MahiruWatermark"
         IdentityElements.Watermark.Parent = overhead
-        IdentityElements.Watermark.Text = "[MengHub]"
+        IdentityElements.Watermark.Text = "[Mahiru]"
         IdentityElements.Watermark.TextColor3 = Color3.fromRGB(255, 105, 180)
         IdentityElements.Watermark.TextScaled = true
         IdentityElements.Watermark.Font = Enum.Font.SourceSansBold
@@ -2259,7 +2259,7 @@ local AntiStaffToggle = ServerUtilitySection:Toggle({
                             }
                             
                             if staffRanks[rank] then
-                                LocalPlayer:Kick("MengHub Detected Staff, Automatically Kicked!")
+                                LocalPlayer:Kick("Mahiru Detected Staff, Automatically Kicked!")
                                 return
                             end
                         end
@@ -2859,7 +2859,7 @@ Window:OnDestroy(function()
         toggleButton:Destroy()
     end
     
-    print("MengHub cleaned up successfully!")
+    print("Mahiru cleaned up successfully!")
 end)
 
 ConfigManager:Load()
