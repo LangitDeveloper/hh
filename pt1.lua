@@ -277,7 +277,6 @@ function StartBlatantFishingV2()
     
     task.spawn(function()
         while IsBlatantFishing do
-            task.spawn(function()
                 pcall(function()
                     Remotes.RF_Cancel:InvokeServer()
                 end)
@@ -294,7 +293,6 @@ function StartBlatantFishingV2()
                 pcall(function()
                     Remotes.RE_Fishing:FireServer()
                 end)
-            end)
             
             task.wait(BlatantCastDelay)
         end
@@ -502,7 +500,7 @@ local function CreateToggleButton()
     end)
 end
 
-CreateToggleButton()
+--CreateToggleButton()
 
 Window:SetToggleKey(Enum.KeyCode.F3)
 Window:IsResizable(true)
@@ -1426,7 +1424,7 @@ local BlatantFishingV2Toggle = FishingTab:Toggle({
         end
     end,
 })
-ConfigManager:Register("blatantToggle", BlatantFishingV2Toggle)
+ConfigManager:Register("blatantv2Toggle", BlatantFishingV2Toggle)
 
 local SellSection = AutomaticTab:Section({Title = "Auto Sell"})
 
