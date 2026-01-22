@@ -273,21 +273,25 @@ end
 
 function StartBlatantFishingV2()
     IsBlatantFishing = true
-    Remotes.RF_AutoFishing:InvokeServer(true)
-    
+    Remotes.RF_AutoFishing:InvokeServer(true)    
     task.spawn(function()
         while IsBlatantFishing do
-            task.wait(BlatantBaitDelay)
-            pcall(function()
-                Remotes.RF_Charge:InvokeServer(workspace:GetServerTimeNow())
+            task.wait(BlatantBaitDelay or 0.3)
+            local success, guid, power = pcall(function()
+                return Remotes.RF_Charge:InvokeServer(workspace:GetServerTimeNow())
             end)
-            task.wait(BlatantCastDelay)
-            pcall(function()
-                Remotes.RF_Minigame:InvokeServer(-1, 0.999)
-            end)
-            pcall(function()
-                Remotes.RE_Fishing:FireServer()
-            end)
+            task.wait(BlatantCastDelay or 0.7)
+            
+            if success and type(power) == "number" then
+                pcall(function()
+                    Remotes.RF_Minigame:InvokeServer(-1, 0.999, power)
+                end)
+                task.wait(0.1)
+                pcall(function()
+                    Remotes.RE_Fishing:FireServer()
+                end)
+            end
+            task.wait(0.05)
         end
     end)
 end
