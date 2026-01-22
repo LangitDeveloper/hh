@@ -277,17 +277,26 @@ function StartBlatantFishingV2()
     
     task.spawn(function()
         while IsBlatantFishing do
-            pcall(Remotes.RF_Cancel.InvokeServer, Remotes.RF_Cancel)
- 
-            pcall(Remotes.RF_Charge.InvokeServer, Remotes.RF_Charge, workspace:GetServerTimeNow())
-            
-            task.wait(BlatantBaitDelay)
-            
-            pcall(Remotes.RF_Minigame.InvokeServer, Remotes.RF_Minigame, -1, 0.999)
+            task.spawn(function()
+                pcall(function()
+                    Remotes.RF_Cancel:InvokeServer()
+                end)
+                
+                pcall(function()
+                    Remotes.RF_Charge:InvokeServer(workspace:GetServerTimeNow())
+                end)
+                
+                pcall(function()
+                    Remotes.RF_Minigame:InvokeServer(-1, 0.999)
+                end)
+                
+                task.wait(BlatantBaitDelay)
+                pcall(function()
+                    Remotes.RE_Fishing:FireServer()
+                end)
+            end)
             
             task.wait(BlatantCastDelay)
-            task.wait(BlatantReelDelay)
-            pcall(Remotes.RE_Fishing.FireServer, Remotes.RE_Fishing)
         end
     end)
 end
@@ -1380,8 +1389,8 @@ FishingTab:Section({Title = "Blatant v2"})
 local BlatantBaitInput = FishingTab:Input({
     Title = "Bait Delay",
     Desc = "Delay sebelum charge (e.g. 0.05 = ultra fast)",
-    Value = "0.05",
-    Placeholder = "0.05",
+    Value = "0.3",
+    Placeholder = "0.3",
     Callback = function(value)
         local num = tonumber(value)
         if num and num >= 0 then
@@ -1394,8 +1403,8 @@ ConfigManager:Register("blatantBaitInput", BlatantBaitInput)
 local BlatantCastInput = FishingTab:Input({
     Title = "Cast Delay", 
     Desc = "Delay sebelum minigame (e.g. 0.1 = instant)",
-    Value = "0.1",
-    Placeholder = "0.1",
+    Value = "0.70",
+    Placeholder = "0.70",
     Callback = function(value)
         local num = tonumber(value)
         if num and num >= 0 then
