@@ -72,6 +72,11 @@ local IsLegitFishing = false
 local IsAutoShake = false
 local IsInstantFishing = false
 local IsBlatantFishing = false
+
+local IsBlatantV3 = false
+local V3_CastDelay     = 0.03   
+local V3_CancelDelay   = 3      
+local V3_CompleteDelay= 3      
 local CurrentFishCount = 0
 
 
@@ -271,7 +276,7 @@ function StartInstantFishing()
     end)
 end
 
-function StartBlatantFishingV2()
+function StartBlatantFishingV3()
     IsBlatantFishing = true
     Remotes.RF_AutoFishing:InvokeServer(true)
     
@@ -281,6 +286,26 @@ function StartBlatantFishingV2()
                     Remotes.RF_Charge:InvokeServer(workspace:GetServerTimeNow())
                 end)
                 
+                pcall(function()
+                    Remotes.RF_Minigame:InvokeServer(-1, 0.999)
+                end)
+                
+                task.wait(V3_CancelDelay)
+                pcall(function()
+                    Remotes.RE_Fishing:FireServer()
+                end)
+            
+            task.wait(V3_CompleteDelay)
+        end
+    end)
+end
+
+function StartBlatantFishingV2()
+    IsBlatantFishing = true
+    Remotes.RF_AutoFishing:InvokeServer(true)
+    
+    task.spawn(function()
+        while IsBlatantFishing do
                 pcall(function()
                     Remotes.RF_Minigame:InvokeServer(-1, 0.999)
                 end)
@@ -1420,7 +1445,51 @@ local BlatantFishingV2Toggle = FishingTab:Toggle({
         end
     end,
 })
-ConfigManager:Register("blatantv2Toggle", BlatantFishingV2Toggle)
+ConfigManager:Register("blatantV2Toggle", BlatantFishingV2Toggle)
+
+FishingTab:Section({Title = "Blatant v3"})
+
+local BlatantcancelInput = FishingTab:Input({
+    Title = "Cancel Delay",
+    Desc = "Delay sebelum charge (e.g. 0.05 = ultra fast)",
+    Value = "0.3",
+    Placeholder = "0.3",
+    Callback = function(value)
+        local num = tonumber(value)
+        if num and num >= 0 then
+            V3_CancelDelay = num
+        end
+    end,
+})
+ConfigManager:Register("blatantcancelInput", BlatantBaitInput)
+
+local BlatantCompleteInput = FishingTab:Input({
+    Title = "Complete Delay", 
+    Desc = "Delay sebelum minigame (e.g. 0.1 = instant)",
+    Value = "0.70",
+    Placeholder = "0.70",
+    Callback = function(value)
+        local num = tonumber(value)
+        if num and num >= 0 then
+            V3_CompleteDelay = num
+        end
+    end,
+})
+ConfigManager:Register("blatantCompleteInput", BlatantCastInput)
+
+local BlatantFishingV3Toggle = FishingTab:Toggle({
+    Title = "Blatant Fishing V3",
+    Value = false,
+    Callback = function(value)
+        if value then
+            StartBlatantFishingV3()
+        else
+            IsBlatantFishing = false
+            Remotes.RF_AutoFishing:InvokeServer(false)
+        end
+    end,
+})
+ConfigManager:Register("blatantV3Toggle", BlatantFishingV3Toggle)
 
 local SellSection = AutomaticTab:Section({Title = "Auto Sell"})
 
