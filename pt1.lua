@@ -447,7 +447,7 @@ end)
 local MahiruUi = loadstring(game:HttpGet("https://raw.githubusercontent.com/LangitDeveloper/hh/main/mahiruui.lua"))()
 local Window = MahiruUi:CreateWindow({
     Title = "Mahiru",
-    Icon = "rbxassetid://11424961500",
+    Icon = "rbxassetid://130987654321",
     Author = "LangitDev",
     Folder = "Mahiru",
     Size = UDim2.fromOffset(380, 260),
@@ -475,7 +475,7 @@ local function CreateToggleButton()
     button.Size = UDim2.new(0, 40, 0, 40)
     button.Position = UDim2.new(0, 20, 0, 100)
     button.BackgroundTransparency = 1
-    button.Image = "rbxassetid://11424961500"
+    button.Image = "rbxassetid://130987654321"
     button.ScaleType = Enum.ScaleType.Fit
     
     local corner = Instance.new("UICorner")
@@ -762,27 +762,58 @@ local NoAnimationToggle = ModesSection:Toggle({
     Title = "No Animations",
     Value = false,
     Callback = function(value)
-        if LocalPlayer.Character then
-            local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-            local animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
-            
-            if animator then
-                if value then
+        IsNoAnimation = value
+        
+        if value then
+            if LocalPlayer.Character then
+                local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+                local animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
+                
+                if animator then
                     for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
                         track:Stop(0)
                     end
                     
-                    local connection = animator.AnimationPlayed:Connect(function(track)
-                        task.defer(function()
-                            pcall(function() track:Stop(0) end)
+                    if not NoAnimationConnection then
+                        NoAnimationConnection = animator.AnimationPlayed:Connect(function(track)
+                            task.defer(function()
+                                if IsNoAnimation then
+                                    pcall(function() 
+                                        track:Stop(0) 
+                                        track:Destroy()
+                                    end)
+                                end
+                            end)
                         end)
-                    end)
-                    
-                    IsNoAnimation = true
-                else
-                    IsNoAnimation = false
+                    end
                 end
             end
+            
+            MahiruUi:Notify({
+                Title = "No Animation",
+                Content = "Animations disabled",
+                Duration = 2,
+                Icon = "square-slash",
+            })
+        else
+            if NoAnimationConnection then
+                NoAnimationConnection:Disconnect()
+                NoAnimationConnection = nil
+            end
+            
+            if LocalPlayer.Character then
+                local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    humanoid:ChangeState(Enum.HumanoidStateType.Running)
+                end
+            end
+            
+            MahiruUi:Notify({
+                Title = "No Animation",
+                Content = "Animations enabled",
+                Duration = 2,
+                Icon = "square-play",
+            })
         end
     end,
 })
