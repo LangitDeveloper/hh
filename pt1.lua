@@ -303,18 +303,16 @@ end
 function StartBlatantFishingV2()
     IsBlatantFishing = true
     Remotes.RF_AutoFishing:InvokeServer(true)
-    
     task.spawn(function()
         while IsBlatantFishing do
-                pcall(function()
-                    Remotes.RF_Minigame:InvokeServer(-1, 0.999)
-                end)
-                
-                task.wait(BlatantBaitDelay)
-                pcall(function()
-                    Remotes.RE_Fishing:FireServer()
-                end)
-            
+            pcall(function()
+                Remotes.RF_Cancel:InvokeServer()
+            end)
+            task.wait(0.05)
+            local _, _, power = Remotes.RF_Charge:InvokeServer(workspace:GetServerTimeNow())
+            Remotes.RF_Minigame:InvokeServer(-1, 0.999, power)
+            task.wait(BlatantBaitDelay)
+            Remotes.RE_Fishing:FireServer()
             task.wait(BlatantCastDelay)
         end
     end)
@@ -447,7 +445,7 @@ LocalPlayer.Idled:Connect(function()
     VirtualUserRef:ClickButton2(Vector2.new())
 end)
 
-local MahiruUi = loadstring(game:HttpGet("https://raw.githubusercontent.com/zhidanptrsyh/MengHub/refs/heads/main/main.lua"))()
+local MahiruUi = loadstring(game:HttpGet("https://raw.githubusercontent.com/LangitDeveloper/hh/main/mahiruui.lua"))()
 local Window = MahiruUi:CreateWindow({
     Title = "Mahiru",
     Icon = "rbxassetid://78018573702743",
