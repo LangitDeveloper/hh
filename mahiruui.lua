@@ -1454,7 +1454,21 @@ local ad=ab.Tween
 function aa.New(ae,af,ag,ah,ai,aj,ak,al)
 ah=ah or"Primary"
 local am=al or(not ak and 10 or 99)
-local an = nil
+local an
+if af and af~=""then
+an=ac("ImageLabel",{
+Image=ab.Icon(af)[1],
+ImageRectSize=ab.Icon(af)[2].ImageRectSize,
+ImageRectOffset=ab.Icon(af)[2].ImageRectPosition,
+Size=UDim2.new(0,21,0,21),
+BackgroundTransparency=1,
+ImageColor3=ah=="White"and Color3.new(0,0,0)or nil,
+ImageTransparency=ah=="White"and.4 or 0,
+ThemeTag={
+ImageColor3=ah~="White"and"Icon"or nil,
+}
+})
+end
 
 local ao=ac("TextButton",{
 Size=UDim2.new(0,0,1,0),
@@ -1535,6 +1549,7 @@ Padding=UDim.new(0,8),
 VerticalAlignment="Center",
 HorizontalAlignment="Center",
 }),
+an,
 ac("TextLabel",{
 BackgroundTransparency=1,
 FontFace=Font.new(ab.Font,Enum.FontWeight.SemiBold),
@@ -5296,7 +5311,7 @@ local ak=ai.Value
 
 local al,am
 if ai.Type=="Toggle"then
-al,am=ad(ak,nil,ai.ToggleFrame.UIElements.Main,ai.Callback,ah.Window.NewElements)
+al,am=ad(ak,ai.Icon,ai.ToggleFrame.UIElements.Main,ai.Callback,ah.Window.NewElements)
 elseif ai.Type=="Checkbox"then
 al,am=ae(ak,ai.Icon,ai.ToggleFrame.UIElements.Main,ai.Callback,ah)
 else

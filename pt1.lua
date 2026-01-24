@@ -67,14 +67,14 @@ local InstantFishingDelay = 0.1
 local BlatantReelDelay = 1.9
 local BlatantFishingDelay = 1.1
 local BlatantBaitDelay = 0.3 
-local BlatantCastDelay = 0.1     
+local BlatantCastDelay = 0.70    
 local IsLegitFishing = false
 local IsAutoShake = false
 local IsInstantFishing = false
 local IsBlatantFishing = false
 
 local IsBlatantV3 = false
-local V3_CastDelay     = 0.03   
+local V3_CastDelay     = 0.3   
 local V3_CancelDelay   = 3      
 local V3_CompleteDelay= 3      
 local CurrentFishCount = 0
@@ -308,7 +308,6 @@ function StartBlatantFishingV2()
             pcall(function()
                 Remotes.RF_Cancel:InvokeServer()
             end)
-            task.wait(0.05)
             local _, _, power = Remotes.RF_Charge:InvokeServer(workspace:GetServerTimeNow())
             Remotes.RF_Minigame:InvokeServer(-1, 0.999, power)
             task.wait(BlatantBaitDelay)
@@ -448,7 +447,7 @@ end)
 local MahiruUi = loadstring(game:HttpGet("https://raw.githubusercontent.com/LangitDeveloper/hh/main/mahiruui.lua"))()
 local Window = MahiruUi:CreateWindow({
     Title = "Mahiru",
-    Icon = "rbxassetid://78018573702743",
+    Icon = "rbxassetid://11424961500",
     Author = "LangitDev",
     Folder = "Mahiru",
     Size = UDim2.fromOffset(380, 260),
@@ -461,13 +460,6 @@ local Window = MahiruUi:CreateWindow({
     BackgroundImageTransparency = 0.42,
     HideSearchBar = true,
     ScrollBarEnabled = false,
-})
-
-Window:Tag({
-    Title = "v1",
-    Icon = "cone",
-    Color = Color3.fromHex("#FF88E3"),
-    Radius = 12,
 })
 
 local ConfigManager = Window.ConfigManager:CreateConfig("mahiruconfig")
@@ -483,13 +475,13 @@ local function CreateToggleButton()
     button.Size = UDim2.new(0, 40, 0, 40)
     button.Position = UDim2.new(0, 20, 0, 100)
     button.BackgroundTransparency = 1
-    button.Image = "rbxassetid://78018573702743"
+    button.Image = "rbxassetid://11424961500"
     button.ScaleType = Enum.ScaleType.Fit
     
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 6)
     corner.Parent = button
-    
+     
     button.MouseButton1Click:Connect(function()
         Window:Toggle()
     end)
