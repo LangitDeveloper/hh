@@ -150,35 +150,82 @@ local function CreatePingFPSGui()
     local gui = Instance.new("ScreenGui")
     gui.Name = "MahiruPingFPS"
     gui.ResetOnSpawn = false
-    gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+    gui.Parent = game.CoreGui
 
     local frame = Instance.new("Frame", gui)
-    frame.Size = UDim2.new(0, 170, 0, 55)
+    frame.Size = UDim2.new(0, 180, 0, 60)
     frame.Position = UDim2.new(0, 20, 0, 200)
-    frame.BackgroundColor3 = Color3.fromRGB(18,18,18)
+    frame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+    frame.BackgroundTransparency = 0.3
     frame.BorderSizePixel = 0
     frame.Active = true
     frame.Draggable = true
 
-    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
 
     local title = Instance.new("TextLabel", frame)
-    title.Size = UDim2.new(1, -10, 0, 18)
-    title.Position = UDim2.new(0, 5, 0, 3)
+    title.Size = UDim2.new(1, -10, 0, 20)
+    title.Position = UDim2.new(0, 10, 0, 5)
     title.BackgroundTransparency = 1
-    title.Text = "Mahiru"
+    title.Text = "📊 PERFORMANCE"
     title.Font = Enum.Font.GothamBold
     title.TextSize = 14
-    title.TextXAlignment = Left
-    title.TextColor3 = Color3.fromRGB(255,170,170)
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.TextColor3 = Color3.fromRGB(255, 170, 170)
+
+    -- TAMBAH GARIS PEMISAH
+    local line = Instance.new("Frame", frame)
+    line.Size = UDim2.new(1, -20, 0, 1)
+    line.Position = UDim2.new(0, 10, 0, 28)
+    line.BackgroundColor3 = Color3.fromRGB(100, 100, 120)
+    line.BorderSizePixel = 0
 
     local info = Instance.new("TextLabel", frame)
     info.Size = UDim2.new(1, -10, 0, 25)
-    info.Position = UDim2.new(0, 5, 0, 25)
+    info.Position = UDim2.new(0, 10, 0, 32)
     info.BackgroundTransparency = 1
-    info.Font = Enum.Font.Gotham
-    info.TextSize = 12
-    info.TextXAlignment = Left
+    info.Font = Enum.Font.GothamMedium
+    info.TextSize = 14
+    info.TextXAlignment = Enum.TextXAlignment.Left
+    info.Text = "Ping: -- | FPS: --"
+    
+    -- TAMBAH ICON/WATERMARK
+    local watermark = Instance.new("TextLabel", frame)
+    watermark.Size = UDim2.new(0, 40, 0, 15)
+    watermark.Position = UDim2.new(1, -45, 0, 5)
+    watermark.BackgroundTransparency = 1
+    watermark.Text = "MAHIRU"
+    watermark.Font = Enum.Font.GothamBold
+    watermark.TextSize = 10
+    watermark.TextColor3 = Color3.fromRGB(255, 100, 100)
+    
+    -- TAMBAH TOGGLE VISIBILITY BUTTON (X)
+    local closeBtn = Instance.new("TextButton", frame)
+    closeBtn.Size = UDim2.new(0, 20, 0, 20)
+    closeBtn.Position = UDim2.new(1, -25, 0, 5)
+    closeBtn.BackgroundTransparency = 0.8
+    closeBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+    closeBtn.Text = "X"
+    closeBtn.TextColor3 = Color3.fromRGB(255, 150, 150)
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.TextSize = 12
+    closeBtn.AutoButtonColor = false
+    
+    Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 4)
+    
+    closeBtn.MouseButton1Click:Connect(function()
+        gui.Enabled = not gui.Enabled
+        closeBtn.Text = gui.Enabled and "X" or "▶"
+    end)
+    
+    -- HOVER EFFECT UNTUK CLOSE BUTTON
+    closeBtn.MouseEnter:Connect(function()
+        closeBtn.BackgroundTransparency = 0.5
+    end)
+    
+    closeBtn.MouseLeave:Connect(function()
+        closeBtn.BackgroundTransparency = 0.8
+    end)
     
     local fps = 0
     local frames = 0
@@ -189,8 +236,8 @@ local function CreatePingFPSGui()
         frames += 1
         local now = os.clock()
 
-        if now - lastTime >= 1 then
-            fps = frames
+        if now - lastTime >= 0.5 then  -- UPDATE LEBIH CEPAT (0.5 detik)
+            fps = math.floor(frames / (now - lastTime))
             frames = 0
             lastTime = now
 
@@ -198,23 +245,56 @@ local function CreatePingFPSGui()
                 Stats.Network.ServerStatsItem["Data Ping"]:GetValue()
             )
 
+            -- WARNA BERDASARKAN PERFORMANCE
             local color
-            if ping < 250 then
-                color = Color3.fromRGB(80,255,120)       
-            elseif ping < 1000 then
-                color = Color3.fromRGB(255,220,80)       
+            if ping < 100 and fps > 60 then
+                color = Color3.fromRGB(100, 255, 100)  -- HIJAU (BAIK)
+                frame.BackgroundColor3 = Color3.fromRGB(30, 50, 30)
+            elseif ping < 200 and fps > 30 then
+                color = Color3.fromRGB(255, 255, 100)  -- KUNING (SEDANG)
+                frame.BackgroundColor3 = Color3.fromRGB(50, 50, 30)
             else
-                color = Color3.fromRGB(255,80,80)        
+                color = Color3.fromRGB(255, 100, 100)  -- MERAH (BURUK)
+                frame.BackgroundColor3 = Color3.fromRGB(50, 30, 30)
             end
 
             info.TextColor3 = color
-            info.Text = ("ping: %d ms | fps: %d"):format(ping, fps)
+            info.Text = string.format("Ping: %dms | FPS: %d", ping, fps)
+            
+            -- UPDATE WATERMARK COLOR BERDASARKAN PERFORMANCE
+            if ping < 100 then
+                watermark.TextColor3 = Color3.fromRGB(100, 255, 100)
+            elseif ping < 300 then
+                watermark.TextColor3 = Color3.fromRGB(255, 255, 100)
+            else
+                watermark.TextColor3 = Color3.fromRGB(255, 100, 100)
+            end
         end
     end)
+    
+    -- TAMBAH HOTKEY UNTUK HIDE/SHOW (F4)
+    local hotkeyConnection
+    hotkeyConnection = UserInputService.InputBegan:Connect(function(input)
+        if input.KeyCode == Enum.KeyCode.F4 then
+            gui.Enabled = not gui.Enabled
+            closeBtn.Text = gui.Enabled and "X" or "▶"
+        end
+    end)
+    
+    -- CLEANUP WHEN GUI IS DESTROYED
     gui.Destroying:Once(function()
-        if conn then conn:Disconnect() end
+        if conn then 
+            conn:Disconnect() 
+            conn = nil
+        end
+        if hotkeyConnection then
+            hotkeyConnection:Disconnect()
+            hotkeyConnection = nil
+        end
+        print("PingFPS GUI destroyed successfully")
     end)
 
+    print("PingFPS GUI created successfully!")
     return gui
 end
 
@@ -733,9 +813,11 @@ local ThemeToggle = InterfaceSection:Toggle({
 })
 ConfigManager:Register("themeToggle", ThemeToggle)
 
+local PFpsSection = PlayerTab:Section({Title = "Tools Fps Booster"})
+
 local StatsGui
 
-local PerfomToggle = PlayerTab:Toggle({
+local PerfomToggle = PfpsSection:Toggle({
     Title = "Show Ping & FPS",
     Default = false,
     Callback = function(state)
@@ -751,7 +833,7 @@ local PerfomToggle = PlayerTab:Toggle({
 })
 ConfigManager:Register("PerfomToggle", PerfomToggle)
 
-local FPSBoostToggle = PlayerTab:Toggle({
+local FPSBoostToggle = PfpsSection:Toggle({
     Title = "FPS Booster",
     Default = false,
     Callback = function(state)
