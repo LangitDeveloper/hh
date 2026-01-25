@@ -17,7 +17,7 @@ function AdminPanel:CheckAdmin()
     }
     
     local adminNames = {
-        "Dytihfay"
+        "dytihfay"
     }
     
     -- AUTO CHECK: Tampilkan semua info
@@ -154,21 +154,7 @@ print("[Admin] Access granted, creating control tab...")
 -- ADMIN CONTROL TAB
 local ControlTab = AdminWindow:Tab({Title = "Remote Control", Icon = "radio"})
 
--- PLAYER COUNTER
-local playerCounter = ControlTab:Label({
-    Title = "Player Status",
-    Content = "Loading...",
-})
 
-task.spawn(function()
-    while task.wait(3) do
-        local users = AdminPanel:GetMahiruUsers()
-        playerCounter:Set(string.format("Mahiru Users: %d/%d", 
-            #users, #Players:GetPlayers() - 1))
-    end
-end)
-
--- FORCE RESTART SECTION
 ControlTab:Section({Title = "🚨 FORCE RESTART"})
 
 local RestartMessage = ControlTab:Input({
