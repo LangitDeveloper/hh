@@ -14,7 +14,7 @@ function AdminPanel:CheckAdmin()
     }
     
     local adminNames = {
-        "LangitDev"
+        "Dytahfay"
     }
     
     for _, id in ipairs(adminIds) do
@@ -94,7 +94,6 @@ local ControlTab = AdminWindow:Tab({Title = "Remote Control", Icon = "radio"})
 
 local playerList = ControlTab:Label({
     Title = "Connected Players",
-    Desc = "Loading...",
 })
 
 task.spawn(function()
@@ -115,11 +114,9 @@ local RestartMessage = ControlTab:Input({
 
 ControlTab:Button({
     Title = "🔥 RESTART ALL PLAYERS",
-    Desc = "Force all Mahiru users to restart",
     Callback = function()
         local confirm = AdminUI:Confirm({
             Title = "CONFIRM RESTART",
-            Desc = "This will restart ALL Mahiru users in this server!\n\nAre you sure?",
             Buttons = {
                 {
                     Title = "YES, RESTART EVERYONE",
@@ -196,13 +193,11 @@ local FeatureSelect = ControlTab:Dropdown({
 
 local FeatureState = ControlTab:Toggle({
     Title = "Feature State",
-    Desc = "ON = Enable, OFF = Disable",
     Default = true,
 })
 
 ControlTab:Button({
     Title = "TOGGLE FOR ALL",
-    Desc = "Enable/disable feature for everyone",
     Callback = function()
         AdminPanel:SendCommandToAll("toggle_feature", {
             feature = FeatureSelect.Value,
@@ -221,7 +216,6 @@ ControlTab:Section({Title = "🎯 MASS CONTROL"})
 
 ControlTab:Button({
     Title = "🔄 RESTART SERVER",
-    Desc = "Restart server (including yourself)",
     Callback = function()
         AdminPanel:SendCommandToAll("restart_all", {
             message = "Server restarting now!"
@@ -234,7 +228,6 @@ ControlTab:Button({
 
 ControlTab:Button({
     Title = "⏸️ STOP ALL FISHING",
-    Desc = "Disable all fishing features",
     Callback = function()
         local features = {"auto_fishing", "auto_shake", "instant_fishing", "blatant_fishing"}
         
@@ -257,7 +250,6 @@ ControlTab:Button({
 
 ControlTab:Button({
     Title = "▶️ START ALL FISHING",
-    Desc = "Enable all fishing features",
     Callback = function()
         AdminPanel:SendCommandToAll("toggle_feature", {
             feature = "auto_fishing",
@@ -288,7 +280,7 @@ ControlTab:Button({
         
         AdminUI:Alert({
             Title = "Player Information",
-            Desc = info,
+            Description = info,
             Buttons = {{Title = "Close"}}
         })
     end,
@@ -296,7 +288,6 @@ ControlTab:Button({
 
 ControlTab:Button({
     Title = "🎮 TELEPORT TO ME",
-    Desc = "Bring all players to your location",
     Callback = function()
         local char = Players.LocalPlayer.Character
         if not char then return end
