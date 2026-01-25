@@ -167,13 +167,12 @@ local function CreatePingFPSGui()
     title.Size = UDim2.new(1, -10, 0, 20)
     title.Position = UDim2.new(0, 10, 0, 5)
     title.BackgroundTransparency = 1
-    title.Text = "📊 PERFORMANCE"
+    title.Text = "Mahiru"
     title.Font = Enum.Font.GothamBold
     title.TextSize = 14
     title.TextXAlignment = Enum.TextXAlignment.Left
     title.TextColor3 = Color3.fromRGB(255, 170, 170)
 
-    -- TAMBAH GARIS PEMISAH
     local line = Instance.new("Frame", frame)
     line.Size = UDim2.new(1, -20, 0, 1)
     line.Position = UDim2.new(0, 10, 0, 28)
@@ -189,17 +188,15 @@ local function CreatePingFPSGui()
     info.TextXAlignment = Enum.TextXAlignment.Left
     info.Text = "Ping: -- | FPS: --"
     
-    -- TAMBAH ICON/WATERMARK
     local watermark = Instance.new("TextLabel", frame)
     watermark.Size = UDim2.new(0, 40, 0, 15)
     watermark.Position = UDim2.new(1, -45, 0, 5)
     watermark.BackgroundTransparency = 1
-    watermark.Text = "MAHIRU"
+    watermark.Text = "LangitDev"
     watermark.Font = Enum.Font.GothamBold
     watermark.TextSize = 10
     watermark.TextColor3 = Color3.fromRGB(255, 100, 100)
     
-    -- TAMBAH TOGGLE VISIBILITY BUTTON (X)
     local closeBtn = Instance.new("TextButton", frame)
     closeBtn.Size = UDim2.new(0, 20, 0, 20)
     closeBtn.Position = UDim2.new(1, -25, 0, 5)
@@ -218,7 +215,6 @@ local function CreatePingFPSGui()
         closeBtn.Text = gui.Enabled and "X" or "▶"
     end)
     
-    -- HOVER EFFECT UNTUK CLOSE BUTTON
     closeBtn.MouseEnter:Connect(function()
         closeBtn.BackgroundTransparency = 0.5
     end)
@@ -236,7 +232,7 @@ local function CreatePingFPSGui()
         frames += 1
         local now = os.clock()
 
-        if now - lastTime >= 0.5 then  -- UPDATE LEBIH CEPAT (0.5 detik)
+        if now - lastTime >= 0.5 then  
             fps = math.floor(frames / (now - lastTime))
             frames = 0
             lastTime = now
@@ -244,24 +240,23 @@ local function CreatePingFPSGui()
             local ping = math.floor(
                 Stats.Network.ServerStatsItem["Data Ping"]:GetValue()
             )
-
-            -- WARNA BERDASARKAN PERFORMANCE
+            
             local color
             if ping < 100 and fps > 60 then
-                color = Color3.fromRGB(100, 255, 100)  -- HIJAU (BAIK)
+                color = Color3.fromRGB(100, 255, 100)  
                 frame.BackgroundColor3 = Color3.fromRGB(30, 50, 30)
             elseif ping < 200 and fps > 30 then
-                color = Color3.fromRGB(255, 255, 100)  -- KUNING (SEDANG)
+                color = Color3.fromRGB(255, 255, 100)  
                 frame.BackgroundColor3 = Color3.fromRGB(50, 50, 30)
             else
-                color = Color3.fromRGB(255, 100, 100)  -- MERAH (BURUK)
+                color = Color3.fromRGB(255, 100, 100) 
                 frame.BackgroundColor3 = Color3.fromRGB(50, 30, 30)
             end
 
             info.TextColor3 = color
             info.Text = string.format("Ping: %dms | FPS: %d", ping, fps)
             
-            -- UPDATE WATERMARK COLOR BERDASARKAN PERFORMANCE
+            
             if ping < 100 then
                 watermark.TextColor3 = Color3.fromRGB(100, 255, 100)
             elseif ping < 300 then
@@ -272,7 +267,7 @@ local function CreatePingFPSGui()
         end
     end)
     
-    -- TAMBAH HOTKEY UNTUK HIDE/SHOW (F4)
+    
     local hotkeyConnection
     hotkeyConnection = UserInputService.InputBegan:Connect(function(input)
         if input.KeyCode == Enum.KeyCode.F4 then
@@ -281,7 +276,6 @@ local function CreatePingFPSGui()
         end
     end)
     
-    -- CLEANUP WHEN GUI IS DESTROYED
     gui.Destroying:Once(function()
         if conn then 
             conn:Disconnect() 
@@ -291,10 +285,10 @@ local function CreatePingFPSGui()
             hotkeyConnection:Disconnect()
             hotkeyConnection = nil
         end
-        print("PingFPS GUI destroyed successfully")
+        print("PingFPS successfully")
     end)
 
-    print("PingFPS GUI created successfully!")
+    print("PingFPS created successfully!")
     return gui
 end
 
@@ -632,7 +626,7 @@ end)
 local MahiruUi = loadstring(game:HttpGet("https://raw.githubusercontent.com/LangitDeveloper/hh/main/mahiruui.lua"))()
 local Window = MahiruUi:CreateWindow({
     Title = "Mahiru",
-    Icon = "rbxassetid://12633176980",
+    Image = "rbxassetid://12633176980",
     Author = "LangitDev",
     Folder = "Mahiru",
     Size = UDim2.fromOffset(380, 260),
