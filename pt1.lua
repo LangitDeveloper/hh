@@ -11,6 +11,7 @@ local VirtualInputManager = game:GetService("VirtualInputManager")
 local TeleportService = game:GetService("TeleportService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
+local Stats = game:GetService("Stats")
 
 local Net = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net
 local Remotes = {
@@ -144,6 +145,122 @@ local BoatLookup = {}
 local SelectedLocation = nil
 local SelectedPlayer = nil
 local PlayerList = {}
+
+local gui = Instance.new("ScreenGui")
+gui.Name = "Mahiru"
+gui.ResetOnSpawn = false
+gui.Parent = Player:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 160, 0, 50)
+frame.Position = UDim2.new(0, 20, 0, 200)
+frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
+frame.BackgroundTransparency = 0.1
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+
+local corner = Instance.new("UICorner", frame)
+corner.CornerRadius = UDim.new(0, 10)
+
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, -10, 0, 18)
+title.Position = UDim2.new(0, 5, 0, 2)
+title.BackgroundTransparency = 1
+title.Text = "Mahiru"
+title.TextColor3 = Color3.fromRGB(255,180,180)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 14
+title.TextXAlignment = Left
+
+local info = Instance.new("TextLabel", frame)
+info.Size = UDim2.new(1, -10, 0, 20)
+info.Position = UDim2.new(0, 5, 0, 22)
+info.BackgroundTransparency = 1
+info.Text = "ping: -- | fps: --"
+info.TextColor3 = Color3.fromRGB(220,220,220)
+info.Font = Enum.Font.Gotham
+info.TextSize = 12
+info.TextXAlignment = Left
+
+local function CreatePingFPSGui()
+    local Players = game:GetService("Players")
+    local RunService = game:GetService("RunService")
+    local Stats = game:GetService("Stats")
+
+    local Player = Players.LocalPlayer
+
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "MahiruPingFPS"
+    gui.ResetOnSpawn = false
+    gui.Parent = Player:WaitForChild("PlayerGui")
+
+    local frame = Instance.new("Frame", gui)
+    frame.Size = UDim2.new(0, 170, 0, 55)
+    frame.Position = UDim2.new(0, 20, 0, 200)
+    frame.BackgroundColor3 = Color3.fromRGB(18,18,18)
+    frame.BorderSizePixel = 0
+    frame.Active = true
+    frame.Draggable = true
+
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 10)
+
+    local title = Instance.new("TextLabel", frame)
+    title.Size = UDim2.new(1, -10, 0, 18)
+    title.Position = UDim2.new(0, 5, 0, 3)
+    title.BackgroundTransparency = 1
+    title.Text = "Mahiru"
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 14
+    title.TextXAlignment = Left
+    title.TextColor3 = Color3.fromRGB(255,170,170)
+
+    local info = Instance.new("TextLabel", frame)
+    info.Size = UDim2.new(1, -10, 0, 25)
+    info.Position = UDim2.new(0, 5, 0, 25)
+    info.BackgroundTransparency = 1
+    info.Font = Enum.Font.Gotham
+    info.TextSize = 12
+    info.TextXAlignment = Left
+    
+    local fps = 0
+    local frames = 0
+    local lastTime = os.clock()
+
+    local conn
+    conn = RunService.RenderStepped:Connect(function()
+        frames += 1
+        local now = os.clock()
+
+        if now - lastTime >= 1 then
+            fps = frames
+            frames = 0
+            lastTime = now
+
+            local ping = math.floor(
+                Stats.Network.ServerStatsItem["Data Ping"]:GetValue()
+            )
+
+            local color
+            if ping < 250 then
+                color = Color3.fromRGB(80,255,120)       
+            elseif ping < 1000 then
+                color = Color3.fromRGB(255,220,80)       
+            else
+                color = Color3.fromRGB(255,80,80)        
+            end
+
+            info.TextColor3 = color
+            info.Text = ("ping: %d ms | fps: %d"):format(ping, fps)
+        end
+    end)
+    gui.Destroying:Once(function()
+        if conn then conn:Disconnect() end
+    end)
+
+    return gui
+end
+
 
 function FormatNumber(num)
     if num >= 1000000 then
@@ -374,6 +491,37 @@ function StartAutoSell()
     end)
 end
 
+local Lighting = game:GetService("Lighting")
+
+local function EnableFPSBooster()
+    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+
+    for _,v in ipairs(workspace:GetDescendants()) do
+        if v:IsA("BasePart") then
+            v.Material = Enum.Material.Plastic
+            v.Reflectance = 0
+            v.CastShadow = false
+        elseif v:IsA("Texture") or v:IsA("Decal") then
+            v:Destroy()
+        elseif v:IsA("ParticleEmitter")
+        or v:IsA("Trail")
+        or v:IsA("Beam") then
+            v.Enabled = false
+        end
+    end
+
+    Lighting.GlobalShadows = false
+    Lighting.FogEnd = 9e9
+    Lighting.Brightness = 1
+    Lighting.EnvironmentDiffuseScale = 0
+    Lighting.EnvironmentSpecularScale = 0
+end
+local function DisableFPSBooster()
+    settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
+    Lighting.GlobalShadows = true
+end
+
+
 function SendFishWebhook(fishId, metadata)
     if not WebhookConfig.Enabled or not WebhookConfig.URL then return end
     
@@ -447,7 +595,7 @@ end)
 local MahiruUi = loadstring(game:HttpGet("https://raw.githubusercontent.com/LangitDeveloper/hh/main/mahiruui.lua"))()
 local Window = MahiruUi:CreateWindow({
     Title = "Mahiru",
-    Icon = "rbxassetid://130987654321",
+    Icon = "rbxassetid://12633176980",
     Author = "LangitDev",
     Folder = "Mahiru",
     Size = UDim2.fromOffset(380, 260),
@@ -475,7 +623,7 @@ local function CreateToggleButton()
     button.Size = UDim2.new(0, 40, 0, 40)
     button.Position = UDim2.new(0, 20, 0, 100)
     button.BackgroundTransparency = 1
-    button.Image = "rbxassetid://130987654321"
+    button.Image = "rbxassetid://12633176980"
     button.ScaleType = Enum.ScaleType.Fit
     
     local corner = Instance.new("UICorner")
@@ -627,6 +775,39 @@ local ThemeToggle = InterfaceSection:Toggle({
     end,
 })
 ConfigManager:Register("themeToggle", ThemeToggle)
+
+local StatsGui
+
+local PerfomToggle = PlayerTab:Toggle({
+    Title = "Show Ping & FPS",
+    Default = false,
+    Callback = function(state)
+        if state then
+            StatsGui = CreatePingFPSGui()
+        else
+            if StatsGui then
+                StatsGui:Destroy()
+                StatsGui = nil
+            end
+        end
+    end
+})
+ConfigManager:Register("PerfomToggle", PerfomToggle)
+
+local FPSBoostToggle = PlayerTab:Toggle({
+    Title = "FPS Booster",
+    Default = false,
+    Callback = function(state)
+        if state then
+            EnableFPSBooster()
+        else
+            DisableFPSBooster()
+        end
+    end
+})
+
+ConfigManager:Register("FPSBoostToggle", FPSBoostToggle)
+
 
 local MovementSection = PlayerTab:Section({Title = "Movement"})
 local WalkSpeedSlider = MovementSection:Slider({
