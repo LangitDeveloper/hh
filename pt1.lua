@@ -12,6 +12,7 @@ local TeleportService = game:GetService("TeleportService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Stats = game:GetService("Stats")
+local LocalPlayer = Players.LocalPlayer
 
 local Net = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net
 local Remotes = {
@@ -184,12 +185,6 @@ info.TextSize = 12
 info.TextXAlignment = Left
 
 local function CreatePingFPSGui()
-    local Players = game:GetService("Players")
-    local RunService = game:GetService("RunService")
-    local Stats = game:GetService("Stats")
-
-    local Player = Players.LocalPlayer
-
     local gui = Instance.new("ScreenGui")
     gui.Name = "MahiruPingFPS"
     gui.ResetOnSpawn = false
