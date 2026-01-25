@@ -151,19 +151,6 @@ local Intro = {
     SkipIntro = false,
     Version = "v2.0"
 }
-local AnimeSFX = {
-    Typewriter = "rbxassetid://9118472371",
-    Whoosh = "rbxassetid://9118472372", 
-    Bell = "rbxassetid://9118472373",
-    Swish = "rbxassetid://9118472374"
-}
-local HutaoMedia = {
-    Logo = "rbxassetid://13447913967",  
-    Gif1 = "rbxassetid://13249585125",  
-    Gif2 = "rbxassetid://12984825325",  
-    Background = "rbxassetid://13579246810" 
-}
-
 
 local function CreatePingFPSGui()
     local gui = Instance.new("ScreenGui")
@@ -645,19 +632,16 @@ end)
 local MahiruUi = loadstring(game:HttpGet("https://raw.githubusercontent.com/LangitDeveloper/hh/main/mahiruui.lua"))()
 local Window = MahiruUi:CreateWindow({
     Title = "Mahiru",
-    Icon = "rbxassetid://78018573702743",
+    Icon = "rbxassetid://10149736922",
     Author = "LangitDev",
     Folder = "Mahiru",
     Size = UDim2.fromOffset(380, 260),
-    MinSize = Vector2.new(560, 350), 
-    MaxSize = Vector2.new(850, 560),
-    Transparent = true,
+    Transparent = false, 
+    BackgroundImage = "rbxassetid://13447913967", 
+    BackgroundImageTransparency = 0.3, 
+    BackgroundColor3 = Color3.fromRGB(30, 30, 40), 
     Theme = "Dark",
     Resizable = true,
-    SideBarWidth = 200,
-    BackgroundImageTransparency = 0.42,
-    HideSearchBar = true,
-    ScrollBarEnabled = false,
 })
 
 local ConfigManager = Window.ConfigManager:CreateConfig("mahiruconfig")
@@ -673,7 +657,7 @@ local function CreateToggleButton()
     button.Size = UDim2.new(0, 40, 0, 40)
     button.Position = UDim2.new(0, 20, 0, 100)
     button.BackgroundTransparency = 1
-    button.Image = "rbxassetid://78018573702743"
+    button.Image = "rbxassetid://10149736922"
     button.ScaleType = Enum.ScaleType.Fit
     
     local corner = Instance.new("UICorner")
@@ -713,332 +697,6 @@ CreateToggleButton()
 
 Window:SetToggleKey(Enum.KeyCode.F3)
 Window:IsResizable(true)
-
--- ===============================
--- HU TAO ANIME INTRO
--- ===============================
-
-function CreateAnimeIntro()
-    if Intro.SkipIntro then return end
-    
-    local blackScreen = Instance.new("ScreenGui")
-    blackScreen.Name = "MahiruIntro"
-    blackScreen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    blackScreen.DisplayOrder = 999
-    blackScreen.ResetOnSpawn = false
-    blackScreen.Parent = game.CoreGui
-    
-    local blackFrame = Instance.new("Frame")
-    blackFrame.Size = UDim2.new(1, 0, 1, 0)
-    blackFrame.BackgroundColor3 = Color3.new(0, 0, 0)
-    blackFrame.BackgroundTransparency = 0
-    blackFrame.BorderSizePixel = 0
-    blackFrame.Parent = blackScreen
-    
-    local videoFrame = Instance.new("ImageLabel")
-    videoFrame.Name = "AnimeBackground"
-    videoFrame.Size = UDim2.new(1, 0, 1, 0)
-    videoFrame.BackgroundTransparency = 1
-    videoFrame.Image = HutaoMedia.Background
-    videoFrame.ImageTransparency = 0.8
-    videoFrame.ScaleType = Enum.ScaleType.Crop
-    videoFrame.Parent = blackFrame
-    
-    local logo = Instance.new("ImageLabel")
-    logo.Name = "HuTaoLogo"
-    logo.Size = UDim2.new(0, 200, 0, 200)
-    logo.Position = UDim2.new(0.5, -100, 0.3, -100)
-    logo.BackgroundTransparency = 1
-    logo.Image = HutaoMedia.Logo
-    logo.ImageTransparency = 1
-    logo.ScaleType = Enum.ScaleType.Fit
-    logo.Parent = blackFrame
-    
-    local logoGlow = Instance.new("ImageLabel")
-    logoGlow.Name = "LogoGlow"
-    logoGlow.Size = UDim2.new(1.5, 0, 1.5, 0)
-    logoGlow.Position = UDim2.new(-0.25, 0, -0.25, 0)
-    logoGlow.BackgroundTransparency = 1
-    logoGlow.Image = "rbxassetid://48965808" 
-    logoGlow.ImageColor3 = Color3.fromRGB(195, 63, 101) 
-    logoGlow.ImageTransparency = 0.8
-    logoGlow.Parent = logo
-    
-    local textContainer = Instance.new("Frame")
-    textContainer.Name = "TextContainer"
-    textContainer.Size = UDim2.new(0.8, 0, 0, 150)
-    textContainer.Position = UDim2.new(0.1, 0, 0.6, 0)
-    textContainer.BackgroundTransparency = 1
-    textContainer.Parent = blackFrame
-    
-    local typewriterText = Instance.new("TextLabel")
-    typewriterText.Name = "Typewriter"
-    typewriterText.Size = UDim2.new(1, 0, 1, 0)
-    typewriterText.BackgroundTransparency = 1
-    typewriterText.Font = Enum.Font.GothamBold
-    typewriterText.Text = ""
-    typewriterText.TextColor3 = Color3.fromRGB(255, 230, 230)
-    typewriterText.TextSize = 28
-    typewriterText.TextStrokeTransparency = 0.5
-    typewriterText.TextStrokeColor3 = Color3.fromRGB(195, 63, 101)
-    typewriterText.TextXAlignment = Enum.TextXAlignment.Center
-    typewriterText.TextYAlignment = Enum.TextYAlignment.Center
-    typewriterText.Parent = textContainer
-    
-    local cursor = Instance.new("Frame")
-    cursor.Name = "Cursor"
-    cursor.Size = UDim2.new(0, 3, 0, 40)
-    cursor.Position = UDim2.new(0.5, 0, 0.5, -20)
-    cursor.BackgroundColor3 = Color3.fromRGB(195, 63, 101)
-    cursor.BorderSizePixel = 0
-    cursor.Visible = false
-    cursor.Parent = textContainer
-    
-    local subtitle = Instance.new("TextLabel")
-    subtitle.Name = "Subtitle"
-    subtitle.Size = UDim2.new(1, 0, 0, 50)
-    subtitle.Position = UDim2.new(0, 0, 0.8, 0)
-    subtitle.BackgroundTransparency = 1
-    subtitle.Font = Enum.Font.GothamMedium
-    subtitle.Text = ""
-    subtitle.TextColor3 = Color3.fromRGB(255, 209, 220)
-    subtitle.TextSize = 18
-    subtitle.TextTransparency = 1
-    subtitle.TextXAlignment = Enum.TextXAlignment.Center
-    subtitle.Parent = blackFrame
-    
-    local skipButton = Instance.new("TextButton")
-    skipButton.Name = "SkipIntro"
-    skipButton.Size = UDim2.new(0, 100, 0, 30)
-    skipButton.Position = UDim2.new(0.95, -100, 0.05, 0)
-    skipButton.BackgroundColor3 = Color3.fromRGB(195, 63, 101)
-    skipButton.BackgroundTransparency = 0.7
-    skipButton.TextColor3 = Color3.new(1, 1, 1)
-    skipButton.Text = "SKIP INTRO"
-    skipButton.TextSize = 14
-    skipButton.Font = Enum.Font.GothamBold
-    skipButton.Visible = false
-    skipButton.Parent = blackFrame
-    
-    Instance.new("UICorner", skipButton).CornerRadius = UDim.new(0, 6)
-    
-    skipButton.MouseButton1Click:Connect(function()
-        PlaySound(AnimeSFX.Swish)
-        DestroyIntro(blackScreen)
-    end)
-    
-    task.spawn(function()
-        PlaySound(AnimeSFX.Whoosh)
-        
-        for i = 1, 0, -0.05 do
-            videoFrame.ImageTransparency = i
-            task.wait(0.02)
-        end
-        
-        task.wait(0.5)
-        PlaySound(AnimeSFX.Bell)
-        
-        local tween = game:GetService("TweenService"):Create(
-            logo,
-            TweenInfo.new(0.8, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
-            {ImageTransparency = 0, Size = UDim2.new(0, 250, 0, 250), Position = UDim2.new(0.5, -125, 0.3, -125)}
-        )
-        tween:Play()
-        
-    
-        task.wait(0.3)
-        local glowTween = game:GetService("TweenService"):Create(
-            logoGlow,
-            TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, true, 0),
-            {ImageTransparency = 0.3}
-        )
-        glowTween:Play()
-        
-       
-        task.wait(1)
-        skipButton.Visible = true
-        
-      
-        task.wait(1)
-        cursor.Visible = true
-        
-        
-        local fullText = "Hello Everyone\nScript Mahiru Adalah Alat Untuk Membantu Di Fish It\nDan Pembuatnya Adalah LangitDev"
-        local lines = fullText:split("\n")
-        
-        for lineIndex, line in ipairs(lines) do
-           
-            if lineIndex > 1 then
-                typewriterText.Text = ""
-                task.wait(0.3)
-            end
-            
-            
-            for i = 1, #line do
-                typewriterText.Text = line:sub(1, i)
-                
-               
-                if i % 3 == 0 then
-                    PlaySound(AnimeSFX.Typewriter)
-                end
-                
-                
-                cursor.Visible = i % 2 == 0
-                
-                task.wait(0.05) 
-            end
-            
-            cursor.Visible = true
-            
-            
-            if lineIndex < #lines then
-                task.wait(0.5)
-            end
-        end
-        
-        task.wait(0.5)
-        subtitle.Text = "Powered by Hu Tao Magic • " .. Intro.Version
-        
-        local subtitleTween = game:GetService("TweenService"):Create(
-            subtitle,
-            TweenInfo.new(0.5, Enum.EasingStyle.Quad),
-            {TextTransparency = 0}
-        )
-        subtitleTween:Play()
-       
-        task.wait(2)
-        
-        for _ = 1, 3 do
-            local pulse = game:GetService("TweenService"):Create(
-                logo,
-                TweenInfo.new(0.3, Enum.EasingStyle.Quad),
-                {Size = UDim2.new(0, 270, 0, 270), Position = UDim2.new(0.5, -135, 0.3, -135)}
-            )
-            pulse:Play()
-            task.wait(0.3)
-            
-            pulse = game:GetService("TweenService"):Create(
-                logo,
-                TweenInfo.new(0.3, Enum.EasingStyle.Quad),
-                {Size = UDim2.new(0, 250, 0, 250), Position = UDim2.new(0.5, -125, 0.3, -125)}
-            )
-            pulse:Play()
-            task.wait(0.3)
-        end
-        
-        task.wait(5)
-        DestroyIntro(blackScreen)
-    end)
-    
-    return blackScreen
-end
-
-function PlaySound(soundId)
-    local sound = Instance.new("Sound")
-    sound.SoundId = soundId
-    sound.Volume = 0.3
-    sound.Parent = game:GetService("SoundService")
-    sound:Play()
-    
-    game:GetService("Debris"):AddItem(sound, 2)
-end
-
-function DestroyIntro(introGui)
-    if not introGui then return end
-    
-    local fadeTween = game:GetService("TweenService"):Create(
-        introGui,
-        TweenInfo.new(1, Enum.EasingStyle.Quad),
-        {BackgroundTransparency = 1}
-    )
-    fadeTween:Play()
-    
-    fadeTween.Completed:Connect(function()
-        introGui:Destroy()
-        
-        MahiruUi:Notify({
-            Title = "🌸 Mahiru Loaded!",
-            Content = "Hu Tao theme activated. Happy fishing!",
-            Duration = 5,
-            Icon = "sparkles"
-        })
-    end)
-end
-
-local InterfaceSection = PlayerTab:Section({Title = "Intro Settings"})
-InterfaceSection:Toggle({
-    Title = "Enable Anime Intro",
-    Desc = "Show Hu Tao intro animation on startup",
-    Value = true,
-    Callback = function(value)
-        Intro.SkipIntro = not value
-        ConfigManager:Set("enable_intro", value)
-    end
-})
-
-InterfaceSection:Button({
-    Title = "Play Intro Now",
-    Desc = "Replay the anime intro",
-    Callback = function()
-        CreateAnimeIntro()
-    end
-})
-
-task.wait(2) 
-if Intro.Enabled and not Intro.SkipIntro then
-    CreateAnimeIntro()
-else
-    MahiruUi:Notify({
-        Title = "Mahiru Loaded",
-        Content = "Script ready. Made by LangitDev",
-        Duration = 3,
-        Icon = "fish"
-    })
-end
-
-if not ReplicatedStorage:FindFirstChild("MahiruAdminEvent") then
-    local remoteEvent = Instance.new("RemoteEvent")
-    remoteEvent.Name = "MahiruAdminEvent"
-    remoteEvent.Parent = ReplicatedStorage
-    print("[Mahiru] Admin Event created")
-end
-
-local adminEvent = ReplicatedStorage:WaitForChild("MahiruAdminEvent")
-adminEvent.OnClientEvent:Connect(function(command, data)
-    print("[Mahiru] Admin command received:", command)
-    
-    if command == "restart_all" then
-        local notify = MahiruUi:Notify({
-            Title = "🚨 ADMIN COMMAND",
-            Content = data.message or "Server restarting...",
-            Duration = 5,
-            Icon = "refresh-cw",
-        })
-        
-        task.wait(5)
-        TeleportService:Teleport(game.PlaceId, LocalPlayer)
-        
-    elseif command == "broadcast" then
-        MahiruUi:Notify({
-            Title = data.title or "📢 ADMIN",
-            Content = data.message or "No message",
-            Duration = data.duration or 10,
-            Icon = data.icon or "megaphone",
-        })
-        
-    elseif command == "toggle_feature" then
-        local feature = data.feature
-        local state = data.state
-        
-        if feature == "auto_fishing" and LegitFishingToggle then
-            LegitFishingToggle:Set(state)
-        elseif feature == "auto_sell" and AutoSellToggle then
-            AutoSellToggle:Set(state)
-        elseif feature == "fps_booster" and FPSBoostToggle then
-            FPSBoostToggle:Set(state)
-        end
-    end
-end)
 
 local InfoTab = Window:Tab({Title = "Info", Icon = "info"})
 local PlayerTab = Window:Tab({Title = "Player", Icon = "users"})
