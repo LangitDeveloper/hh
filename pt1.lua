@@ -813,7 +813,7 @@ local ThemeToggle = InterfaceSection:Toggle({
 })
 ConfigManager:Register("themeToggle", ThemeToggle)
 
-local PFpsSection = PlayerTab:Section({Title = "Tools Fps Booster"})
+local PfpsSection = PlayerTab:Section({Title = "Tools Fps Booster"})
 
 local StatsGui
 
