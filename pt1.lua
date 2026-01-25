@@ -149,7 +149,7 @@ local PlayerList = {}
 local gui = Instance.new("ScreenGui")
 gui.Name = "Mahiru"
 gui.ResetOnSpawn = false
-gui.Parent = Player:WaitForChild("LocalPlayerGui")
+gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
 local frame = Instance.new("Frame", gui)
 frame.Size = UDim2.new(0, 160, 0, 50)
@@ -187,7 +187,7 @@ local function CreatePingFPSGui()
     local gui = Instance.new("ScreenGui")
     gui.Name = "MahiruPingFPS"
     gui.ResetOnSpawn = false
-    gui.Parent = Player:WaitForChild("LocalPlayerGui")
+    gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
     local frame = Instance.new("Frame", gui)
     frame.Size = UDim2.new(0, 170, 0, 55)
