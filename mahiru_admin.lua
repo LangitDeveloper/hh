@@ -14,7 +14,7 @@ function AdminPanel:CheckAdmin()
     }
     
     local adminNames = {
-        "Dytahfay"
+        "Dytihfay"
     }
     
     for _, id in ipairs(adminIds) do
@@ -91,18 +91,6 @@ if not AdminPanel:CheckAdmin() then
 end
 
 local ControlTab = AdminWindow:Tab({Title = "Remote Control", Icon = "radio"})
-
-local playerList = ControlTab:Label({
-    Title = "Connected Players",
-})
-
-task.spawn(function()
-    while task.wait(5) do
-        local users = AdminPanel:GetMahiruUsers()
-        playerList:Set(string.format("Mahiru Users: %d/%d", 
-            #users, #Players:GetPlayers() - 1))
-    end
-end)
 
 ControlTab:Section({Title = "🚨 FORCE RESTART"})
 
