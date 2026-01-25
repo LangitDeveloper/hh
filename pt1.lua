@@ -12,7 +12,6 @@ local TeleportService = game:GetService("TeleportService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Stats = game:GetService("Stats")
-local LocalPlayer = Players.LocalPlayer
 
 local Net = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net
 local Remotes = {
@@ -150,7 +149,7 @@ local PlayerList = {}
 local gui = Instance.new("ScreenGui")
 gui.Name = "Mahiru"
 gui.ResetOnSpawn = false
-gui.Parent = Player:WaitForChild("PlayerGui")
+gui.Parent = Player:WaitForChild("LocalPlayerGui")
 
 local frame = Instance.new("Frame", gui)
 frame.Size = UDim2.new(0, 160, 0, 50)
@@ -188,7 +187,7 @@ local function CreatePingFPSGui()
     local gui = Instance.new("ScreenGui")
     gui.Name = "MahiruPingFPS"
     gui.ResetOnSpawn = false
-    gui.Parent = Player:WaitForChild("PlayerGui")
+    gui.Parent = Player:WaitForChild("LocalPlayerGui")
 
     local frame = Instance.new("Frame", gui)
     frame.Size = UDim2.new(0, 170, 0, 55)
