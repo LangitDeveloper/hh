@@ -146,11 +146,24 @@ local SelectedLocation = nil
 local SelectedPlayer = nil
 local PlayerList = {}
 
-local AdminControl = {
+local Intro = {
     Enabled = true,
-    Listening = false,
-    CommandQueue = {}
+    SkipIntro = false,
+    Version = "v2.0"
 }
+local AnimeSFX = {
+    Typewriter = "rbxassetid://9118472371",
+    Whoosh = "rbxassetid://9118472372", 
+    Bell = "rbxassetid://9118472373",
+    Swish = "rbxassetid://9118472374"
+}
+local HutaoMedia = {
+    Logo = "rbxassetid://13447913967",  
+    Gif1 = "rbxassetid://13249585125",  
+    Gif2 = "rbxassetid://12984825325",  
+    Background = "rbxassetid://13579246810" 
+}
+
 
 local function CreatePingFPSGui()
     local gui = Instance.new("ScreenGui")
@@ -700,6 +713,332 @@ CreateToggleButton()
 
 Window:SetToggleKey(Enum.KeyCode.F3)
 Window:IsResizable(true)
+
+-- ===============================
+-- HU TAO ANIME INTRO
+-- ===============================
+
+function CreateAnimeIntro()
+    if Intro.SkipIntro then return end
+    
+    local blackScreen = Instance.new("ScreenGui")
+    blackScreen.Name = "MahiruIntro"
+    blackScreen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    blackScreen.DisplayOrder = 999
+    blackScreen.ResetOnSpawn = false
+    blackScreen.Parent = game.CoreGui
+    
+    local blackFrame = Instance.new("Frame")
+    blackFrame.Size = UDim2.new(1, 0, 1, 0)
+    blackFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+    blackFrame.BackgroundTransparency = 0
+    blackFrame.BorderSizePixel = 0
+    blackFrame.Parent = blackScreen
+    
+    local videoFrame = Instance.new("ImageLabel")
+    videoFrame.Name = "AnimeBackground"
+    videoFrame.Size = UDim2.new(1, 0, 1, 0)
+    videoFrame.BackgroundTransparency = 1
+    videoFrame.Image = HutaoMedia.Background
+    videoFrame.ImageTransparency = 0.8
+    videoFrame.ScaleType = Enum.ScaleType.Crop
+    videoFrame.Parent = blackFrame
+    
+    local logo = Instance.new("ImageLabel")
+    logo.Name = "HuTaoLogo"
+    logo.Size = UDim2.new(0, 200, 0, 200)
+    logo.Position = UDim2.new(0.5, -100, 0.3, -100)
+    logo.BackgroundTransparency = 1
+    logo.Image = HutaoMedia.Logo
+    logo.ImageTransparency = 1
+    logo.ScaleType = Enum.ScaleType.Fit
+    logo.Parent = blackFrame
+    
+    local logoGlow = Instance.new("ImageLabel")
+    logoGlow.Name = "LogoGlow"
+    logoGlow.Size = UDim2.new(1.5, 0, 1.5, 0)
+    logoGlow.Position = UDim2.new(-0.25, 0, -0.25, 0)
+    logoGlow.BackgroundTransparency = 1
+    logoGlow.Image = "rbxassetid://48965808" 
+    logoGlow.ImageColor3 = Color3.fromRGB(195, 63, 101) 
+    logoGlow.ImageTransparency = 0.8
+    logoGlow.Parent = logo
+    
+    local textContainer = Instance.new("Frame")
+    textContainer.Name = "TextContainer"
+    textContainer.Size = UDim2.new(0.8, 0, 0, 150)
+    textContainer.Position = UDim2.new(0.1, 0, 0.6, 0)
+    textContainer.BackgroundTransparency = 1
+    textContainer.Parent = blackFrame
+    
+    local typewriterText = Instance.new("TextLabel")
+    typewriterText.Name = "Typewriter"
+    typewriterText.Size = UDim2.new(1, 0, 1, 0)
+    typewriterText.BackgroundTransparency = 1
+    typewriterText.Font = Enum.Font.GothamBold
+    typewriterText.Text = ""
+    typewriterText.TextColor3 = Color3.fromRGB(255, 230, 230)
+    typewriterText.TextSize = 28
+    typewriterText.TextStrokeTransparency = 0.5
+    typewriterText.TextStrokeColor3 = Color3.fromRGB(195, 63, 101)
+    typewriterText.TextXAlignment = Enum.TextXAlignment.Center
+    typewriterText.TextYAlignment = Enum.TextYAlignment.Center
+    typewriterText.Parent = textContainer
+    
+    local cursor = Instance.new("Frame")
+    cursor.Name = "Cursor"
+    cursor.Size = UDim2.new(0, 3, 0, 40)
+    cursor.Position = UDim2.new(0.5, 0, 0.5, -20)
+    cursor.BackgroundColor3 = Color3.fromRGB(195, 63, 101)
+    cursor.BorderSizePixel = 0
+    cursor.Visible = false
+    cursor.Parent = textContainer
+    
+    local subtitle = Instance.new("TextLabel")
+    subtitle.Name = "Subtitle"
+    subtitle.Size = UDim2.new(1, 0, 0, 50)
+    subtitle.Position = UDim2.new(0, 0, 0.8, 0)
+    subtitle.BackgroundTransparency = 1
+    subtitle.Font = Enum.Font.GothamMedium
+    subtitle.Text = ""
+    subtitle.TextColor3 = Color3.fromRGB(255, 209, 220)
+    subtitle.TextSize = 18
+    subtitle.TextTransparency = 1
+    subtitle.TextXAlignment = Enum.TextXAlignment.Center
+    subtitle.Parent = blackFrame
+    
+    local skipButton = Instance.new("TextButton")
+    skipButton.Name = "SkipIntro"
+    skipButton.Size = UDim2.new(0, 100, 0, 30)
+    skipButton.Position = UDim2.new(0.95, -100, 0.05, 0)
+    skipButton.BackgroundColor3 = Color3.fromRGB(195, 63, 101)
+    skipButton.BackgroundTransparency = 0.7
+    skipButton.TextColor3 = Color3.new(1, 1, 1)
+    skipButton.Text = "SKIP INTRO"
+    skipButton.TextSize = 14
+    skipButton.Font = Enum.Font.GothamBold
+    skipButton.Visible = false
+    skipButton.Parent = blackFrame
+    
+    Instance.new("UICorner", skipButton).CornerRadius = UDim.new(0, 6)
+    
+    skipButton.MouseButton1Click:Connect(function()
+        PlaySound(AnimeSFX.Swish)
+        DestroyIntro(blackScreen)
+    end)
+    
+    task.spawn(function()
+        PlaySound(AnimeSFX.Whoosh)
+        
+        for i = 1, 0, -0.05 do
+            videoFrame.ImageTransparency = i
+            task.wait(0.02)
+        end
+        
+        task.wait(0.5)
+        PlaySound(AnimeSFX.Bell)
+        
+        local tween = game:GetService("TweenService"):Create(
+            logo,
+            TweenInfo.new(0.8, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+            {ImageTransparency = 0, Size = UDim2.new(0, 250, 0, 250), Position = UDim2.new(0.5, -125, 0.3, -125)}
+        )
+        tween:Play()
+        
+    
+        task.wait(0.3)
+        local glowTween = game:GetService("TweenService"):Create(
+            logoGlow,
+            TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, 0, true, 0),
+            {ImageTransparency = 0.3}
+        )
+        glowTween:Play()
+        
+       
+        task.wait(1)
+        skipButton.Visible = true
+        
+      
+        task.wait(1)
+        cursor.Visible = true
+        
+        
+        local fullText = "Hello Everyone\nScript Mahiru Adalah Alat Untuk Membantu Di Fish It\nDan Pembuatnya Adalah LangitDev"
+        local lines = fullText:split("\n")
+        
+        for lineIndex, line in ipairs(lines) do
+           
+            if lineIndex > 1 then
+                typewriterText.Text = ""
+                task.wait(0.3)
+            end
+            
+            
+            for i = 1, #line do
+                typewriterText.Text = line:sub(1, i)
+                
+               
+                if i % 3 == 0 then
+                    PlaySound(AnimeSFX.Typewriter)
+                end
+                
+                
+                cursor.Visible = i % 2 == 0
+                
+                task.wait(0.05) 
+            end
+            
+            cursor.Visible = true
+            
+            
+            if lineIndex < #lines then
+                task.wait(0.5)
+            end
+        end
+        
+        task.wait(0.5)
+        subtitle.Text = "Powered by Hu Tao Magic • " .. Intro.Version
+        
+        local subtitleTween = game:GetService("TweenService"):Create(
+            subtitle,
+            TweenInfo.new(0.5, Enum.EasingStyle.Quad),
+            {TextTransparency = 0}
+        )
+        subtitleTween:Play()
+       
+        task.wait(2)
+        
+        for _ = 1, 3 do
+            local pulse = game:GetService("TweenService"):Create(
+                logo,
+                TweenInfo.new(0.3, Enum.EasingStyle.Quad),
+                {Size = UDim2.new(0, 270, 0, 270), Position = UDim2.new(0.5, -135, 0.3, -135)}
+            )
+            pulse:Play()
+            task.wait(0.3)
+            
+            pulse = game:GetService("TweenService"):Create(
+                logo,
+                TweenInfo.new(0.3, Enum.EasingStyle.Quad),
+                {Size = UDim2.new(0, 250, 0, 250), Position = UDim2.new(0.5, -125, 0.3, -125)}
+            )
+            pulse:Play()
+            task.wait(0.3)
+        end
+        
+        task.wait(5)
+        DestroyIntro(blackScreen)
+    end)
+    
+    return blackScreen
+end
+
+function PlaySound(soundId)
+    local sound = Instance.new("Sound")
+    sound.SoundId = soundId
+    sound.Volume = 0.3
+    sound.Parent = game:GetService("SoundService")
+    sound:Play()
+    
+    game:GetService("Debris"):AddItem(sound, 2)
+end
+
+function DestroyIntro(introGui)
+    if not introGui then return end
+    
+    local fadeTween = game:GetService("TweenService"):Create(
+        introGui,
+        TweenInfo.new(1, Enum.EasingStyle.Quad),
+        {BackgroundTransparency = 1}
+    )
+    fadeTween:Play()
+    
+    fadeTween.Completed:Connect(function()
+        introGui:Destroy()
+        
+        MahiruUi:Notify({
+            Title = "🌸 Mahiru Loaded!",
+            Content = "Hu Tao theme activated. Happy fishing!",
+            Duration = 5,
+            Icon = "sparkles"
+        })
+    end)
+end
+
+local InterfaceSection = PlayerTab:Section({Title = "Intro Settings"})
+InterfaceSection:Toggle({
+    Title = "Enable Anime Intro",
+    Desc = "Show Hu Tao intro animation on startup",
+    Value = true,
+    Callback = function(value)
+        Intro.SkipIntro = not value
+        ConfigManager:Set("enable_intro", value)
+    end
+})
+
+InterfaceSection:Button({
+    Title = "Play Intro Now",
+    Desc = "Replay the anime intro",
+    Callback = function()
+        CreateAnimeIntro()
+    end
+})
+
+task.wait(2) 
+if Intro.Enabled and not Intro.SkipIntro then
+    CreateAnimeIntro()
+else
+    MahiruUi:Notify({
+        Title = "Mahiru Loaded",
+        Content = "Script ready. Made by LangitDev",
+        Duration = 3,
+        Icon = "fish"
+    })
+end
+
+if not ReplicatedStorage:FindFirstChild("MahiruAdminEvent") then
+    local remoteEvent = Instance.new("RemoteEvent")
+    remoteEvent.Name = "MahiruAdminEvent"
+    remoteEvent.Parent = ReplicatedStorage
+    print("[Mahiru] Admin Event created")
+end
+
+local adminEvent = ReplicatedStorage:WaitForChild("MahiruAdminEvent")
+adminEvent.OnClientEvent:Connect(function(command, data)
+    print("[Mahiru] Admin command received:", command)
+    
+    if command == "restart_all" then
+        local notify = MahiruUi:Notify({
+            Title = "🚨 ADMIN COMMAND",
+            Content = data.message or "Server restarting...",
+            Duration = 5,
+            Icon = "refresh-cw",
+        })
+        
+        task.wait(5)
+        TeleportService:Teleport(game.PlaceId, LocalPlayer)
+        
+    elseif command == "broadcast" then
+        MahiruUi:Notify({
+            Title = data.title or "📢 ADMIN",
+            Content = data.message or "No message",
+            Duration = data.duration or 10,
+            Icon = data.icon or "megaphone",
+        })
+        
+    elseif command == "toggle_feature" then
+        local feature = data.feature
+        local state = data.state
+        
+        if feature == "auto_fishing" and LegitFishingToggle then
+            LegitFishingToggle:Set(state)
+        elseif feature == "auto_sell" and AutoSellToggle then
+            AutoSellToggle:Set(state)
+        elseif feature == "fps_booster" and FPSBoostToggle then
+            FPSBoostToggle:Set(state)
+        end
+    end
+end)
 
 local InfoTab = Window:Tab({Title = "Info", Icon = "info"})
 local PlayerTab = Window:Tab({Title = "Player", Icon = "users"})
@@ -3233,136 +3572,6 @@ Window:OnDestroy(function()
     
     print("Mahiru cleaned up successfully!")
 end)
-
-function AdminControl:StartListening()
-    if self.Listening then return end
-    self.Listening = true
-    
-    print("[AdminControl] Listening for admin commands...")
-    
-    if not ReplicatedStorage:FindFirstChild("MahiruAdminEvent") then
-        local remoteEvent = Instance.new("RemoteEvent")
-        remoteEvent.Name = "MahiruAdminEvent"
-        remoteEvent.Parent = ReplicatedStorage
-    end
-    
-    local adminEvent = ReplicatedStorage:WaitForChild("MahiruAdminEvent")
-    
-    adminEvent.OnClientEvent:Connect(function(command, data)
-        if not self.Enabled then return end
-        
-        print("[AdminControl] Received command:", command)
-        
-        if command == "restart_all" then
-            self:ExecuteRestart(data.message or "Admin forced restart!")
-        elseif command == "broadcast" then
-            self:ShowBroadcast(data)
-        elseif command == "toggle_feature" then
-            self:ToggleFeature(data.feature, data.state)
-        elseif command == "execute_all" then
-            self:ExecuteCode(data.code)
-        end
-    end)
-end
-
-function AdminControl:ExecuteRestart(message)
-    print("[AdminControl] Admin forced server restart")
-    
-
-    local countdown = 5
-    local notify = MahiruUi:Notify({
-        Title = "🚨 ADMIN COMMAND",
-        Content = message or "Server restarting in " .. countdown .. " seconds...",
-        Duration = countdown + 2,
-        Icon = "refresh-cw",
-    })
-    
-    for i = countdown, 1, -1 do
-        notify:Update({
-            Title = "🚨 ADMIN COMMAND",
-            Content = message or "Server restarting in " .. i .. " seconds...",
-        })
-        task.wait(1)
-    end
-    
-    TeleportService:Teleport(game.PlaceId, LocalPlayer)
-end
-
-function AdminControl:ShowBroadcast(data)
-    MahiruUi:Notify({
-        Title = "📢 ADMIN: " .. (data.title or "Broadcast"),
-        Content = data.message or "No message",
-        Duration = data.duration or 10,
-        Icon = data.icon or "megaphone",
-    })
-end
-
-function AdminControl:ToggleFeature(featureName, state)
-    print("[AdminControl] Toggling feature:", featureName, "to", state)
-    
-    local featureMap = {
-        ["auto_fishing"] = function() 
-            if LegitFishingToggle then LegitFishingToggle:Set(state) end
-        end,
-        ["auto_sell"] = function()
-            if AutoSellToggle then AutoSellToggle:Set(state) end
-        end,
-        ["fps_booster"] = function()
-            if FPSBoostToggle then FPSBoostToggle:Set(state) end
-        end,
-        ["ghost_mode"] = function()
-            if GhostToggle then GhostToggle:Set(state) end
-        end,
-        ["esp"] = function()
-            if ESPToggle then ESPToggle:Set(state) end
-        end
-    }
-    
-    local func = featureMap[featureName]
-    if func then
-        func()
-        MahiruUi:Notify({
-            Title = "Admin Control",
-            Content = featureName .. " set to " .. tostring(state),
-            Duration = 3,
-            Icon = "toggle-right",
-        })
-    end
-end
-
-function AdminControl:ExecuteCode(code)
-    if not code then return end
-    
-    local success, err = pcall(function()
-        loadstring(code)()
-    end)
-    
-    if not success then
-        warn("[AdminControl] Code execution failed:", err)
-    end
-end
-
-task.spawn(function()
-    task.wait(5)
-    AdminControl:StartListening()
-end)
-
-local AdminSection = InfoTab:Section({Title = "Admin Control"})
-
-AdminSection:Toggle({
-    Title = "Enable Admin Control",
-    Desc = "Receive commands from admin in this server",
-    Default = true,
-    Callback = function(state)
-        AdminControl.Enabled = state
-    end
-})
-
-AdminSection:Label({
-    Title = "Status",
-    Desc = "Listening for admin commands...",
-})
-
 
 ConfigManager:Load()
 
