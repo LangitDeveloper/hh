@@ -146,43 +146,6 @@ local SelectedLocation = nil
 local SelectedPlayer = nil
 local PlayerList = {}
 
-local gui = Instance.new("ScreenGui")
-gui.Name = "Mahiru"
-gui.ResetOnSpawn = false
-gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-
-local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 160, 0, 50)
-frame.Position = UDim2.new(0, 20, 0, 200)
-frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
-frame.BackgroundTransparency = 0.1
-frame.BorderSizePixel = 0
-frame.Active = true
-frame.Draggable = true
-
-local corner = Instance.new("UICorner", frame)
-corner.CornerRadius = UDim.new(0, 10)
-
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1, -10, 0, 18)
-title.Position = UDim2.new(0, 5, 0, 2)
-title.BackgroundTransparency = 1
-title.Text = "Mahiru"
-title.TextColor3 = Color3.fromRGB(255,180,180)
-title.Font = Enum.Font.GothamBold
-title.TextSize = 14
-title.TextXAlignment = Left
-
-local info = Instance.new("TextLabel", frame)
-info.Size = UDim2.new(1, -10, 0, 20)
-info.Position = UDim2.new(0, 5, 0, 22)
-info.BackgroundTransparency = 1
-info.Text = "ping: -- | fps: --"
-info.TextColor3 = Color3.fromRGB(220,220,220)
-info.Font = Enum.Font.Gotham
-info.TextSize = 12
-info.TextXAlignment = Left
-
 local function CreatePingFPSGui()
     local gui = Instance.new("ScreenGui")
     gui.Name = "MahiruPingFPS"
