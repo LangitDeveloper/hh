@@ -630,7 +630,7 @@ LocalPlayer.Idled:Connect(function()
 end)
 
 local MahiruUi = loadstring(game:HttpGet("https://raw.githubusercontent.com/LangitDeveloper/hh/main/mahiruui.lua"))()
-local Window = MengHubUI:CreateWindow({
+local Window = MahiruUi:CreateWindow({
     Title = "Mahiru",
     Icon = "rbxassetid://78018573702743",
     Author = "LangitDev",
