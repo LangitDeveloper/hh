@@ -146,11 +146,163 @@ local SelectedLocation = nil
 local SelectedPlayer = nil
 local PlayerList = {}
 
-local Intro = {
-    Enabled = true,
-    SkipIntro = false,
-    Version = "v2.0"
-}
+
+local function CreatePingFPSGui()
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "MahiruPingFPS"
+    gui.ResetOnSpawn = false
+    gui.Parent = game.CoreGui
+
+    local frame = Instance.new("Frame", gui)
+    frame.Size = UDim2.new(0, 180, 0, 60)
+    frame.Position = UDim2.new(0, 20, 0, 200)
+    frame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+    frame.BackgroundTransparency = 0.3
+    frame.BorderSizePixel = 0
+    frame.Active = true
+    frame.Draggable = true
+
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
+
+    local title = Instance.new("TextLabel", frame)
+    title.Size = UDim2.new(1, -10, 0, 20)
+    title.Position = UDim2.new(0, 10, 0, 5)
+    title.BackgroundTransparency = 1
+    title.Text = "Mahiru"
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 14
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.TextColor3 = Color3.fromRGB(255, 170, 170)
+
+    local line = Instance.new("Frame", frame)
+    line.Size = UDim2.new(1, -20, 0, 1)
+    line.Position = UDim2.new(0, 10, 0, 28)
+    line.BackgroundColor3 = Color3.fromRGB(100, 100, 120)
+    line.BorderSizePixel = 0
+
+    local info = Instance.new("TextLabel", frame)
+    info.Size = UDim2.new(1, -10, 0, 25)
+    info.Position = UDim2.new(0, 10, 0, 32)
+    info.BackgroundTransparency = 1
+    info.Font = Enum.Font.GothamMedium
+    info.TextSize = 14
+    info.TextXAlignment = Enum.TextXAlignment.Left
+    info.Text = "Ping: -- | FPS: --"
+    
+    local watermark = Instance.new("TextLabel", frame)
+    watermark.Size = UDim2.new(0, 40, 0, 15)
+    watermark.Position = UDim2.new(1, -45, 0, 5)
+    watermark.BackgroundTransparency = 1
+    watermark.Text = "LangitDev"
+    watermark.Font = Enum.Font.GothamBold
+    watermark.TextSize = 10
+    watermark.TextColor3 = Color3.fromRGB(255, 100, 100)
+    
+    local closeBtn = Instance.new("TextButton", frame)
+    closeBtn.Size = UDim2.new(0, 20, 0, 20)
+    closeBtn.Position = UDim2.new(1, -25, 0, 5)
+    closeBtn.BackgroundTransparency = 0.8
+    closeBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+    closeBtn.Text = "-"
+    closeBtn.TextColor3 = Color3.fromRGB(255, 150, 150)
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.TextSize = 12
+    closeBtn.AutoButtonColor = false
+    
+    Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 4)
+    
+    closeBtn.MouseButton1Click:Connect(function()
+        gui.Enabled = not gui.Enabled
+        closeBtn.Text = gui.Enabled and "X" or "▶"
+    end)
+    
+    closeBtn.MouseEnter:Connect(function()
+        closeBtn.BackgroundTransparency = 0.5
+    end)
+    
+    closeBtn.MouseLeave:Connect(function()
+        closeBtn.BackgroundTransparency = 0.8
+    end)
+    
+    local fps = 0
+    local frames = 0
+    local lastTime = os.clock()
+
+    local conn
+    conn = RunService.RenderStepped:Connect(function()
+        frames = frames + 1
+        local now = os.clock()
+
+        if now - lastTime >= 0.5 then  
+            fps = math.floor(frames / (now - lastTime))
+            frames = 0
+            lastTime = now
+
+            local ping = math.floor(
+                Stats.Network.ServerStatsItem["Data Ping"]:GetValue()
+            )
+            
+            local color
+            if ping < 100 and fps > 60 then
+                color = Color3.fromRGB(100, 255, 100)  
+                frame.BackgroundColor3 = Color3.fromRGB(30, 50, 30)
+            elseif ping < 200 and fps > 30 then
+                color = Color3.fromRGB(255, 255, 100)  
+                frame.BackgroundColor3 = Color3.fromRGB(50, 50, 30)
+            else
+                color = Color3.fromRGB(255, 100, 100) 
+                frame.BackgroundColor3 = Color3.fromRGB(50, 30, 30)
+            end
+
+            info.TextColor3 = color
+            info.Text = string.format("Ping: %dms | FPS: %d", ping, fps)
+            
+            
+            if ping < 100 then
+                watermark.TextColor3 = Color3.fromRGB(100, 255, 100)
+            elseif ping < 300 then
+                watermark.TextColor3 = Color3.fromRGB(255, 255, 100)
+            else
+                watermark.TextColor3 = Color3.fromRGB(255, 100, 100)
+            end
+        end
+    end)
+    
+    
+    local hotkeyConnection
+    hotkeyConnection = UserInputService.InputBegan:Connect(function(input)
+        if input.KeyCode == Enum.KeyCode.F4 then
+            gui.Enabled = not gui.Enabled
+            closeBtn.Text = gui.Enabled and "X" or "▶"
+        end
+    end)
+    
+    gui.Destroying:Once(function()
+        if conn then 
+            conn:Disconnect() 
+            conn = nil
+        end
+        if hotkeyConnection then
+            hotkeyConnection:Disconnect()
+            hotkeyConnection = nil
+        end
+        print("PingFPS successfully")
+    end)
+
+    print("PingFPS created successfully!")
+    return gui
+end
+
+
+function FormatNumber(num)
+    if num >= 1000000 then
+        return string.format("%.1fM", num / 1000000)
+    elseif num >= 1000 then
+        return string.format("%.0fK", num / 1000)
+    end
+    return tostring(num)
+end
+
 
 
 function GetFishCount()
@@ -1436,9 +1588,9 @@ FishingTab:Toggle({
     end,
 })
 
-local BlaSection = FishingTab:Section({Title = "Blatant V1"})
+FishingTab:Section({Title = "Blatant V1"})
 
-local BlatantReelInput = BlaSection:Input({
+local BlatantReelInput = FishingTab:Input({
     Title = "Delay Reel",
     Desc = "Reel Timing (e.g. 1.9)",
     Value = "",
@@ -1452,7 +1604,7 @@ local BlatantReelInput = BlaSection:Input({
 })
 ConfigManager:Register("blatantReelInput", BlatantReelInput)
 
-local BlatantFishInput = BlaSection:Input({
+local BlatantFishInput = FishingTab:Input({
     Title = "Delay Fishing",
     Desc = "Fishing Timing (e.g. 1.1)",
     Value = "",
@@ -1466,7 +1618,7 @@ local BlatantFishInput = BlaSection:Input({
 })
 ConfigManager:Register("blatantFishInput", BlatantFishInput)
 
-local BlatantFishingToggle = BlaSection:Toggle({
+local BlatantFishingToggle = FishingTab:Toggle({
     Title = "Blatant Fishing",
     Value = false,
     Callback = function(value)
@@ -1489,9 +1641,9 @@ FishingTab:Button({
     end,
 })
 
-local BlatSection = FishingTab:Section({Title = "Blatant V2"})
+FishingTab:Section({Title = "Blatant V2"})
 
-local BlatantBaitInput = BlatSection:Input({
+local BlatantBaitInput = FishingTab:Input({
     Title = "Bait Delay",
     Desc = "Delay sebelum charge (e.g. 0.05 = ultra fast)",
     Value = "0.3",
@@ -1505,7 +1657,7 @@ local BlatantBaitInput = BlatSection:Input({
 })
 ConfigManager:Register("blatantBaitInput", BlatantBaitInput)
 
-local BlatantCastInput = BlatSection:Input({
+local BlatantCastInput = FishingTab:Input({
     Title = "Cast Delay", 
     Desc = "Delay sebelum minigame (e.g. 0.1 = instant)",
     Value = "0.70",
@@ -1519,7 +1671,7 @@ local BlatantCastInput = BlatSection:Input({
 })
 ConfigManager:Register("blatantCastInput", BlatantCastInput)
 
-local BlatantFishingV2Toggle = BlatSection:Toggle({
+local BlatantFishingV2Toggle = FishingTab:Toggle({
     Title = "Blatant Fishing",
     Value = false,
     Callback = function(value)
@@ -1533,9 +1685,9 @@ local BlatantFishingV2Toggle = BlatSection:Toggle({
 })
 ConfigManager:Register("blatantV2Toggle", BlatantFishingV2Toggle)
 
-local BlataSection = FishingTab:Section({Title = "Blatant V3"})
+FishingTab:Section({Title = "Blatant V3"})
 
-local BlatantcancelInput = BlataSection:Input({
+local BlatantcancelInput = FishingTab:Input({
     Title = "Cancel Delay",
     Desc = "Delay sebelum charge (e.g. 0.05 = ultra fast)",
     Value = "0.3",
@@ -1549,7 +1701,7 @@ local BlatantcancelInput = BlataSection:Input({
 })
 ConfigManager:Register("blatantcancelInput", BlatantBaitInput)
 
-local BlatantCompleteInput = BlataSection:Input({
+local BlatantCompleteInput = FishingTab:Input({
     Title = "Complete Delay", 
     Desc = "Delay sebelum minigame (e.g. 0.1 = instant)",
     Value = "0.70",
@@ -1563,7 +1715,7 @@ local BlatantCompleteInput = BlataSection:Input({
 })
 ConfigManager:Register("blatantCompleteInput", BlatantCastInput)
 
-local BlatantFishingV3Toggle = BlataSection:Toggle({
+local BlatantFishingV3Toggle = FishingTab:Toggle({
     Title = "Blatant Fishing V3",
     Value = false,
     Callback = function(value)
