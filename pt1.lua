@@ -235,7 +235,7 @@ local function CreatePingFPSGui()
 
     local conn
     conn = RunService.RenderStepped:Connect(function()
-        frames += 1
+        frames = frames + 1
         local now = os.clock()
 
         if now - lastTime >= 0.5 then  
