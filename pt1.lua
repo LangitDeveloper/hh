@@ -630,18 +630,21 @@ LocalPlayer.Idled:Connect(function()
 end)
 
 local MahiruUi = loadstring(game:HttpGet("https://raw.githubusercontent.com/LangitDeveloper/hh/main/mahiruui.lua"))()
-local Window = MahiruUi:CreateWindow({
+local Window = MengHubUI:CreateWindow({
     Title = "Mahiru",
-    Icon = "rbxassetid://91069103989932",
+    Icon = "rbxassetid://78018573702743",
     Author = "LangitDev",
     Folder = "Mahiru",
     Size = UDim2.fromOffset(380, 260),
-    Transparent = false, 
-    BackgroundImage = "rbxassetid://91069103989932", 
-    BackgroundImageTransparency = 0.3, 
-    BackgroundColor3 = Color3.fromRGB(30, 30, 40), 
+    MinSize = Vector2.new(560, 350),
+    MaxSize = Vector2.new(850, 560),
+    Transparent = true,
     Theme = "Dark",
     Resizable = true,
+    SideBarWidth = 200,
+    BackgroundImageTransparency = 0.42,
+    HideSearchBar = true,
+    ScrollBarEnabled = false,
 })
 
 local ConfigManager = Window.ConfigManager:CreateConfig("mahiruconfig")
@@ -1588,9 +1591,9 @@ FishingTab:Toggle({
     end,
 })
 
-FishingTab:Section({Title = "Blatant Features"})
+local BlaSection = FishingTab:Section({Title = "Blatant V1"})
 
-local BlatantReelInput = FishingTab:Input({
+local BlatantReelInput = BlaSection:Input({
     Title = "Delay Reel",
     Desc = "Reel Timing (e.g. 1.9)",
     Value = "",
@@ -1604,7 +1607,7 @@ local BlatantReelInput = FishingTab:Input({
 })
 ConfigManager:Register("blatantReelInput", BlatantReelInput)
 
-local BlatantFishInput = FishingTab:Input({
+local BlatantFishInput = BlaSection:Input({
     Title = "Delay Fishing",
     Desc = "Fishing Timing (e.g. 1.1)",
     Value = "",
@@ -1618,7 +1621,7 @@ local BlatantFishInput = FishingTab:Input({
 })
 ConfigManager:Register("blatantFishInput", BlatantFishInput)
 
-local BlatantFishingToggle = FishingTab:Toggle({
+local BlatantFishingToggle = BlaSection:Toggle({
     Title = "Blatant Fishing",
     Value = false,
     Callback = function(value)
@@ -1641,9 +1644,9 @@ FishingTab:Button({
     end,
 })
 
-FishingTab:Section({Title = "Blatant v2"})
+local BlatSection = FishingTab:Section({Title = "Blatant V2"})
 
-local BlatantBaitInput = FishingTab:Input({
+local BlatantBaitInput = BlatSection:Input({
     Title = "Bait Delay",
     Desc = "Delay sebelum charge (e.g. 0.05 = ultra fast)",
     Value = "0.3",
@@ -1657,7 +1660,7 @@ local BlatantBaitInput = FishingTab:Input({
 })
 ConfigManager:Register("blatantBaitInput", BlatantBaitInput)
 
-local BlatantCastInput = FishingTab:Input({
+local BlatantCastInput = BlatSection:Input({
     Title = "Cast Delay", 
     Desc = "Delay sebelum minigame (e.g. 0.1 = instant)",
     Value = "0.70",
@@ -1671,7 +1674,7 @@ local BlatantCastInput = FishingTab:Input({
 })
 ConfigManager:Register("blatantCastInput", BlatantCastInput)
 
-local BlatantFishingV2Toggle = FishingTab:Toggle({
+local BlatantFishingV2Toggle = BlatSection:Toggle({
     Title = "Blatant Fishing",
     Value = false,
     Callback = function(value)
@@ -1685,9 +1688,9 @@ local BlatantFishingV2Toggle = FishingTab:Toggle({
 })
 ConfigManager:Register("blatantV2Toggle", BlatantFishingV2Toggle)
 
-FishingTab:Section({Title = "Blatant v3"})
+local BlataSection = FishingTab:Section({Title = "Blatant V3"})
 
-local BlatantcancelInput = FishingTab:Input({
+local BlatantcancelInput = BlataSection:Input({
     Title = "Cancel Delay",
     Desc = "Delay sebelum charge (e.g. 0.05 = ultra fast)",
     Value = "0.3",
@@ -1701,7 +1704,7 @@ local BlatantcancelInput = FishingTab:Input({
 })
 ConfigManager:Register("blatantcancelInput", BlatantBaitInput)
 
-local BlatantCompleteInput = FishingTab:Input({
+local BlatantCompleteInput = BlataSection:Input({
     Title = "Complete Delay", 
     Desc = "Delay sebelum minigame (e.g. 0.1 = instant)",
     Value = "0.70",
@@ -1715,7 +1718,7 @@ local BlatantCompleteInput = FishingTab:Input({
 })
 ConfigManager:Register("blatantCompleteInput", BlatantCastInput)
 
-local BlatantFishingV3Toggle = FishingTab:Toggle({
+local BlatantFishingV3Toggle = BlataSection:Toggle({
     Title = "Blatant Fishing V3",
     Value = false,
     Callback = function(value)
