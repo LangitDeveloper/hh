@@ -705,7 +705,6 @@ Window:IsResizable(true)
 
 local InfoTab = Window:Tab({Title = "Info", Icon = "info"})
 local PlayerTab = Window:Tab({Title = "Player", Icon = "users"})
-local IsengTab = Window:Tab({Tittle = "Iseng", Icon = "rbxassetid://140165584241571"})
 local FishingTab = Window:Tab({Title = "Fishing", Icon = "rbxassetid://103247953194129"})
 local AutomaticTab = Window:Tab({Title = "Automatic", Icon = "rbxassetid://12662718374"})
 local WebhookTab = Window:Tab({Title = "Webhook", Icon = "rbxassetid://137601480983962"})
@@ -1460,68 +1459,6 @@ HideIdentSection:Button({
 })
 
 SetupIdentity()
-
--- ============================
--- ISENG V1: TELEPORT ALL PLAYERS
--- ============================
-local IsengV1Section = IsengTab:Section({Title = "Iseng V1: Teleport All"})
-
-local IsengV1Toggle = IsengV1Section:Toggle({
-    Title = "Teleport All Players",
-    Desc = "Semua player akan teleport ke posisi kamu",
-    Value = false,
-    Callback = function(value)
-        IsengV1_Enabled = value
-        if value then
-            task.spawn(function()
-                while IsengV1_Enabled do
-                    local ourCharacter = LocalPlayer.Character
-                    if ourCharacter then
-                        local ourRoot = ourCharacter:FindFirstChild("HumanoidRootPart")
-                        
-                        if ourRoot then
-                            local ourPosition = ourRoot.Position
-                            
-                            for _, player in ipairs(Players:GetPlayers()) do
-                                if player ~= LocalPlayer then
-                                    local char = player.Character
-                                    if char then
-                                        local root = char:FindFirstChild("HumanoidRootPart")
-                                        
-                                        if root then
-                                            local offset = Vector3.new(
-                                                math.random(-5, 5),
-                                                3,
-                                                math.random(-5, 5)
-                                            )
-                                            root.CFrame = CFrame.new(ourPosition + offset)
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                    task.wait(0.5)
-                end
-            end)
-            
-            MahiruUi:Notify({
-                Title = "Iseng V1",
-                Content = "Semua player akan teleport ke kamu!",
-                Duration = 2,
-                Icon = "user-round-x",
-            })
-        else
-            MahiruUi:Notify({
-                Title = "Iseng V1",
-                Content = "Mode iseng V1 dimatikan",
-                Duration = 2,
-                Icon = "user-round-check",
-            })
-        end
-    end,
-})
-ConfigManager:Register("isengV1Toggle", IsengV1Toggle)
 
 local FishingSection = FishingTab:Section({Title = "Auto Fishing"})
 
@@ -3227,7 +3164,6 @@ PlayerSection:Button({
 Window:OnDestroy(function()
     ConfigManager:Save()
     
-    if IsengV1Toggle then IsengV1Toggle:Set(false) end
     if LegitFishingToggle then LegitFishingToggle:Set(false) end
     if AutoShakeToggle then AutoShakeToggle:Set(false) end
     if InstantFishingToggle then InstantFishingToggle:Set(false) end
