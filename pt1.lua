@@ -636,7 +636,7 @@ local MahiruUi = loadstring(game:HttpGet("https://raw.githubusercontent.com/Test
 local WindowConfig = {
     Title = "Mahiru Script",
     Footer = "Version 1.0.0",
-    Image = "14504705337",
+    Image = "78018573702743",
     Color = Color3.fromRGB(0, 208, 255),
     Theme = 9542022979,
     Version = 4,
@@ -710,7 +710,7 @@ local UtilitiesTab = MainWindow:Tab({Title = "Utilities", Icon = "box"})
 local ShopTab = MainWindow:Tab({Title = "Shop", Icon = "shopping-cart"})
 local TeleportTab = MainWindow:Tab({Title = "Teleport", Icon = "map"})
 
-InfoTab:Paragraph({
+InfoTab:AddParagraph({
     Title = "Mahiru Alert!",
     Desc = "Welcome To Script Mahiru, By LangitDev",
     Color = "Green",
@@ -1527,7 +1527,7 @@ ConfigManager:Register("autoShakeToggle", AutoShakeToggle)
 
 FishingTab:Section({Title = "Instant Fishing"})
 
-FishingTab:Paragraph({
+FishingTab:AddParagraph({
     Title = "Instant Fishing Settings",
     Desc = "For instant fishing, you must first set the completion delay. The default is 0.1.",
     Color = "Green",
@@ -2090,7 +2090,7 @@ FavoriteSection:Button({
 
 local SPSection = AutomaticTab:Section({Title = "Save Position Features"})
 
-SPSection:Paragraph({
+SPSection:AddParagraph({
     Title = "Guide Teleport",
     Desc = [[
 <b><font color="rgb(0,162,255)">AUTO TELEPORT?</font></b>
@@ -2173,7 +2173,7 @@ end
 
 local EnchantSection = AutomaticTab:Section({Title = "Enchant Features"})
 
-local EnchantStatus = EnchantSection:Paragraph({
+local EnchantStatus = EnchantSection:AddParagraph({
     Title = "Enchant Status",
     Desc = "Current Rod : None\nCurrent Enchant : None\nEnchant Stones Left : 0",
 })
@@ -2460,7 +2460,7 @@ WebhookTab:Button({
 
 local SisyphusSection = QuestTab:Section({Title = "Sisyphus State Quest"})
 
-local DeepSeaPanel = SisyphusSection:Paragraph({
+local DeepSeaPanel = SisyphusSection:AddParagraph({
     Title = "Deep Sea Panel",
     Desc = "Loading...",
 })
@@ -2537,7 +2537,7 @@ SisyphusSection:Button({
 
 local ElementSection = QuestTab:Section({Title = "Element Quest"})
 
-local ElementPanel = ElementSection:Paragraph({
+local ElementPanel = ElementSection:AddParagraph({
     Title = "Element Panel",
     Desc = "Loading...",
 })
@@ -2726,7 +2726,7 @@ ConfigManager:Register("divingGearToggle", DivingGearToggle)
 
 local MerchantShopSection = ShopTab:Section({Title = "Merchant Shop"})
 
-local MerchantPanel = MerchantShopSection:Paragraph({
+local MerchantPanel = MerchantShopSection:AddParagraph({
     Title = "MERCHANT STOCK PANEL",
     Desc = "Loading...",
 })
