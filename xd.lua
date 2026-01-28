@@ -1,13 +1,17 @@
 local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/TesterX14/XXXX/refs/heads/main/Library"))()
-local Window = library:MakeWindow({
-    Name = "Mahiru Script",
-    HidePremium = false,
-    SaveConfig = false,
-    ConfigFolder = "MahiruConfig",
-    IntroEnabled = true,
-    IntroText = "Welcome to Mahiru Script",
-    Icon = "https://files.catbox.moe/x531zq.jpg"
-})
+local WindowConfig = {
+    Title = "Chloe X |",
+    Footer = "Version 1.0.8",
+    Image = "132435516080103",
+    Color = Color3.fromRGB(0, 208, 255),
+    Theme = 9542022979,
+    Version = 4,
+}
+
+local MainWindow = Library:Window(WindowConfig)
+if MainWindow then
+    chloex("Window loaded!")
+end
 
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
@@ -614,14 +618,14 @@ local function chloex(message)
     })
 end
 
-local PlayerTab = Window:MakeTab({Name = "Player Info", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local PlayerTab = MainWindow:MakeTab({Name = "Player Info", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 
 PlayerTab:AddSection({Name = "Player Info"})
 PlayerTab:AddParagraph("Display Name", Player.DisplayName)
 PlayerTab:AddParagraph("Username", Player.Name)
 PlayerTab:AddParagraph("UserID", tostring(Player.UserId))
 
-local FishingTab = Window:MakeTab({Name = "Fishing", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local FishingTab = MainWindow:MakeTab({Name = "Fishing", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 
 FishingTab:AddSection({Name = "Fishing Features"})
 
@@ -667,59 +671,52 @@ local function Fastest()
     end)
 end
 
-FishingTab:AddSlider({
-    Name = "Delay Reel",
-    Min = 0.1,
-    Max = 10,
-    Default = Fish.Reel,
-    Color = Color3.fromRGB(255,255,255),
-    Increment = 0.1,
-    ValueName = "seconds",
-    Flag = "ReelDelay",
-    Callback = function(value)
-        Fish.Reel = value
+FishingTab:AddInput({
+    Title = "Delay Reel",
+    Value = tostring(_G.Reel),
+    Default = "1.9",
+    Callback = function(input)
+        local reelValue = tonumber(input)
+        if reelValue and reelValue > 0 then
+            _G.Reel = reelValue
+        end
         SaveConfig()
-    end
+    end,
 })
 
-FishingTab:AddSlider({
-    Name = "Delay Fishing",
-    Min = 0.1,
-    Max = 10,
-    Default = Fish.FishingDelay,
-    Color = Color3.fromRGB(255,255,255),
-    Increment = 0.1,
-    ValueName = "seconds",
-    Flag = "FishingDelay",
-    Callback = function(value)
-        Fish.FishingDelay = value
+FishingTab:AddInput({
+    Title = "Delay Fishing",
+    Value = tostring(_G.FishingDelay),
+    Default = "1.1",
+    Callback = function(input)
+        local fishingDelay = tonumber(input)
+        if fishingDelay and fishingDelay > 0 then
+            _G.FishingDelay = fishingDelay
+        end
         SaveConfig()
-    end
+    end,
 })
 
 FishingTab:AddToggle({
-    Name = "Blatant Fishing",
-    Default = Fish.FBlatant,
-    Flag = "BlatantFishing",
+    Title = "Blatant Fishing",
+    Default = _G.FBlatant,
     Callback = function(enabled)
-        Fish.FBlatant = enabled
-        if Network.Functions.AutoEnabled then
-            Network.Functions.AutoEnabled:InvokeServer(enabled)
-        end
+        _G.FBlatant = enabled
+        Network.Functions.AutoEnabled:InvokeServer(enabled)
         
         if enabled then
-            Player:SetAttribute("Loading", nil)
+            LocalPlayer:SetAttribute("Loading", nil)
             
             task.spawn(function()
-                while Fish.FBlatant do
+                while _G.FBlatant do
                     Fastest()
-                    task.wait(Fish.Reel)
+                    task.wait(_G.Reel)
                 end
             end)
         else
-            Player:SetAttribute("Loading", false)
+            LocalPlayer:SetAttribute("Loading", false)
         end
-    end
+    end,
 })
 
 FishingTab:AddButton({
@@ -750,7 +747,7 @@ FishingTab:AddButton({
 FishingTab:AddSection({Name = "Fishing Stats"})
 local statsLabel = FishingTab:AddLabel("Fish: 0 | Sold: 0")
 
-local CheatTab = Window:MakeTab({Name = "Tools", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local CheatTab = MainWindow:MakeTab({Name = "Tools", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 
 CheatTab:AddSection({Name = "Movement"})
 
@@ -880,7 +877,7 @@ CheatTab:AddSlider({
     end
 })
 
-local VisualTab = Window:MakeTab({Name = "Visuals", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local VisualTab = MainWindow:MakeTab({Name = "Visuals", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 
 VisualTab:AddSection({Name = "Visual Effects"})
 
@@ -912,7 +909,7 @@ VisualTab:AddToggle({
     end
 })
 
-local TeleportTab = Window:MakeTab({Name = "Teleport", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local TeleportTab = MainWindow:MakeTab({Name = "Teleport", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 
 TeleportTab:AddSection({Name = "Map Teleport"})
 
@@ -1090,7 +1087,7 @@ TeleportTab:AddButton({
     end
 })
 
-local EventsTab = Window:MakeTab({Name = "Shop", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local EventsTab = MainWindow:MakeTab({Name = "Shop", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 
 EventsTab:AddSection({Name = "Auto Buy Cuaca"})
 
@@ -1163,7 +1160,7 @@ EventsTab:AddToggle({
     end
 })
 
-local AboutTab = Window:MakeTab({Name = "About", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local AboutTab = MainWindow:MakeTab({Name = "About", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 
 AboutTab:AddSection({Name = "Script Information"})
 AboutTab:AddParagraph("Mahiru Script V1", "A fishing script for Roblox")
