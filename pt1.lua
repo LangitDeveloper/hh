@@ -667,7 +667,7 @@ local function CreateToggleButton()
     corner.Parent = button
      
     button.MouseButton1Click:Connect(function()
-        MainWindow:AddToggle()
+        MainWindow:Toggle()
     end)
     
     local dragging = false
