@@ -667,7 +667,7 @@ local function CreateToggleButton()
     corner.Parent = button
      
     button.MouseButton1Click:Connect(function()
-        MainWindow:Toggle()
+        MainWindow:AddToggle()
     end)
     
     local dragging = false
@@ -700,15 +700,15 @@ CreateToggleButton()
 MainWindow:SetToggleKey(Enum.KeyCode.F3)
 MainWindow:IsResizable(true)
 
-local InfoTab = MainWindow:Tab({Title = "Info", Icon = "info"})
-local PlayerTab = MainWindow:Tab({Title = "Player", Icon = "users"})
-local FishingTab = MainWindow:Tab({Title = "Fishing", Icon = "rbxassetid://103247953194129"})
-local AutomaticTab = MainWindow:Tab({Title = "Automatic", Icon = "rbxassetid://12662718374"})
-local WebhookTab = MainWindow:Tab({Title = "Webhook", Icon = "rbxassetid://137601480983962"})
-local QuestTab = MainWindow:Tab({Title = "Quest", Icon = "rbxassetid://114127804740858"})
-local UtilitiesTab = MainWindow:Tab({Title = "Utilities", Icon = "box"})
-local ShopTab = MainWindow:Tab({Title = "Shop", Icon = "shopping-cart"})
-local TeleportTab = MainWindow:Tab({Title = "Teleport", Icon = "map"})
+local InfoTab = MainWindow:AddTab({Title = "Info", Icon = "info"})
+local PlayerTab = MainWindow:AddTab({Title = "Player", Icon = "users"})
+local FishingTab = MainWindow:AddTab({Title = "Fishing", Icon = "rbxassetid://103247953194129"})
+local AutomaticTab = MainWindow:AddTab({Title = "Automatic", Icon = "rbxassetid://12662718374"})
+local WebhookTab = MainWindow:AddTab({Title = "Webhook", Icon = "rbxassetid://137601480983962"})
+local QuestTab = MainWindow:AddTab({Title = "Quest", Icon = "rbxassetid://114127804740858"})
+local UtilitiesTab = MainWindow:AddTab({Title = "Utilities", Icon = "box"})
+local ShopTab = MainWindow:AddTab({Title = "Shop", Icon = "shopping-cart"})
+local TeleportTab = MainWindow:AddTab({Title = "Teleport", Icon = "map"})
 
 InfoTab:AddParagraph({
     Title = "Mahiru Alert!",
@@ -718,7 +718,7 @@ InfoTab:AddParagraph({
     ImageSize = 30,
 })
 
-InfoTab:Button({
+InfoTab:AddButton({
     Title = "Need Help?",
     Desc = "Click This To Copy Discord Link.\nJoin to <font color=\"#FF90E3\">Discord Mahiru</font>!",
     Callback = function()
@@ -786,19 +786,19 @@ local function ServerHop()
     end
 end
 
-InfoTab:Button({
+InfoTab:AddButton({
     Title = "Rejoin Server",
     Callback = RejoinServer
 })
 
-InfoTab:Button({
+InfoTab:AddButton({
     Title = "Server Hop",
     Desc = "Join a new server",
     Callback = ServerHop
 })
 
-local InterfaceSection = PlayerTab:Section({Title = "User Interface"})
-local ThemeToggle = InterfaceSection:Toggle({
+local InterfaceSection = PlayerTab:AddSection({Title = "User Interface"})
+local ThemeToggle = InterfaceSection:AddToggle({
     Title = "Change Theme",
     Desc = "Dark = OFF | Light = ON",
     Value = false,
@@ -812,11 +812,11 @@ local ThemeToggle = InterfaceSection:Toggle({
 })
 ConfigManager:Register("themeToggle", ThemeToggle)
 
-local PfpsSection = PlayerTab:Section({Title = "Tools Fps Booster"})
+local PfpsSection = PlayerTab:AddSection({Title = "Tools Fps Booster"})
 
 local StatsGui
 
-local PerfomToggle = PfpsSection:Toggle({
+local PerfomToggle = PfpsSection:AddToggle({
     Title = "Show Ping & FPS",
     Default = false,
     Callback = function(state)
@@ -832,7 +832,7 @@ local PerfomToggle = PfpsSection:Toggle({
 })
 ConfigManager:Register("PerfomToggle", PerfomToggle)
 
-local FPSBoostToggle = PfpsSection:Toggle({
+local FPSBoostToggle = PfpsSection:AddToggle({
     Title = "FPS Booster",
     Default = false,
     Callback = function(state)
@@ -847,8 +847,8 @@ local FPSBoostToggle = PfpsSection:Toggle({
 ConfigManager:Register("FPSBoostToggle", FPSBoostToggle)
 
 
-local MovementSection = PlayerTab:Section({Title = "Movement"})
-local WalkSpeedSlider = MovementSection:Slider({
+local MovementSection = PlayerTab:AddSection({Title = "Movement"})
+local WalkSpeedSlider = MovementSection:AddSlider({
     Title = "WalkSpeed",
     Step = 1,
     Value = {Min = 16, Max = 200, Default = 16},
@@ -859,7 +859,7 @@ local WalkSpeedSlider = MovementSection:Slider({
     end,
 })
 
-local JumpPowerSlider = MovementSection:Slider({
+local JumpPowerSlider = MovementSection:AddSlider({
     Title = "JumpPower",
     Step = 1,
     Value = {Min = 50, Max = 500, Default = 50},
@@ -870,7 +870,7 @@ local JumpPowerSlider = MovementSection:Slider({
     end,
 })
 
-MovementSection:Button({
+MovementSection:AddButton({
     Title = "Reset Speed And Jump",
     Callback = function()
         if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
@@ -890,7 +890,7 @@ MovementSection:Button({
 
 MovementSection:Divider()
 
-local FlySpeedSlider = MovementSection:Slider({
+local FlySpeedSlider = MovementSection:AddSlider({
     Title = "Fly Speed",
     Step = 1,
     Value = {Min = 1, Max = 10, Default = 1},
@@ -899,7 +899,7 @@ local FlySpeedSlider = MovementSection:Slider({
     end,
 })
 
-local FlyToggle = MovementSection:Toggle({
+local FlyToggle = MovementSection:AddToggle({
     Title = "Enable Fly",
     Value = false,
     Callback = function(value)
@@ -975,9 +975,9 @@ local FlyToggle = MovementSection:Toggle({
     end,
 })
 
-local ModesSection = PlayerTab:Section({Title = "Modes"})
+local ModesSection = PlayerTab:AddSection({Title = "Modes"})
 
-local NoAnimationToggle = ModesSection:Toggle({
+local NoAnimationToggle = ModesSection:AddToggle({
     Title = "No Animations",
     Value = false,
     Callback = function(value)
@@ -1038,7 +1038,7 @@ local NoAnimationToggle = ModesSection:Toggle({
 })
 ConfigManager:Register("noAnimationToggle", NoAnimationToggle)
 
-ModesSection:Toggle({
+ModesSection:AddToggle({
     Title = "Hide Rod On Hand",
     Desc = "This feature makes rod invisible! and hides other player's rods too",
     Value = false,
@@ -1062,7 +1062,7 @@ ModesSection:Toggle({
 
 ModesSection:Divider()
 
-local InfiniteJumpToggle = ModesSection:Toggle({
+local InfiniteJumpToggle = ModesSection:AddToggle({
     Title = "Infinite Jump",
     Value = false,
     Callback = function(value)
@@ -1076,7 +1076,7 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
-local NoClipToggle = ModesSection:Toggle({
+local NoClipToggle = ModesSection:AddToggle({
     Title = "Noclip",
     Value = false,
     Callback = function(value)
@@ -1102,7 +1102,7 @@ RunService.Stepped:Connect(function()
     end
 end)
 
-local WalkOnWaterToggle = ModesSection:Toggle({
+local WalkOnWaterToggle = ModesSection:AddToggle({
     Title = "Walk On Water",
     Value = false,
     Callback = function(value)
@@ -1131,7 +1131,7 @@ local WalkOnWaterToggle = ModesSection:Toggle({
     end,
 })
 
-local MaxZoomToggle = ModesSection:Toggle({
+local MaxZoomToggle = ModesSection:AddToggle({
     Title = "Max Zoom 1000",
     Desc = "Increase max camera distance",
     Value = false,
@@ -1152,9 +1152,9 @@ local MaxZoomToggle = ModesSection:Toggle({
     end,
 })
 
-local BoostSection = PlayerTab:Section({Title = "Boost Player"})
+local BoostSection = PlayerTab:AddSection({Title = "Boost Player"})
 
-local DisableVFXToggle = BoostSection:Toggle({
+local DisableVFXToggle = BoostSection:AddToggle({
     Title = "Disable VFX",
     Value = false,
     Callback = function(value)
@@ -1175,7 +1175,7 @@ local DisableVFXToggle = BoostSection:Toggle({
     end,
 })
 
-local DisableCutsceneToggle = BoostSection:Toggle({
+local DisableCutsceneToggle = BoostSection:AddToggle({
     Title = "Disable Cutscene",
     Value = false,
     Callback = function(value)
@@ -1192,7 +1192,7 @@ local DisableCutsceneToggle = BoostSection:Toggle({
 })
 ConfigManager:Register("cutsceneToggle", DisableCutsceneToggle)
 
-local DisableFishNotificationToggle = BoostSection:Toggle({
+local DisableFishNotificationToggle = BoostSection:AddToggle({
     Title = "Disable Obtained Fish",
     Value = false,
     Callback = function(value)
@@ -1205,9 +1205,9 @@ local DisableFishNotificationToggle = BoostSection:Toggle({
 })
 ConfigManager:Register("obtainedFishToggle", DisableFishNotificationToggle)
 
-local RenderSection = PlayerTab:Section({Title = "Rendering"})
+local RenderSection = PlayerTab:AddSection({Title = "Rendering"})
 
-RenderSection:Toggle({
+RenderSection:AddToggle({
     Title = "Reduce Map",
     Desc = "Don't turn this on with Disable 3D Render",
     Value = false,
@@ -1241,7 +1241,7 @@ RenderSection:Toggle({
     end,
 })
 
-RenderSection:Toggle({
+RenderSection:AddToggle({
     Title = "Disable 3D Rendering",
     Value = false,
     Callback = function(value)
@@ -1255,7 +1255,7 @@ RenderSection:Toggle({
     end,
 })
 
-local ESPToggle = RenderSection:Toggle({
+local ESPToggle = RenderSection:AddToggle({
     Title = "Player ESP",
     Value = false,
     Callback = function(value)
@@ -1319,7 +1319,7 @@ local ESPToggle = RenderSection:Toggle({
     end,
 })
 
-local HideIdentSection = PlayerTab:Section({Title = "Identity"})
+local HideIdentSection = PlayerTab:AddSection({Title = "Identity"})
 
 local function SetupIdentity()
     local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
@@ -1382,7 +1382,7 @@ local function ShowIdentity()
     IdentityElements.Watermark.Visible = false
 end
 
-local NameChangerInput = HideIdentSection:Input({
+local NameChangerInput = HideIdentSection:AddInput({
     Title = "Name Changer",
     Value = "",
     Placeholder = "Mahiru",
@@ -1392,7 +1392,7 @@ local NameChangerInput = HideIdentSection:Input({
 })
 ConfigManager:Register("nameChangerInput", NameChangerInput)
 
-local LevelChangerInput = HideIdentSection:Input({
+local LevelChangerInput = HideIdentSection:AddInput({
     Title = "Level Changer",
     Value = "",
     Placeholder = "Lvl: ",
@@ -1402,7 +1402,7 @@ local LevelChangerInput = HideIdentSection:Input({
 })
 ConfigManager:Register("levelChangerInput", LevelChangerInput)
 
-local IdentityToggle = HideIdentSection:Toggle({
+local IdentityToggle = HideIdentSection:AddToggle({
     Title = "Start Hide Identity",
     Value = false,
     Callback = function(value)
@@ -1430,7 +1430,7 @@ LocalPlayer.CharacterAdded:Connect(function()
     end
 end)
 
-HideIdentSection:Button({
+HideIdentSection:AddButton({
     Title = "Reset Character In Place",
     Callback = function()
         local character = LocalPlayer.Character
@@ -1457,9 +1457,9 @@ HideIdentSection:Button({
 
 SetupIdentity()
 
-local FishingSection = FishingTab:Section({Title = "Auto Fishing"})
+local FishingSection = FishingTab:AddSection({Title = "Auto Fishing"})
 
-local LegitDelayInput = FishingSection:Input({
+local LegitDelayInput = FishingSection:AddInput({
     Title = "Legit Delay",
     Desc = "Delay complete fishing!",
     Value = "",
@@ -1473,7 +1473,7 @@ local LegitDelayInput = FishingSection:Input({
 })
 ConfigManager:Register("legitInput", LegitDelayInput)
 
-local ShakeDelayInput = FishingSection:Input({
+local ShakeDelayInput = FishingSection:AddInput({
     Title = "Shake Delay",
     Value = "",
     Placeholder = "Default: 0.15",
@@ -1486,7 +1486,7 @@ local ShakeDelayInput = FishingSection:Input({
 })
 ConfigManager:Register("shakeInput", ShakeDelayInput)
 
-local LegitFishingToggle = FishingSection:Toggle({
+local LegitFishingToggle = FishingSection:AddToggle({
     Title = "Legit Fishing",
     Value = false,
     Callback = function(value)
@@ -1500,7 +1500,7 @@ local LegitFishingToggle = FishingSection:Toggle({
 })
 ConfigManager:Register("LegitFishingToggle", LegitFishingToggle)
 
-local AutoShakeToggle = FishingSection:Toggle({
+local AutoShakeToggle = FishingSection:AddToggle({
     Title = "Auto Shake",
     Desc = "Spam click during fishing (only legit)",
     Value = false,
@@ -1525,7 +1525,7 @@ local AutoShakeToggle = FishingSection:Toggle({
 })
 ConfigManager:Register("autoShakeToggle", AutoShakeToggle)
 
-FishingTab:Section({Title = "Instant Fishing"})
+FishingTab:AddSection({Title = "Instant Fishing"})
 
 FishingTab:AddParagraph({
     Title = "Instant Fishing Settings",
@@ -1535,7 +1535,7 @@ FishingTab:AddParagraph({
     ImageSize = 30,
 })
 
-local InstantDelayInput = FishingTab:Input({
+local InstantDelayInput = FishingTab:AddInput({
     Title = "Delay Complete",
     Value = "",
     Placeholder = "Default: 0.1",
@@ -1548,7 +1548,7 @@ local InstantDelayInput = FishingTab:Input({
 })
 ConfigManager:Register("instantDelayCompleteValue", InstantDelayInput)
 
-local InstantFishingToggle = FishingTab:Toggle({
+local InstantFishingToggle = FishingTab:AddToggle({
     Title = "Instant Fishing",
     Desc = "Auto instantly catch fish",
     Value = false,
@@ -1563,7 +1563,7 @@ local InstantFishingToggle = FishingTab:Toggle({
 })
 ConfigManager:Register("instantToggle", InstantFishingToggle)
 
-FishingTab:Toggle({
+FishingTab:AddToggle({
     Title = "Talon Fishing",
     Desc = "Auto In Game Fishing + Auto Shake",
     Value = false,
@@ -1590,9 +1590,9 @@ FishingTab:Toggle({
     end,
 })
 
-FishingTab:Section({Title = "Blatant V1"})
+FishingTab:AddSection({Title = "Blatant V1"})
 
-local BlatantReelInput = FishingTab:Input({
+local BlatantReelInput = FishingTab:AddInput({
     Title = "Delay Reel",
     Desc = "Reel Timing (e.g. 1.9)",
     Value = "",
@@ -1606,7 +1606,7 @@ local BlatantReelInput = FishingTab:Input({
 })
 ConfigManager:Register("blatantReelInput", BlatantReelInput)
 
-local BlatantFishInput = FishingTab:Input({
+local BlatantFishInput = FishingTab:AddInput({
     Title = "Delay Fishing",
     Desc = "Fishing Timing (e.g. 1.1)",
     Value = "",
@@ -1620,7 +1620,7 @@ local BlatantFishInput = FishingTab:Input({
 })
 ConfigManager:Register("blatantFishInput", BlatantFishInput)
 
-local BlatantFishingToggle = FishingTab:Toggle({
+local BlatantFishingToggle = FishingTab:AddToggle({
     Title = "Blatant Fishing",
     Value = false,
     Callback = function(value)
@@ -1634,7 +1634,7 @@ local BlatantFishingToggle = FishingTab:Toggle({
 })
 ConfigManager:Register("blatantToggle", BlatantFishingToggle)
 
-FishingTab:Button({
+FishingTab:AddButton({
     Title = "Recovery Fishing",
     Callback = function()
         pcall(function()
@@ -1643,9 +1643,9 @@ FishingTab:Button({
     end,
 })
 
-FishingTab:Section({Title = "Blatant V2"})
+FishingTab:AddSection({Title = "Blatant V2"})
 
-local BlatantBaitInput = FishingTab:Input({
+local BlatantBaitInput = FishingTab:AddInput({
     Title = "Bait Delay",
     Desc = "Delay sebelum charge (e.g. 0.05 = ultra fast)",
     Value = "0.3",
@@ -1659,7 +1659,7 @@ local BlatantBaitInput = FishingTab:Input({
 })
 ConfigManager:Register("blatantBaitInput", BlatantBaitInput)
 
-local BlatantCastInput = FishingTab:Input({
+local BlatantCastInput = FishingTab:AddInput({
     Title = "Cast Delay", 
     Desc = "Delay sebelum minigame (e.g. 0.1 = instant)",
     Value = "0.70",
@@ -1673,7 +1673,7 @@ local BlatantCastInput = FishingTab:Input({
 })
 ConfigManager:Register("blatantCastInput", BlatantCastInput)
 
-local BlatantFishingV2Toggle = FishingTab:Toggle({
+local BlatantFishingV2Toggle = FishingTab:AddToggle({
     Title = "Blatant Fishing",
     Value = false,
     Callback = function(value)
@@ -1687,9 +1687,9 @@ local BlatantFishingV2Toggle = FishingTab:Toggle({
 })
 ConfigManager:Register("blatantV2Toggle", BlatantFishingV2Toggle)
 
-FishingTab:Section({Title = "Blatant V3"})
+FishingTab:AddSection({Title = "Blatant V3"})
 
-local BlatantcancelInput = FishingTab:Input({
+local BlatantcancelInput = FishingTab:AddInput({
     Title = "Cancel Delay",
     Desc = "Delay sebelum charge (e.g. 0.05 = ultra fast)",
     Value = "0.3",
@@ -1703,7 +1703,7 @@ local BlatantcancelInput = FishingTab:Input({
 })
 ConfigManager:Register("blatantcancelInput", BlatantBaitInput)
 
-local BlatantCompleteInput = FishingTab:Input({
+local BlatantCompleteInput = FishingTab:AddInput({
     Title = "Complete Delay", 
     Desc = "Delay sebelum minigame (e.g. 0.1 = instant)",
     Value = "0.70",
@@ -1717,7 +1717,7 @@ local BlatantCompleteInput = FishingTab:Input({
 })
 ConfigManager:Register("blatantCompleteInput", BlatantCastInput)
 
-local BlatantFishingV3Toggle = FishingTab:Toggle({
+local BlatantFishingV3Toggle = FishingTab:AddToggle({
     Title = "Blatant Fishing V3",
     Value = false,
     Callback = function(value)
@@ -1731,9 +1731,9 @@ local BlatantFishingV3Toggle = FishingTab:Toggle({
 })
 ConfigManager:Register("blatantV3Toggle", BlatantFishingV3Toggle)
 
-local SellSection = AutomaticTab:Section({Title = "Auto Sell"})
+local SellSection = AutomaticTab:AddSection({Title = "Auto Sell"})
 
-SellSection:Dropdown({
+SellSection:AddDropdown({
     Title = "Select Sell Mode",
     Values = {"Delay", "Count"},
     Value = "Delay",
@@ -1742,7 +1742,7 @@ SellSection:Dropdown({
     end,
 })
 
-SellSection:Input({
+SellSection:AddInput({
     Title = "Sell Value",
     Desc = "Delay = Minute | Count = Fish Count",
     Value = "60",
@@ -1756,7 +1756,7 @@ SellSection:Input({
     end,
 })
 
-SellSection:Toggle({
+SellSection:AddToggle({
     Title = "Auto Sell All",
     Value = false,
     Callback = function(value)
@@ -1768,9 +1768,9 @@ SellSection:Toggle({
     end,
 })
 
-local WeatherSection = AutomaticTab:Section({Title = "Auto Buy Weather"})
+local WeatherSection = AutomaticTab:AddSection({Title = "Auto Buy Weather"})
 
-local WeatherDropdown = WeatherSection:Dropdown({
+local WeatherDropdown = WeatherSection:AddDropdown({
     Title = "Select Weather",
     Desc = "",
     Values = {
@@ -1795,7 +1795,7 @@ local WeatherDropdown = WeatherSection:Dropdown({
 })
 ConfigManager:Register("weatherDropdown", WeatherDropdown)
 
-local WeatherToggle = WeatherSection:Toggle({
+local WeatherToggle = WeatherSection:AddToggle({
     Title = "Auto Buy Weather",
     Value = false,
     Callback = function(value)
@@ -1829,7 +1829,7 @@ local WeatherToggle = WeatherSection:Toggle({
 })
 ConfigManager:Register("weatherToggle", WeatherToggle)
 
-local EventSection = AutomaticTab:Section({Title = "Event Features"})
+local EventSection = AutomaticTab:AddSection({Title = "Event Features"})
 
 local function GetActiveEvents()
     local events = {}
@@ -1902,7 +1902,7 @@ local function FindEventPart(eventName)
     return nil
 end
 
-local EventDropdown = EventSection:Dropdown({
+local EventDropdown = EventSection:AddDropdown({
     Title = "Select Event",
     Values = GetActiveEvents() or {},
     Callback = function(value)
@@ -1910,7 +1910,7 @@ local EventDropdown = EventSection:Dropdown({
     end,
 })
 
-local EventToggle = EventSection:Toggle({
+local EventToggle = EventSection:AddToggle({
     Title = "Auto Event",
     Value = false,
     Callback = function(value)
@@ -1951,7 +1951,7 @@ local EventToggle = EventSection:Toggle({
     end,
 })
 
-local FavoriteSection = AutomaticTab:Section({Title = "Favorite Features"})
+local FavoriteSection = AutomaticTab:AddSection({Title = "Favorite Features"})
 
 local FishNames = {}
 for _, fish in pairs(FishData) do
@@ -1959,7 +1959,7 @@ for _, fish in pairs(FishData) do
 end
 table.sort(FishNames)
 
-local NameDropdown = FavoriteSection:Dropdown({
+local NameDropdown = FavoriteSection:AddDropdown({
     Title = "Name",
     Desc = "Favorite By Name Fish (Recommended)",
     Values = #FishNames > 0 and FishNames or {"No Fish Found"},
@@ -1975,14 +1975,14 @@ local NameDropdown = FavoriteSection:Dropdown({
     end,
 })
 
-FavoriteSection:Button({
+FavoriteSection:AddButton({
     Title = "Refresh Fish",
     Callback = function()
         NameDropdown:Refresh(FishNames)
     end,
 })
 
-FavoriteSection:Dropdown({
+FavoriteSection:AddDropdown({
     Title = "Rarity",
     Desc = "Favorite By Rarity (Optional)",
     Values = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic", "Secret"},
@@ -1998,7 +1998,7 @@ FavoriteSection:Dropdown({
     end,
 })
 
-FavoriteSection:Dropdown({
+FavoriteSection:AddDropdown({
     Title = "Variant",
     Desc = "Favorite By Variant (Only works with Name)",
     Values = {"Galaxy", "Corrupt", "Gemstone", "Ghost", "Lightning", "Fairy Dust", "Gold", "Midnight", "Radioactive", "Stone", "Holographic", "Albino", "Bloodmoon", "Sandy", "Acidic", "Color Burn", "Festive", "Frozen"},
@@ -2019,7 +2019,7 @@ FavoriteSection:Dropdown({
     end,
 })
 
-local AutoFavoriteToggle = FavoriteSection:Toggle({
+local AutoFavoriteToggle = FavoriteSection:AddToggle({
     Title = "Auto Favorite",
     Value = false,
     Callback = function(value)
@@ -2075,7 +2075,7 @@ local AutoFavoriteToggle = FavoriteSection:Toggle({
     end,
 })
 
-FavoriteSection:Button({
+FavoriteSection:AddButton({
     Title = "Unfavorite All",
     Callback = function()
         local inventory = PlayerData:GetExpect({"Inventory", "Items"}) or {}
@@ -2088,7 +2088,7 @@ FavoriteSection:Button({
     end,
 })
 
-local SPSection = AutomaticTab:Section({Title = "Save Position Features"})
+local SPSection = AutomaticTab:AddSection({Title = "Save Position Features"})
 
 SPSection:AddParagraph({
     Title = "Guide Teleport",
@@ -2140,7 +2140,7 @@ local function TeleportToLastPosition()
     end
 end
 
-SPSection:Button({
+SPSection:AddButton({
     Title = "Save Position",
     Callback = function()
         local character = LocalPlayer.Character
@@ -2154,7 +2154,7 @@ SPSection:Button({
     end,
 })
 
-SPSection:Button({
+SPSection:AddButton({
     Title = "Reset Position",
     Callback = function()
         if isfile("Mahiru/FishIt/Position.json") then
@@ -2171,7 +2171,7 @@ if LocalPlayer.Character then
     TeleportToLastPosition()
 end
 
-local EnchantSection = AutomaticTab:Section({Title = "Enchant Features"})
+local EnchantSection = AutomaticTab:AddSection({Title = "Enchant Features"})
 
 local EnchantStatus = EnchantSection:AddParagraph({
     Title = "Enchant Status",
@@ -2218,7 +2218,7 @@ local function GetEnchantInfo(stoneId)
     return rodName, enchantName, stoneCount, stoneUUIDs
 end
 
-EnchantSection:Button({
+EnchantSection:AddButton({
     Title = "Click Enchant",
     Callback = function()
         task.spawn(function()
@@ -2264,7 +2264,7 @@ EnchantSection:Button({
     end,
 })
 
-EnchantSection:Button({
+EnchantSection:AddButton({
     Title = "Teleport Enchant Altar",
     Callback = function()
         local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
@@ -2282,7 +2282,7 @@ EnchantSection:Button({
 
 EnchantSection:Divider()
 
-EnchantSection:Button({
+EnchantSection:AddButton({
     Title = "Click Double Enchant",
     Desc = "Starting Double Enchanting",
     Callback = function()
@@ -2329,7 +2329,7 @@ EnchantSection:Button({
     end,
 })
 
-EnchantSection:Button({
+EnchantSection:AddButton({
     Title = "Teleport Second Enchant Altar",
     Callback = function()
         local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
@@ -2345,9 +2345,9 @@ EnchantSection:Button({
     end,
 })
 
-WebhookTab:Section({Title = "Webhook Fish Caught"})
+WebhookTab:AddSection({Title = "Webhook Fish Caught"})
 
-local WebhookURLInput = WebhookTab:Input({
+local WebhookURLInput = WebhookTab:AddInput({
     Title = "Webhook URL",
     Value = "",
     Placeholder = "Input Here",
@@ -2357,7 +2357,7 @@ local WebhookURLInput = WebhookTab:Input({
 })
 ConfigManager:Register("webhookURLInput", WebhookURLInput)
 
-WebhookTab:Dropdown({
+WebhookTab:AddDropdown({
     Title = "Tier Filter",
     Values = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic", "Secret"},
     Value = {"Mythic", "Secret"},
@@ -2368,7 +2368,7 @@ WebhookTab:Dropdown({
     end,
 })
 
-local FishNameDropdown = WebhookTab:Dropdown({
+local FishNameDropdown = WebhookTab:AddDropdown({
     Title = "Name Filter",
     Values = #FishNames > 0 and FishNames or {"No Fish Found"},
     Multi = true,
@@ -2378,14 +2378,14 @@ local FishNameDropdown = WebhookTab:Dropdown({
     end,
 })
 
-WebhookTab:Button({
+WebhookTab:AddButton({
     Title = "Refresh Fish",
     Callback = function()
         FishNameDropdown:Refresh(FishNames)
     end,
 })
 
-local WebhookNameInput = WebhookTab:Input({
+local WebhookNameInput = WebhookTab:AddInput({
     Title = "Hide Identity",
     Value = "",
     Placeholder = "Input Here",
@@ -2395,7 +2395,7 @@ local WebhookNameInput = WebhookTab:Input({
 })
 ConfigManager:Register("webhookNameInput", WebhookNameInput)
 
-local WebhookToggle = WebhookTab:Toggle({
+local WebhookToggle = WebhookTab:AddToggle({
     Title = "Send Fish Webhook",
     Value = false,
     Callback = function(value)
@@ -2406,7 +2406,7 @@ ConfigManager:Register("webhookToggle", WebhookToggle)
 
 WebhookTab:Divider()
 
-WebhookTab:Button({
+WebhookTab:AddButton({
     Title = "Test Webhook Connection",
     Callback = function()
         if not WebhookConfig.URL or not WebhookConfig.URL:match("discord.com/api/webhooks") then
@@ -2458,7 +2458,7 @@ WebhookTab:Button({
     end,
 })
 
-local SisyphusSection = QuestTab:Section({Title = "Sisyphus State Quest"})
+local SisyphusSection = QuestTab:AddSection({Title = "Sisyphus State Quest"})
 
 local DeepSeaPanel = SisyphusSection:AddParagraph({
     Title = "Deep Sea Panel",
@@ -2499,7 +2499,7 @@ local function TeleportTo(x, y, z, rotation)
     end
 end
 
-SisyphusSection:Toggle({
+SisyphusSection:AddToggle({
     Title = "Auto Deep Sea Quest",
     Desc = "Automatically complete Deep Sea Quest!",
     Value = false,
@@ -2521,28 +2521,28 @@ SisyphusSection:Toggle({
     end,
 })
 
-SisyphusSection:Button({
+SisyphusSection:AddButton({
     Title = "Treasure Room",
     Callback = function()
         TeleportTo(-3601, -283, -1611)
     end,
 })
 
-SisyphusSection:Button({
+SisyphusSection:AddButton({
     Title = "Sisyphus Statue",
     Callback = function()
         TeleportTo(-3698, -135, -1008)
     end,
 })
 
-local ElementSection = QuestTab:Section({Title = "Element Quest"})
+local ElementSection = QuestTab:AddSection({Title = "Element Quest"})
 
 local ElementPanel = ElementSection:AddParagraph({
     Title = "Element Panel",
     Desc = "Loading...",
 })
 
-ElementSection:Toggle({
+ElementSection:AddToggle({
     Title = "Auto Element Quest",
     Desc = "Automatically teleport through Element Quest Stages!",
     Value = false,
@@ -2578,21 +2578,21 @@ ElementSection:Toggle({
     end,
 })
 
-ElementSection:Button({
+ElementSection:AddButton({
     Title = "Secret Temple",
     Callback = function()
         TeleportTo(1453, -22, -636)
     end,
 })
 
-ElementSection:Button({
+ElementSection:AddButton({
     Title = "Underground Cellar",
     Callback = function()
         TeleportTo(2136, -91, -701)
     end,
 })
 
-ElementSection:Button({
+ElementSection:AddButton({
     Title = "Transcended Stones",
     Callback = function()
         TeleportTo(1480, 128, -593)
@@ -2606,9 +2606,9 @@ task.spawn(function()
     end
 end)
 
-local ServerUtilitySection = UtilitiesTab:Section({Title = "Server Utility"})
+local ServerUtilitySection = UtilitiesTab:AddSection({Title = "Server Utility"})
 
-local AntiStaffToggle = ServerUtilitySection:Toggle({
+local AntiStaffToggle = ServerUtilitySection:AddToggle({
     Title = "Anti Staff",
     Desc = "Auto kick if staff/developer joins the server",
     Value = false,
@@ -2651,7 +2651,7 @@ local AntiStaffToggle = ServerUtilitySection:Toggle({
 })
 ConfigManager:Register("antiStaffToggle", AntiStaffToggle)
 
-local StreamerModeToggle = ServerUtilitySection:Toggle({
+local StreamerModeToggle = ServerUtilitySection:AddToggle({
     Title = "Streamer Mode",
     Desc = "This will hide the location, character, and coins.",
     Value = false,
@@ -2693,7 +2693,7 @@ ConfigManager:Register("streamerModeToggle", StreamerModeToggle)
 
 UtilitiesTab:Divider()
 
-local RadarToggle = UtilitiesTab:Toggle({
+local RadarToggle = UtilitiesTab:AddToggle({
     Title = "Bypass Radar",
     Value = false,
     Callback = function(value)
@@ -2704,7 +2704,7 @@ local RadarToggle = UtilitiesTab:Toggle({
 })
 ConfigManager:Register("radarToggle", RadarToggle)
 
-local DivingGearToggle = UtilitiesTab:Toggle({
+local DivingGearToggle = UtilitiesTab:AddToggle({
     Title = "Bypass Diving Gear",
     Value = false,
     Callback = function(value)
@@ -2724,7 +2724,7 @@ local DivingGearToggle = UtilitiesTab:Toggle({
 })
 ConfigManager:Register("divingGearToggle", DivingGearToggle)
 
-local MerchantShopSection = ShopTab:Section({Title = "Merchant Shop"})
+local MerchantShopSection = ShopTab:AddSection({Title = "Merchant Shop"})
 
 local MerchantPanel = MerchantShopSection:AddParagraph({
     Title = "MERCHANT STOCK PANEL",
@@ -2752,7 +2752,7 @@ local function UpdateMerchantInfo()
     end
 end
 
-MerchantShopSection:Button({
+MerchantShopSection:AddButton({
     Title = "Open/Close Merchant",
     Callback = function()
         local merchant = PlayerGui:FindFirstChild("Merchant")
@@ -2777,7 +2777,7 @@ task.spawn(function()
     end
 end)
 
-MerchantShopSection:Button({
+MerchantShopSection:AddButton({
     Title = "Teleport To Merchant",
     Callback = function()
         local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
@@ -2788,7 +2788,7 @@ MerchantShopSection:Button({
     end,
 })
 
-local RodSection = ShopTab:Section({Title = "Purchase Rod"})
+local RodSection = ShopTab:AddSection({Title = "Purchase Rod"})
 
 local Rods = {
     ["Chrome Rod (43.7K)"] = {Id = 7, Price = 43700},
@@ -2830,7 +2830,7 @@ for name, data in pairs(Rods) do
 end
 table.sort(RodOptions)
 
-local RodDropdown = RodSection:Dropdown({
+local RodDropdown = RodSection:AddDropdown({
     Title = "Select Rod",
     Values = RodOptions,
     Callback = function(value)
@@ -2838,7 +2838,7 @@ local RodDropdown = RodSection:Dropdown({
     end,
 })
 
-RodSection:Button({
+RodSection:AddButton({
     Title = "Purchase",
     Callback = function()
         if not SelectedRod then
@@ -2868,7 +2868,7 @@ RodSection:Button({
     end,
 })
 
-local BaitSection = ShopTab:Section({Title = "Purchase Bait"})
+local BaitSection = ShopTab:AddSection({Title = "Purchase Bait"})
 
 local Baits = {
     ["Starter Bait (0)"] = {Id = 1, Price = 0},
@@ -2908,7 +2908,7 @@ for name, data in pairs(Baits) do
 end
 table.sort(BaitOptions)
 
-local BaitDropdown = BaitSection:Dropdown({
+local BaitDropdown = BaitSection:AddDropdown({
     Title = "Select Bait",
     Values = BaitOptions,
     Callback = function(value)
@@ -2916,7 +2916,7 @@ local BaitDropdown = BaitSection:Dropdown({
     end,
 })
 
-BaitSection:Button({
+BaitSection:AddButton({
     Title = "Purchase",
     Callback = function()
         if not SelectedBait then
@@ -2946,7 +2946,7 @@ BaitSection:Button({
     end,
 })
 
-local BoatSection = ShopTab:Section({Title = "Purchase Boat"})
+local BoatSection = ShopTab:AddSection({Title = "Purchase Boat"})
 
 local Boats = {
     ["Small Boat (300)"] = {Id = 1, Price = 300},
@@ -2963,7 +2963,7 @@ for name, data in pairs(Boats) do
     table.insert(BoatOptions, name)
 end
 
-local BoatDropdown = BoatSection:Dropdown({
+local BoatDropdown = BoatSection:AddDropdown({
     Title = "Select Boat",
     Values = BoatOptions,
     Callback = function(value)
@@ -2971,7 +2971,7 @@ local BoatDropdown = BoatSection:Dropdown({
     end,
 })
 
-BoatSection:Button({
+BoatSection:AddButton({
     Title = "Purchase",
     Callback = function()
         if not SelectedBoat then
@@ -3001,7 +3001,7 @@ BoatSection:Button({
     end,
 })
 
-local LocationSection = TeleportTab:Section({Title = "Location"})
+local LocationSection = TeleportTab:AddSection({Title = "Location"})
 
 local Locations = {
     "Ancient Jungle",
@@ -3063,7 +3063,7 @@ local LocationCoordinates = {
     ["Pirate Cove"] = Vector3.new(3207.78, 9.10, 3546.13),
 }
 
-local LocationDropdown = LocationSection:Dropdown({
+local LocationDropdown = LocationSection:AddDropdown({
     Title = "Choose Location",
     Values = Locations,
     Value = "Ancient Jungle",
@@ -3073,7 +3073,7 @@ local LocationDropdown = LocationSection:Dropdown({
 })
 ConfigManager:Register("tpLocationDropdown", LocationDropdown)
 
-LocationSection:Button({
+LocationSection:AddButton({
     Title = "Teleport",
     Callback = function()
         if not SelectedLocation then
@@ -3096,7 +3096,7 @@ LocationSection:Button({
     end,
 })
 
-local PlayerSection = TeleportTab:Section({Title = "Player"})
+local PlayerSection = TeleportTab:AddSection({Title = "Player"})
 
 local function GetPlayerList()
     local players = {}
@@ -3106,7 +3106,7 @@ local function GetPlayerList()
     return players
 end
 
-local PlayerDropdown = PlayerSection:Dropdown({
+local PlayerDropdown = PlayerSection:AddDropdown({
     Title = "Select Player",
     Values = GetPlayerList(),
     Callback = function(value)
@@ -3114,7 +3114,7 @@ local PlayerDropdown = PlayerSection:Dropdown({
     end,
 })
 
-PlayerSection:Button({
+PlayerSection:AddButton({
     Title = "Refresh",
     Callback = function()
         PlayerDropdown:Refresh(GetPlayerList())
@@ -3127,7 +3127,7 @@ PlayerSection:Button({
     end,
 })
 
-PlayerSection:Button({
+PlayerSection:AddButton({
     Title = "Go",
     Callback = function()
         if not SelectedPlayer then
