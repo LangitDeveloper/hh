@@ -700,15 +700,16 @@ CreateToggleButton()
 MainWindow:SetToggleKey(Enum.KeyCode.F3)
 MainWindow:IsResizable(true)
 
-local InfoTab = MainWindow:AddTab({Title = "Info", Icon = "info"})
-local PlayerTab = MainWindow:AddTab({Title = "Player", Icon = "users"})
-local FishingTab = MainWindow:AddTab({Title = "Fishing", Icon = "rbxassetid://103247953194129"})
-local AutomaticTab = MainWindow:AddTab({Title = "Automatic", Icon = "rbxassetid://12662718374"})
-local WebhookTab = MainWindow:AddTab({Title = "Webhook", Icon = "rbxassetid://137601480983962"})
-local QuestTab = MainWindow:AddTab({Title = "Quest", Icon = "rbxassetid://114127804740858"})
-local UtilitiesTab = MainWindow:AddTab({Title = "Utilities", Icon = "box"})
-local ShopTab = MainWindow:AddTab({Title = "Shop", Icon = "shopping-cart"})
-local TeleportTab = MainWindow:AddTab({Title = "Teleport", Icon = "map"})
+local Tabs = {}
+Tabs.InfoTab = MainWindow:AddTab({Title = "Info", Icon = "info"})
+Tabs.PlayerTab = MainWindow:AddTab({Title = "Player", Icon = "users"})
+Tabs.FishingTab = MainWindow:AddTab({Title = "Fishing", Icon = "rbxassetid://103247953194129"})
+Tabs.AutomaticTab = MainWindow:AddTab({Title = "Automatic", Icon = "rbxassetid://12662718374"})
+Tabs.WebhookTab = MainWindow:AddTab({Title = "Webhook", Icon = "rbxassetid://137601480983962"})
+Tabs.QuestTab = MainWindow:AddTab({Title = "Quest", Icon = "rbxassetid://114127804740858"})
+Tabs.UtilitiesTab = MainWindow:AddTab({Title = "Utilities", Icon = "box"})
+Tabs.ShopTab = MainWindow:AddTab({Title = "Shop", Icon = "shopping-cart"})
+Tabs.TeleportTab = MainWindow:AddTab({Title = "Teleport", Icon = "map"})
 
 InfoTab:AddParagraph({
     Title = "Mahiru Alert!",
