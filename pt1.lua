@@ -646,7 +646,7 @@ local MainWindow = MahiruUi:Window(WindowConfig)
 if MainWindow then
 end
 
-local ConfigManager = Window.ConfigManager:CreateConfig("mahiruconfig")
+local ConfigManager = MainWindow.ConfigManager:CreateConfig("mahiruconfig")
 
 local function CreateToggleButton()
     local screenGui = Instance.new("ScreenGui")
@@ -724,14 +724,14 @@ InfoTab:AddButton({
     Callback = function()
         if setclipboard then
             setclipboard("discord.gg/mahiruscript")
-            MainMainWindow:Notify({
+            MainWindow:Notify({
                 Title = "Success",
                 Content = "Discord link copied to clipboard!",
                 Duration = 3,
                 Icon = "laptop-minimal-check",
             })
         else
-            MainMainWindow:Notify({
+            MainWindow:Notify({
                 Title = "Error",
                 Content = "Executor doesn't support clipboard!",
                 Duration = 3,
@@ -777,7 +777,7 @@ local function ServerHop()
     if #servers > 0 then
         TeleportService:TeleportToPlaceInstance(placeId, servers[math.random(1, #servers)], LocalPlayer)
     else
-        MainMainWindow:Notify({
+        MainWindow:Notify({
             Title = "Error",
             Content = "No servers available or all are full",
             Duration = 2.5,
@@ -804,9 +804,9 @@ local ThemeToggle = InterfaceSection:AddToggle({
     Value = false,
     Callback = function(value)
         if value then
-            MainMainWindow:SetTheme("Light Theme")
+            MainWindow:SetTheme("Light Theme")
         else
-            MainMainWindow:SetTheme("Dark Theme")
+            MainWindow:SetTheme("Dark Theme")
         end
     end,
 })
@@ -878,7 +878,7 @@ MovementSection:AddButton({
             LocalPlayer.Character.Humanoid.JumpPower = 50
             WalkSpeedSlider:Set(16)
             JumpPowerSlider:Set(50)
-            MainMainWindow:Notify({
+            MainWindow:Notify({
                 Title = "Success",
                 Content = "Speed and jump reset successfully",
                 Duration = 2.5,
@@ -1008,7 +1008,7 @@ local NoAnimationToggle = ModesSection:AddToggle({
                 end
             end
             
-            MainMainWindow:Notify({
+            MainWindow:Notify({
                 Title = "No Animation",
                 Content = "Animations disabled",
                 Duration = 2,
@@ -1027,7 +1027,7 @@ local NoAnimationToggle = ModesSection:AddToggle({
                 end
             end
             
-            MainMainWindow:Notify({
+            MainWindow:Notify({
                 Title = "No Animation",
                 Content = "Animations enabled",
                 Duration = 2,
@@ -1082,7 +1082,7 @@ local NoClipToggle = ModesSection:AddToggle({
     Callback = function(value)
         IsNoClip = value
         if value then
-            MainMainWindow:Notify({
+            MainWindow:Notify({
                 Title = "Success",
                 Content = "Noclip enabled",
                 Duration = 2.5,
@@ -1246,7 +1246,7 @@ RenderSection:AddToggle({
     Value = false,
     Callback = function(value)
         RunService:Set3dRenderingEnabled(not value)
-        MainMainWindow:Notify({
+        MainWindow:Notify({
             Title = value and "Disabled" or "Enabled",
             Content = value and "3D Render disabled" or "3D Render enabled",
             Duration = 2.5,
@@ -1446,7 +1446,7 @@ HideIdentSection:AddButton({
         task.wait(0.2)
         LocalPlayer.Character:WaitForChild("HumanoidRootPart").CFrame = position
         
-        MainMainWindow:Notify({
+        MainWindow:Notify({
             Title = "Success",
             Content = "Character reset in same location!",
             Duration = 2.5,
@@ -2134,7 +2134,7 @@ local function TeleportToLastPosition()
     if savedPosition then
         task.wait(2)
         rootPart.CFrame = savedPosition
-        MainMainWindow:Notify({
+        MainWindow:Notify({
             Title = "Teleported to your last position...",
         })
     end
@@ -2147,7 +2147,7 @@ SPSection:AddButton({
         local rootPart = character and character:FindFirstChild("HumanoidRootPart")
         if rootPart then
             SavePosition(rootPart.CFrame)
-            MainMainWindow:Notify({
+            MainWindow:Notify({
                 Title = "Position saved successfully!",
             })
         end
@@ -2160,7 +2160,7 @@ SPSection:AddButton({
         if isfile("Mahiru/FishIt/Position.json") then
             delfile("Mahiru/FishIt/Position.json")
         end
-        MainMainWindow:Notify({
+        MainWindow:Notify({
             Title = "Last position has been reset!",
         })
     end,
@@ -2440,14 +2440,14 @@ WebhookTab:AddButton({
             end)
             
             if success then
-                MainMainWindow:Notify({
+                MainWindow:Notify({
                     Title = "Success",
                     Content = "Webhook test sent successfully!",
                     Duration = 3,
                     Icon = "laptop-minimal-check",
                 })
             else
-                MainMainWindow:Notify({
+                MainWindow:Notify({
                     Title = "Error",
                     Content = "Failed to send webhook: " .. tostring(errorMsg),
                     Duration = 3,
@@ -2842,7 +2842,7 @@ RodSection:AddButton({
     Title = "Purchase",
     Callback = function()
         if not SelectedRod then
-            MainMainWindow:Notify({
+            MainWindow:Notify({
                 Title = "Error",
                 Content = "Select Rod First!",
                 Duration = 2.5,
@@ -2853,7 +2853,7 @@ RodSection:AddButton({
         
         local rodData = Rods[SelectedRod]
         if not rodData then
-            MainMainWindow:Notify({
+            MainWindow:Notify({
                 Title = "Error",
                 Content = "Rod ID Not Found!",
                 Duration = 2.5,
@@ -2920,7 +2920,7 @@ BaitSection:AddButton({
     Title = "Purchase",
     Callback = function()
         if not SelectedBait then
-            MainMainWindow:Notify({
+            MainWindow:Notify({
                 Title = "Error",
                 Content = "Select Bait First!",
                 Duration = 2.5,
@@ -2931,7 +2931,7 @@ BaitSection:AddButton({
         
         local baitData = Baits[SelectedBait]
         if not baitData then
-            MainMainWindow:Notify({
+            MainWindow:Notify({
                 Title = "Error",
                 Content = "Bait ID Not Found!",
                 Duration = 2.5,
@@ -2975,7 +2975,7 @@ BoatSection:AddButton({
     Title = "Purchase",
     Callback = function()
         if not SelectedBoat then
-            MainMainWindow:Notify({
+            MainWindow:Notify({
                 Title = "Error",
                 Content = "Select Boat First!",
                 Duration = 2.5,
@@ -2986,7 +2986,7 @@ BoatSection:AddButton({
         
         local boatData = Boats[SelectedBoat]
         if not boatData then
-            MainMainWindow:Notify({
+            MainWindow:Notify({
                 Title = "Error",
                 Content = "Boat ID Not Found!",
                 Duration = 2.5,
@@ -3077,7 +3077,7 @@ LocationSection:AddButton({
     Title = "Teleport",
     Callback = function()
         if not SelectedLocation then
-            MainMainWindow:Notify({
+            MainWindow:Notify({
                 Title = "Error",
                 Content = "Select location first!",
                 Duration = 2.5,
@@ -3118,7 +3118,7 @@ PlayerSection:AddButton({
     Title = "Refresh",
     Callback = function()
         PlayerDropdown:Refresh(GetPlayerList())
-        MainMainWindow:Notify({
+        MainWindow:Notify({
             Title = "Success",
             Content = "Player list refreshed successfully",
             Duration = 2.5,
@@ -3131,7 +3131,7 @@ PlayerSection:AddButton({
     Title = "Go",
     Callback = function()
         if not SelectedPlayer then
-            MainMainWindow:Notify({
+            MainWindow:Notify({
                 Title = "Error",
                 Content = "Select player first!",
                 Duration = 2.5,
@@ -3142,7 +3142,7 @@ PlayerSection:AddButton({
         
         local targetPlayer = Players:FindFirstChild(SelectedPlayer)
         if not targetPlayer or not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            MainMainWindow:Notify({
+            MainWindow:Notify({
                 Title = "Error",
                 Content = "Invalid player!",
                 Duration = 2.5,
