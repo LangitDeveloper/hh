@@ -657,9 +657,8 @@ Tabs.Utilities = MainWindow:AddTab({Name = "Utilities", Icon = "box"})
 Tabs.Shop = MainWindow:AddTab({Name = "Shop", Icon = "shopping-cart"})
 Tabs.Teleport = MainWindow:AddTab({Name = "Teleport", Icon = "map"})
 
-local InfooSection = Tabs.Info:AddSection({Name = "User Interface"})
 
-InfooSection:AddParagraph({
+Tabs.Info:AddParagraph({
     Name = "Mahiru Alert!",
     Desc = "Welcome To Script Mahiru, By LangitDev",
     Color = "Green",
@@ -667,7 +666,7 @@ InfooSection:AddParagraph({
     ImageSize = 30,
 })
 
-InfooSection:AddButton({
+Tabs.Info:AddButton({
     Name = "Need Help?",
     Desc = "Click This To Copy Discord Link.\nJoin to <font color=\"#FF90E3\">Discord Mahiru</font>!",
     Callback = function()
@@ -733,12 +732,12 @@ local function ServerHop()
     end
 end
 
-InfooSection:AddButton({
+Tabs.Info:AddButton({
     Name = "Rejoin Server",
     Callback = RejoinServer
 })
 
-InfooSection:AddButton({
+Tabs.Info:AddButton({
     Name = "Server Hop",
     Desc = "Join a new server",
     Callback = ServerHop
