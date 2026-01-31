@@ -743,7 +743,7 @@ Tabs.Info:AddButton({
     Callback = ServerHop
 })
 
-local InterfaceSection = Tabs.Player:AddSection({Name = "User Interface"})
+local InterfaceSection = Tabs.Player:AddSection({"User Interface"})
 local ThemeToggle = InterfaceSection:AddToggle({
     Name = "Change Theme",
     Desc = "Dark = OFF | Light = ON",
@@ -757,7 +757,7 @@ local ThemeToggle = InterfaceSection:AddToggle({
     end,
 })
 
-local PfpsSection = Tabs.Player:AddSection({Name = "Tools Fps Booster"})
+local PfpsSection = Tabs.Player:AddSection({"Tools Fps Booster"})
 
 local StatsGui
 
@@ -788,7 +788,7 @@ local FPSBoostToggle = PfpsSection:AddToggle({
     end
 })
 
-local MovementSection = Tabs.Player:AddSection({Name = "Movement"})
+local MovementSection = Tabs.Player:AddSection({"Movement"})
 local WalkSpeedSlider = MovementSection:AddSlider({
     Name = "WalkSpeed",
     Step = 1,
@@ -915,7 +915,7 @@ local FlyToggle = MovementSection:AddToggle({
     end,
 })
 
-local ModesSection = Tabs.Player:AddSection({Name = "Modes"})
+local ModesSection = Tabs.Player:AddSection({"Modes"})
 
 local NoAnimationToggle = ModesSection:AddToggle({
     Name = "No Animations",
@@ -1091,7 +1091,7 @@ local MaxZoomToggle = ModesSection:AddToggle({
     end,
 })
 
-local BoostSection = Tabs.Player:AddSection({Name = "Boost Player"})
+local BoostSection = Tabs.Player:AddSection({"Boost Player"})
 
 local DisableVFXToggle = BoostSection:AddToggle({
     Name = "Disable VFX",
@@ -1144,7 +1144,7 @@ local DisableFishNotificationToggle = BoostSection:AddToggle({
 })
 
 
-local RenderSection = Tabs.Player:AddSection({Name = "Rendering"})
+local RenderSection = Tabs.Player:AddSection({"Rendering"})
 
 RenderSection:AddToggle({
     Name = "Reduce Map",
@@ -1258,7 +1258,7 @@ local ESPToggle = RenderSection:AddToggle({
     end,
 })
 
-local HideIdentSection = Tabs.Player:AddSection({Name = "Identity"})
+local HideIdentSection = Tabs.Player:AddSection({"Identity"})
 
 local function SetupIdentity()
     local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
@@ -1393,7 +1393,7 @@ HideIdentSection:AddButton({
 
 SetupIdentity()
 
-local FishingSection = Tabs.Fishing:AddSection({Name = "Auto Fishing"})
+local FishingSection = Tabs.Fishing:AddSection({"Auto Fishing"})
 
 local LegitDelayInput = FishingSection:AddInput({
     Name = "Legit Delay",
@@ -1460,7 +1460,7 @@ local AutoShakeToggle = FishingSection:AddToggle({
 })
 
 
-Tabs.Fishing:AddSection({Name = "Instant Fishing"})
+Tabs.Fishing:AddSection({"Instant Fishing"})
 
 Tabs.Fishing:AddParagraph({
     Name = "Instant Fishing Settings",
@@ -1523,7 +1523,7 @@ Tabs.Fishing:AddToggle({
     end,
 })
 
-Tabs.Fishing:AddSection({Name = "Blatant V1"})
+Tabs.Fishing:AddSection({"Blatant V1"})
 
 local BlatantReelInput = Tabs.Fishing:AddInput({
     Name = "Delay Reel",
@@ -1573,7 +1573,7 @@ Tabs.Fishing:AddButton({
     end,
 })
 
-Tabs.Fishing:AddSection({Name = "Blatant V2"})
+Tabs.Fishing:AddSection({"Blatant V2"})
 
 local BlatantBaitInput = Tabs.Fishing:AddInput({
     Name = "Bait Delay",
@@ -1615,7 +1615,7 @@ local BlatantFishingV2Toggle = Tabs.Fishing:AddToggle({
     end,
 })
 
-Tabs.Fishing:AddSection({Name = "Blatant V3"})
+Tabs.Fishing:AddSection({"Blatant V3"})
 
 local BlatantcancelInput = Tabs.Fishing:AddInput({
     Name = "Cancel Delay",
@@ -1656,7 +1656,7 @@ local BlatantFishingV3Toggle = Tabs.Fishing:AddToggle({
     end,
 })
 
-local SellSection = Tabs.Automatic:AddSection({Name = "Auto Sell"})
+local SellSection = Tabs.Automatic:AddSection({"Auto Sell"})
 
 SellSection:AddDropdown({
     Name = "Select Sell Mode",
@@ -1693,7 +1693,7 @@ SellSection:AddToggle({
     end,
 })
 
-local WeatherSection = Tabs.Automatic:AddSection({Name = "Auto Buy Weather"})
+local WeatherSection = Tabs.Automatic:AddSection({"Auto Buy Weather"})
 
 local WeatherDropdown = WeatherSection:AddDropdown({
     Name = "Select Weather",
@@ -1752,7 +1752,7 @@ local WeatherToggle = WeatherSection:AddToggle({
     end,
 })
 
-local EventSection = Tabs.Automatic:AddSection({Name = "Event Features"})
+local EventSection = Tabs.Automatic:AddSection({"Event Features"})
 
 local function GetActiveEvents()
     local events = {}
@@ -1874,7 +1874,7 @@ local EventToggle = EventSection:AddToggle({
     end,
 })
 
-local FavoriteSection = Tabs.Automatic:AddSection({Name = "Favorite Features"})
+local FavoriteSection = Tabs.Automatic:AddSection({"Favorite Features"})
 
 local FishNames = {}
 for _, fish in pairs(FishData) do
@@ -2011,7 +2011,7 @@ FavoriteSection:AddButton({
     end,
 })
 
-local SPSection = Tabs.Automatic:AddSection({Name = "Save Position Features"})
+local SPSection = Tabs.Automatic:AddSection({"Save Position Features"})
 
 SPSection:AddParagraph({
     Name = "Guide Teleport",
@@ -2094,7 +2094,7 @@ if LocalPlayer.Character then
     TeleportToLastPosition()
 end
 
-local EnchantSection = Tabs.Automatic:AddSection({Name = "Enchant Features"})
+local EnchantSection = Tabs.Automatic:AddSection({"Enchant Features"})
 
 local EnchantStatus = EnchantSection:AddParagraph({
     Name = "Enchant Status",
@@ -2268,7 +2268,7 @@ EnchantSection:AddButton({
     end,
 })
 
-Tabs.Webhook:AddSection({Name = "Webhook Fish Caught"})
+Tabs.Webhook:AddSection({"Webhook Fish Caught"})
 
 local WebhookURLInput = Tabs.Webhook:AddInput({
     Name = "Webhook URL",
@@ -2381,7 +2381,7 @@ Tabs.Webhook:AddButton({
     end,
 })
 
-local SisyphusSection = Tabs.Quest:AddSection({Name = "Sisyphus State Quest"})
+local SisyphusSection = Tabs.Quest:AddSection({"Sisyphus State Quest"})
 
 local DeepSeaPanel = SisyphusSection:AddParagraph({
     Name = "Deep Sea Panel",
@@ -2460,7 +2460,7 @@ SisyphusSection:AddButton({
     end,
 })
 
-local ElementSection = Tabs.Quest:AddSection({Name = "Element Quest"})
+local ElementSection = Tabs.Quest:AddSection({"Element Quest"})
 
 local ElementPanel = ElementSection:AddParagraph({
     Name = "Element Panel",
@@ -2531,7 +2531,7 @@ task.spawn(function()
     end
 end)
 
-local ServerUtilitySection = Tabs.Utilities:AddSection({Name = "Server Utility"})
+local ServerUtilitySection = Tabs.Utilities:AddSection({"Server Utility"})
 
 local AntiStaffToggle = ServerUtilitySection:AddToggle({
     Name = "Anti Staff",
@@ -2646,7 +2646,7 @@ local DivingGearToggle = Tabs.Utilities:AddToggle({
     end,
 })
 
-local MerchantShopSection = Tabs.Shop:AddSection({Name = "Merchant Shop"})
+local MerchantShopSection = Tabs.Shop:AddSection({"Merchant Shop"})
 
 local MerchantPanel = MerchantShopSection:AddParagraph({
     Name = "MERCHANT STOCK PANEL",
@@ -2710,7 +2710,7 @@ MerchantShopSection:AddButton({
     end,
 })
 
-local RodSection = Tabs.Shop:AddSection({Name = "Purchase Rod"})
+local RodSection = Tabs.Shop:AddSection({"Purchase Rod"})
 
 local Rods = {
     ["Chrome Rod (43.7K)"] = {Id = 7, Price = 43700},
@@ -2790,7 +2790,7 @@ RodSection:AddButton({
     end,
 })
 
-local BaitSection = Tabs.Shop:AddSection({Name = "Purchase Bait"})
+local BaitSection = Tabs.Shop:AddSection({"Purchase Bait"})
 
 local Baits = {
     ["Starter Bait (0)"] = {Id = 1, Price = 0},
@@ -2868,7 +2868,7 @@ BaitSection:AddButton({
     end,
 })
 
-local BoatSection = Tabs.Shop:AddSection({Name = "Purchase Boat"})
+local BoatSection = Tabs.Shop:AddSection({"Purchase Boat"})
 
 local Boats = {
     ["Small Boat (300)"] = {Id = 1, Price = 300},
@@ -2923,7 +2923,7 @@ BoatSection:AddButton({
     end,
 })
 
-local LocationSection = Tabs.Teleport:AddSection({Name = "Location"})
+local LocationSection = Tabs.Teleport:AddSection({"Location"})
 
 local Locations = {
     "Ancient Jungle",
@@ -3018,7 +3018,7 @@ LocationSection:AddButton({
     end,
 })
 
-local PlayerSection = Tabs.Teleport:AddSection({Name = "Player"})
+local PlayerSection = Tabs.Teleport:AddSection({"Player"})
 
 local function GetPlayerList()
     local players = {}
