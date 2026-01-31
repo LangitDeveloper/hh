@@ -712,14 +712,6 @@ Tabs.Teleport = MainWindow:AddTab({Name = "Teleport", Icon = "map"})
 
 local Info = Tabs.Info:AddSection("Info Support")
 
-Info:AddParagraph({
-    Name = "Mahiru Alert!",
-    Description = "Welcome To Script Mahiru, By LangitDev",
-    Color = "Green",
-    Image = "rbxassetid://12633176980",
-    ImageSize = 30,
-})
-
 Info:AddButton({
     Name = "Need Help?",
     Description = "Click This To Copy Discord Link.\nJoin to <font color=\"#FF90E3\">Discord Mahiru</font>!",
