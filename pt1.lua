@@ -667,7 +667,7 @@ local Info = Tabs.Info:AddSection("Info Support")
 
 Info:AddParagraph({
     Name = "Mahiru Alert!",
-    Desc = "Welcome To Script Mahiru, By LangitDev",
+    Description = "Welcome To Script Mahiru, By LangitDev",
     Color = "Green",
     Image = "rbxassetid://12633176980",
     ImageSize = 30,
@@ -675,7 +675,7 @@ Info:AddParagraph({
 
 Info:AddButton({
     Name = "Need Help?",
-    Desc = "Click This To Copy Discord Link.\nJoin to <font color=\"#FF90E3\">Discord Mahiru</font>!",
+    Description = "Click This To Copy Discord Link.\nJoin to <font color=\"#FF90E3\">Discord Mahiru</font>!",
     Callback = function()
         if setclipboard then
             setclipboard("discord.gg/mahiruscript")
@@ -731,14 +731,14 @@ Info:AddButton({
 
 Info:AddButton({
     Name = "Server Hop",
-    Desc = "Join a new server",
+    Description = "Join a new server",
     Callback = ServerHop
 })
 
 local InterfaceSection = Tabs.Player:AddSection({"User Interface"})
 local ThemeToggle = InterfaceSection:AddToggle({
     Name = "Change Theme",
-    Desc = "Dark = OFF | Light = ON",
+    Description = "Dark = OFF | Light = ON",
     Value = false,
     Callback = function(value)
         if value then
@@ -956,7 +956,7 @@ local NoAnimationToggle = ModesSection:AddToggle({
 
 ModesSection:AddToggle({
     Name = "Hide Rod On Hand",
-    Desc = "This feature makes rod invisible! and hides other player's rods too",
+    Description = "This feature makes rod invisible! and hides other player's rods too",
     Value = false,
     Callback = function(value)
         IsHideRod = value
@@ -1044,7 +1044,7 @@ local WalkOnWaterToggle = ModesSection:AddToggle({
 
 local MaxZoomToggle = ModesSection:AddToggle({
     Name = "Max Zoom 1000",
-    Desc = "Increase max camera distance",
+    Description = "Increase max camera distance",
     Value = false,
     Callback = function(value)
         if value then
@@ -1120,7 +1120,7 @@ local RenderSection = Tabs.Player:AddSection({"Rendering"})
 
 RenderSection:AddToggle({
     Name = "Reduce Map",
-    Desc = "Don't turn this on with Disable 3D Render",
+    Description = "Don't turn this on with Disable 3D Render",
     Value = false,
     Callback = function(value)
         if value then
@@ -1369,7 +1369,7 @@ local FishingSection = Tabs.Fishing:AddSection({"Auto Fishing"})
 
 local LegitDelayInput = FishingSection:AddInput({
     Name = "Legit Delay",
-    Desc = "Delay complete fishing!",
+    Description = "Delay complete fishing!",
     Value = "",
     Placeholder = "Default: 0.2",
     Callback = function(value)
@@ -1409,7 +1409,7 @@ local LegitFishingToggle = FishingSection:AddToggle({
 
 local AutoShakeToggle = FishingSection:AddToggle({
     Name = "Auto Shake",
-    Desc = "Spam click during fishing (only legit)",
+    Description = "Spam click during fishing (only legit)",
     Value = false,
     Callback = function(value)
         IsAutoShake = value
@@ -1436,7 +1436,7 @@ Tabs.Fishing:AddSection({"Instant Fishing"})
 
 Tabs.Fishing:AddParagraph({
     Name = "Instant Fishing Settings",
-    Desc = "For instant fishing, you must first set the completion delay. The default is 0.1.",
+    Description = "For instant fishing, you must first set the completion delay. The default is 0.1.",
     Color = "Green",
     Image = "rbxassetid://103247953194129",
     ImageSize = 30,
@@ -1456,7 +1456,7 @@ local InstantDelayInput = Tabs.Fishing:AddInput({
 
 local InstantFishingToggle = Tabs.Fishing:AddToggle({
     Name = "Instant Fishing",
-    Desc = "Auto instantly catch fish",
+    Description = "Auto instantly catch fish",
     Value = false,
     Callback = function(value)
         if value then
@@ -1470,7 +1470,7 @@ local InstantFishingToggle = Tabs.Fishing:AddToggle({
 
 Tabs.Fishing:AddToggle({
     Name = "Talon Fishing",
-    Desc = "Auto In Game Fishing + Auto Shake",
+    Description = "Auto In Game Fishing + Auto Shake",
     Value = false,
     Callback = function(value)
         IsAutoShake = value
@@ -1499,7 +1499,7 @@ Tabs.Fishing:AddSection({"Blatant V1"})
 
 local BlatantReelInput = Tabs.Fishing:AddInput({
     Name = "Delay Reel",
-    Desc = "Reel Timing (e.g. 1.9)",
+    Description = "Reel Timing (e.g. 1.9)",
     Value = "",
     Placeholder = "Default: 1.9",
     Callback = function(value)
@@ -1512,7 +1512,7 @@ local BlatantReelInput = Tabs.Fishing:AddInput({
 
 local BlatantFishInput = Tabs.Fishing:AddInput({
     Name = "Delay Fishing",
-    Desc = "Fishing Timing (e.g. 1.1)",
+    Description = "Fishing Timing (e.g. 1.1)",
     Value = "",
     Placeholder = "Default: 1.1",
     Callback = function(value)
@@ -1549,7 +1549,7 @@ Tabs.Fishing:AddSection({"Blatant V2"})
 
 local BlatantBaitInput = Tabs.Fishing:AddInput({
     Name = "Bait Delay",
-    Desc = "Delay sebelum charge (e.g. 0.05 = ultra fast)",
+    Description = "Delay sebelum charge (e.g. 0.05 = ultra fast)",
     Value = "0.3",
     Placeholder = "0.3",
     Callback = function(value)
@@ -1563,7 +1563,7 @@ local BlatantBaitInput = Tabs.Fishing:AddInput({
 
 local BlatantCastInput = Tabs.Fishing:AddInput({
     Name = "Cast Delay", 
-    Desc = "Delay sebelum minigame (e.g. 0.1 = instant)",
+    Description = "Delay sebelum minigame (e.g. 0.1 = instant)",
     Value = "0.70",
     Placeholder = "0.70",
     Callback = function(value)
@@ -1591,7 +1591,7 @@ Tabs.Fishing:AddSection({"Blatant V3"})
 
 local BlatantcancelInput = Tabs.Fishing:AddInput({
     Name = "Cancel Delay",
-    Desc = "Delay sebelum charge (e.g. 0.05 = ultra fast)",
+    Description = "Delay sebelum charge (e.g. 0.05 = ultra fast)",
     Value = "0.3",
     Placeholder = "0.3",
     Callback = function(value)
@@ -1604,7 +1604,7 @@ local BlatantcancelInput = Tabs.Fishing:AddInput({
 
 local BlatantCompleteInput = Tabs.Fishing:AddInput({
     Name = "Complete Delay", 
-    Desc = "Delay sebelum minigame (e.g. 0.1 = instant)",
+    Description = "Delay sebelum minigame (e.g. 0.1 = instant)",
     Value = "0.70",
     Placeholder = "0.70",
     Callback = function(value)
@@ -1641,7 +1641,7 @@ SellSection:AddDropdown({
 
 SellSection:AddInput({
     Name = "Sell Value",
-    Desc = "Delay = Minute | Count = Fish Count",
+    Description = "Delay = Minute | Count = Fish Count",
     Value = "60",
     Callback = function(value)
         local num = tonumber(value) or 1
@@ -1669,7 +1669,7 @@ local WeatherSection = Tabs.Automatic:AddSection({"Auto Buy Weather"})
 
 local WeatherDropdown = WeatherSection:AddDropdown({
     Name = "Select Weather",
-    Desc = "",
+    Description = "",
     Values = {
         "Cloudy ($10,000)",
         "Wind ($10,000)",
@@ -1856,7 +1856,7 @@ table.sort(FishNames)
 
 local NameDropdown = FavoriteSection:AddDropdown({
     Name = "Name",
-    Desc = "Favorite By Name Fish (Recommended)",
+    Description = "Favorite By Name Fish (Recommended)",
     Values = #FishNames > 0 and FishNames or {"No Fish Found"},
     Multi = true,
     AllowNone = true,
@@ -1879,7 +1879,7 @@ FavoriteSection:AddButton({
 
 FavoriteSection:AddDropdown({
     Name = "Rarity",
-    Desc = "Favorite By Rarity (Optional)",
+    Description = "Favorite By Rarity (Optional)",
     Values = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic", "Secret"},
     Multi = true,
     AllowNone = true,
@@ -1895,7 +1895,7 @@ FavoriteSection:AddDropdown({
 
 FavoriteSection:AddDropdown({
     Name = "Variant",
-    Desc = "Favorite By Variant (Only works with Name)",
+    Description = "Favorite By Variant (Only works with Name)",
     Values = {"Galaxy", "Corrupt", "Gemstone", "Ghost", "Lightning", "Fairy Dust", "Gold", "Midnight", "Radioactive", "Stone", "Holographic", "Albino", "Bloodmoon", "Sandy", "Acidic", "Color Burn", "Festive", "Frozen"},
     Multi = true,
     AllowNone = true,
@@ -1987,7 +1987,7 @@ local SPSection = Tabs.Automatic:AddSection({"Save Position Features"})
 
 SPSection:AddParagraph({
     Name = "Guide Teleport",
-    Desc = [[
+    Description = [[
 <b><font color="rgb(0,162,255)">AUTO TELEPORT?</font></b>
 Click <b><font color="rgb(0,162,255)">Save Position</font></b> to save your current position!
 
@@ -2070,7 +2070,7 @@ local EnchantSection = Tabs.Automatic:AddSection({"Enchant Features"})
 
 local EnchantStatus = EnchantSection:AddParagraph({
     Name = "Enchant Status",
-    Desc = "Current Rod : None\nCurrent Enchant : None\nEnchant Stones Left : 0",
+    Description = "Current Rod : None\nCurrent Enchant : None\nEnchant Stones Left : 0",
 })
 
 local function GetEnchantInfo(stoneId)
@@ -2179,7 +2179,7 @@ EnchantSection:Divider()
 
 EnchantSection:AddButton({
     Name = "Click Double Enchant",
-    Desc = "Starting Double Enchanting",
+    Description = "Starting Double Enchanting",
     Callback = function()
         task.spawn(function()
             local rodName, enchantName, stoneCount, stoneUUIDs = GetEnchantInfo(246)
@@ -2357,7 +2357,7 @@ local SisyphusSection = Tabs.Quest:AddSection({"Sisyphus State Quest"})
 
 local DeepSeaPanel = SisyphusSection:AddParagraph({
     Name = "Deep Sea Panel",
-    Desc = "Loading...",
+    Description = "Loading...",
 })
 
 local function GetQuestInfo(questName)
@@ -2396,7 +2396,7 @@ end
 
 SisyphusSection:AddToggle({
     Name = "Auto Deep Sea Quest",
-    Desc = "Automatically complete Deep Sea Quest!",
+    Description = "Automatically complete Deep Sea Quest!",
     Value = false,
     Callback = function(value)
         IsAutoDeepSeaQuest = value
@@ -2436,12 +2436,12 @@ local ElementSection = Tabs.Quest:AddSection({"Element Quest"})
 
 local ElementPanel = ElementSection:AddParagraph({
     Name = "Element Panel",
-    Desc = "Loading...",
+    Description = "Loading...",
 })
 
 ElementSection:AddToggle({
     Name = "Auto Element Quest",
-    Desc = "Automatically teleport through Element Quest Stages!",
+    Description = "Automatically teleport through Element Quest Stages!",
     Value = false,
     Callback = function(value)
         IsAutoElementQuest = value
@@ -2507,7 +2507,7 @@ local ServerUtilitySection = Tabs.Utilities:AddSection({"Server Utility"})
 
 local AntiStaffToggle = ServerUtilitySection:AddToggle({
     Name = "Anti Staff",
-    Desc = "Auto kick if staff/developer joins the server",
+    Description = "Auto kick if staff/developer joins the server",
     Value = false,
     Callback = function(value)
         if value then
@@ -2549,7 +2549,7 @@ local AntiStaffToggle = ServerUtilitySection:AddToggle({
 
 local StreamerModeToggle = ServerUtilitySection:AddToggle({
     Name = "Streamer Mode",
-    Desc = "This will hide the location, character, and coins.",
+    Description = "This will hide the location, character, and coins.",
     Value = false,
     Callback = function(value)
         local eventsFrame = PlayerGui.Events.Frame
@@ -2622,7 +2622,7 @@ local MerchantShopSection = Tabs.Shop:AddSection({"Merchant Shop"})
 
 local MerchantPanel = MerchantShopSection:AddParagraph({
     Name = "MERCHANT STOCK PANEL",
-    Desc = "Loading...",
+    Description = "Loading...",
 })
 
 local function UpdateMerchantInfo()
