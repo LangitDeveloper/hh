@@ -632,6 +632,22 @@ LocalPlayer.Idled:Connect(function()
 end)
 
 local MahiruUi = loadstring(game:HttpGet("https://raw.githubusercontent.com/LangitDeveloper/hh/main/mahiruui.lua"))()
+local Window = MahiruUi:CreateWindow({
+    Title = "Mahiru",
+    Icon = "rbxassetid://78018573702743",
+    Author = "LangitDev",
+    Folder = "Mahiru",
+    Size = UDim2.fromOffset(380, 260),
+    MinSize = Vector2.new(560, 350),
+    MaxSize = Vector2.new(850, 560),
+    Transparent = true,
+    Theme = "Dark",
+    Resizable = true,
+    SideBarWidth = 200,
+    BackgroundImageTransparency = 0.42,
+    HideSearchBar = true,
+    ScrollBarEnabled = false,
+})
 
 local ConfigManager = Window.ConfigManager:CreateConfig("mahiruconfig")
 
