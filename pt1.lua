@@ -651,7 +651,54 @@ local WindowConfig = {
 local MainWindow = MahiruUi:Window(WindowConfig)
 if MainWindow then
 end
+local function CreateToggleButton()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Parent = game:GetService("CoreGui")
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    screenGui.Name = "ToggleUIButton"
+    
+    local button = Instance.new("ImageButton")
+    button.Parent = screenGui
+    button.Size = UDim2.new(0, 40, 0, 40)
+    button.Position = UDim2.new(0, 20, 0, 100)
+    button.BackgroundTransparency = 1
+    button.Image = "rbxassetid://91069103989932"
+    button.ScaleType = Enum.ScaleType.Fit
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 6)
+    corner.Parent = button
+     
+    button.MouseButton1Click:Connect(function()
+        Window:Toggle()
+    end)
+    
+    local dragging = false
+    local dragStart, startPos
+    
+    button.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = button.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            button.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+end
 
+CreateToggleButton()
 local Tabs = {}
 Tabs.Info = MainWindow:AddTab({Name = "Info", Icon = "info"})
 Tabs.Player = MainWindow:AddTab({Name = "Player", Icon = "users"})
