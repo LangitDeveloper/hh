@@ -151,6 +151,12 @@ local SelectedLocation = nil
 local SelectedPlayer = nil
 local PlayerList = {}
 
+local function mahiru(message)
+    print("[Mahiru] " .. tostring(message))
+    if MainWindow and MainWindow.Notify then
+       MainWindow:Notify(message)
+    end
+end
 
 local function CreatePingFPSGui()
     local gui = Instance.new("ScreenGui")
@@ -657,8 +663,9 @@ Tabs.Utilities = MainWindow:AddTab({Name = "Utilities", Icon = "box"})
 Tabs.Shop = MainWindow:AddTab({Name = "Shop", Icon = "shopping-cart"})
 Tabs.Teleport = MainWindow:AddTab({Name = "Teleport", Icon = "map"})
 
+local Info = Tabs.Info:AddSection("Info Support")
 
-Tabs.Info:AddParagraph({
+Info:AddParagraph({
     Name = "Mahiru Alert!",
     Desc = "Welcome To Script Mahiru, By LangitDev",
     Color = "Green",
@@ -666,7 +673,7 @@ Tabs.Info:AddParagraph({
     ImageSize = 30,
 })
 
-Tabs.Info:AddButton({
+Info:AddButton({
     Name = "Need Help?",
     Desc = "Click This To Copy Discord Link.\nJoin to <font color=\"#FF90E3\">Discord Mahiru</font>!",
     Callback = function()
@@ -732,12 +739,12 @@ local function ServerHop()
     end
 end
 
-Tabs.Info:AddButton({
+Info:AddButton({
     Name = "Rejoin Server",
     Callback = RejoinServer
 })
 
-Tabs.Info:AddButton({
+Info:AddButton({
     Name = "Server Hop",
     Desc = "Join a new server",
     Callback = ServerHop
