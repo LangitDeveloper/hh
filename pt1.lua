@@ -679,19 +679,9 @@ Info:AddButton({
     Callback = function()
         if setclipboard then
             setclipboard("discord.gg/mahiruscript")
-            MainWindow:Notify({
-                Name = "Success",
-                Content = "Discord link copied to clipboard!",
-                Duration = 3,
-                Icon = "laptop-minimal-check",
-            })
+            mahiru("succes")
         else
-            MainWindow:Notify({
-                Name = "Error",
-                Content = "Executor doesn't support clipboard!",
-                Duration = 3,
-                Icon = "circle-x",
-            })
+            mahiru("error")
         end
     end,
 })
@@ -730,12 +720,7 @@ local function ServerHop()
     if #servers > 0 then
         TeleportService:TeleportToPlaceInstance(placeId, servers[math.random(1, #servers)], LocalPlayer)
     else
-        MainWindow:Notify({
-            Name = "Error",
-            Content = "No servers available or all are full",
-            Duration = 2.5,
-            Icon = "circle-x",
-        })
+        mahiru("error")
     end
 end
 
@@ -826,12 +811,7 @@ MovementSection:AddButton({
             LocalPlayer.Character.Humanoid.JumpPower = 50
             WalkSpeedSlider:Set(16)
             JumpPowerSlider:Set(50)
-            MainWindow:Notify({
-                Name = "Success",
-                Content = "Speed and jump reset successfully",
-                Duration = 2.5,
-                Icon = "laptop-minimal-check",
-            })
+            mahiru("succes")
         end
     end,
 })
@@ -955,12 +935,7 @@ local NoAnimationToggle = ModesSection:AddToggle({
                 end
             end
             
-            MainWindow:Notify({
-                Name = "No Animation",
-                Content = "Animations disabled",
-                Duration = 2,
-                Icon = "square-slash",
-            })
+            mahiru("no animation off")
         else
             if NoAnimationConnection then
                 NoAnimationConnection:Disconnect()
@@ -974,12 +949,7 @@ local NoAnimationToggle = ModesSection:AddToggle({
                 end
             end
             
-            MainWindow:Notify({
-                Name = "No Animation",
-                Content = "Animations enabled",
-                Duration = 2,
-                Icon = "square-play",
-            })
+            mahiru("no animasi on")
         end
     end,
 })
@@ -1028,12 +998,7 @@ local NoClipToggle = ModesSection:AddToggle({
     Callback = function(value)
         IsNoClip = value
         if value then
-            MainWindow:Notify({
-                Name = "Success",
-                Content = "Noclip enabled",
-                Duration = 2.5,
-                Icon = "laptop-minimal-check",
-            })
+            mahiru("succes")
         end
     end,
 })
