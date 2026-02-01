@@ -151,6 +151,194 @@ local SelectedLocation = nil
 local SelectedPlayer = nil
 local PlayerList = {}
 
+local DebugData = {
+    LastRemotes = {},
+    RemoteLogs = {},
+    FishingStates = {},
+    Performance = {},
+    EventLogs = {}
+}
+
+local DebugPanels = {}
+
+local OriginalRemotes = {}
+local RemoteConnections = {}
+
+function StartRemoteMonitoring()
+    print("[DEBUG] Starting remote monitoring...")
+    
+    for name, remote in pairs(Remotes) do
+        if remote and not OriginalRemotes[name] then
+            if remote:IsA("RemoteEvent") then
+                OriginalRemotes[name] = remote.FireServer
+                remote.FireServer = function(self, ...)
+                    local args = {...}
+                    LogRemoteCall(name, "FireServer", args, "RE")
+                    return OriginalRemotes[name](self, ...)
+                end
+                
+            elseif remote:IsA("RemoteFunction") then
+                
+                if remote.OnClientInvoke then
+                    OriginalRemotes[name] = remote.OnClientInvoke
+                    remote.OnClientInvoke = function(...)
+                        local args = {...}
+                        LogRemoteCall(name, "OnClientInvoke", args, "RF")
+                        return OriginalRemotes[name](...)
+                    end
+                end
+                
+            
+                OriginalRemotes[name .. "_Invoke"] = remote.InvokeServer
+                remote.InvokeServer = function(self, ...)
+                    local args = {...}
+                    LogRemoteCall(name, "InvokeServer", args, "RF")
+                    return OriginalRemotes[name .. "_Invoke"](self, ...)
+                end
+            end
+        end
+    end
+    
+    
+    HookNetDirectory()
+    
+    MahiruUi:Notify({
+        Title = "Debug",
+        Content = "Remote monitoring started!",
+        Duration = 2,
+        Icon = "radio"
+    })
+end
+
+function StopRemoteMonitoring()
+    print("[DEBUG] Stopping remote monitoring...")
+    
+    for name, originalFunc in pairs(OriginalRemotes) do
+        local remote = Remotes[name]
+        if remote then
+            if string.find(name, "_Invoke") then
+                local actualName = name:gsub("_Invoke", "")
+                if Remotes[actualName] then
+                    Remotes[actualName].InvokeServer = originalFunc
+                end
+            else
+                if remote:IsA("RemoteEvent") then
+                    remote.FireServer = originalFunc
+                elseif remote:IsA("RemoteFunction") and remote.OnClientInvoke then
+                    remote.OnClientInvoke = originalFunc
+                end
+            end
+        end
+    end
+    
+    OriginalRemotes = {}
+    
+    for _, conn in pairs(RemoteConnections) do
+        conn:Disconnect()
+    end
+    RemoteConnections = {}
+    
+    MahiruUi:Notify({
+        Title = "Debug",
+        Content = "Remote monitoring stopped!",
+        Duration = 2,
+        Icon = "radio-tower"
+    })
+end
+
+function HookNetDirectory()
+    local function HookAllInFolder(folder, prefix)
+        for _, item in ipairs(folder:GetChildren()) do
+            if item:IsA("RemoteEvent") or item:IsA("RemoteFunction") then
+                local fullName = prefix .. item.Name
+                
+                if not DebugData.HookedRemotes[fullName] then
+                    DebugData.HookedRemotes[fullName] = true
+                    
+                    if item:IsA("RemoteEvent") then
+                        local original = item.FireServer
+                        item.FireServer = function(self, ...)
+                            local args = {...}
+                            LogRemoteCall(fullName, "FireServer", args, "RE")
+                            return original(self, ...)
+                        end
+                    elseif item:IsA("RemoteFunction") then
+                        local original = item.InvokeServer
+                        item.InvokeServer = function(self, ...)
+                            local args = {...}
+                            LogRemoteCall(fullName, "InvokeServer", args, "RF")
+                            return original(self, ...)
+                        end
+                    end
+                end
+            elseif #item:GetChildren() > 0 then
+                HookAllInFolder(item, prefix .. item.Name .. "/")
+            end
+        end
+    end
+    
+    DebugData.HookedRemotes = {}
+    HookAllInFolder(Net, "Net/")
+end
+
+function LogRemoteCall(name, method, args, type)
+    local timestamp = os.date("%H:%M:%S")
+    local argStr = ""
+    
+    if args and #args > 0 then
+        for i, arg in ipairs(args) do
+            if type(arg) == "table" then
+                argStr = argStr .. string.format("{table:%d} ", i)
+            elseif type(arg) == "number" then
+                argStr = argStr .. string.format("%.2f ", arg)
+            elseif type(arg) == "string" then
+                if #arg > 20 then
+                    argStr = argStr .. string.format("\"%s...\" ", arg:sub(1, 20))
+                else
+                    argStr = argStr .. string.format("\"%s\" ", arg)
+                end
+            else
+                argStr = argStr .. tostring(arg) .. " "
+            end
+        end
+    else
+        argStr = "No args"
+    end
+    
+    local logEntry = string.format("[%s] %s.%s(%s)", timestamp, name, method, argStr)
+    
+   
+    table.insert(DebugData.RemoteLogs, 1, logEntry)
+    if #DebugData.RemoteLogs > 50 then
+        table.remove(DebugData.RemoteLogs, 51)
+    end
+    
+  
+    if RemoteMonitorToggle.Value then
+        UpdateRemoteLogDisplay()
+    end
+end
+
+function UpdateRemoteLogDisplay()
+    local filter = DebugData.RemoteFilter or "All"
+    local displayLogs = {}
+    
+    for _, log in ipairs(DebugData.RemoteLogs) do
+        if filter == "All" or 
+           (filter == "RE" and string.find(log, "%.FireServer%(")) or
+           (filter == "RF" and string.find(log, "%.InvokeServer%(")) then
+            table.insert(displayLogs, log)
+        end
+        if #displayLogs >= 10 then break end
+    end
+    
+    if #displayLogs > 0 then
+        RemoteLogPanel:SetDesc(table.concat(displayLogs, "\n"))
+    else
+        RemoteLogPanel:SetDesc("No remote activity...")
+    end
+end
+
 
 local function CreatePingFPSGui()
     local gui = Instance.new("ScreenGui")
@@ -492,7 +680,7 @@ function StartBlatantFishing()
                     Remotes.RF_Minigame:InvokeServer(-1, 0.999)
                 end)
                 
-                task.wait(BlatantFishingDelay)
+                task.wait(V3_CompleteDelay)
                 pcall(function()
                     Remotes.RE_Fishing:FireServer()
                 end)
@@ -704,6 +892,7 @@ Window:SetToggleKey(Enum.KeyCode.F3)
 Window:IsResizable(true)
 
 local InfoTab = Window:Tab({Title = "Info", Icon = "info"})
+local DebugTab = Window:Tab({Title = "Debug", Icon = "Info"})
 local PlayerTab = Window:Tab({Title = "Player", Icon = "users"})
 local FishingTab = Window:Tab({Title = "Fishing", Icon = "rbxassetid://103247953194129"})
 local AutomaticTab = Window:Tab({Title = "Automatic", Icon = "rbxassetid://12662718374"})
@@ -978,31 +1167,10 @@ local FlyToggle = MovementSection:Toggle({
     end,
 })
 
--- Tambahkan ini setelah deklarasi semua variable dan sebelum pembuatan Window
 
--- ===============================
--- DEBUG & MONITORING SYSTEM
--- ===============================
-local DebugTab = Window:Tab({Title = "🛠️ Debug", Icon = "bug"})
 
--- Data storage untuk monitoring
-local DebugData = {
-    LastRemotes = {},
-    RemoteLogs = {},
-    FishingStates = {},
-    Performance = {},
-    EventLogs = {}
-}
+local RemoteMonitorSection = DebugTab:Section({Title = "Remote Monitor"})
 
--- UI Elements untuk monitoring
-local DebugPanels = {}
-
--- ===============================
--- REMOTE MONITORING SECTION
--- ===============================
-local RemoteMonitorSection = DebugTab:Section({Title = "📡 Remote Monitor"})
-
--- Toggle untuk monitoring remote
 local RemoteMonitorToggle = RemoteMonitorSection:Toggle({
     Title = "Enable Remote Monitoring",
     Desc = "Monitor semua remote calls real-time",
@@ -1016,7 +1184,6 @@ local RemoteMonitorToggle = RemoteMonitorSection:Toggle({
     end
 })
 
--- Panel untuk menampilkan remote logs
 local RemoteLogPanel = RemoteMonitorSection:Paragraph({
     Title = "Remote Logs (Last 10)",
     Desc = "Waiting for activity...",
@@ -1024,7 +1191,6 @@ local RemoteLogPanel = RemoteMonitorSection:Paragraph({
 })
 DebugPanels.RemoteLog = RemoteLogPanel
 
--- Filter untuk remote types
 local RemoteFilter = RemoteMonitorSection:Dropdown({
     Title = "Filter Remote Type",
     Values = {"All", "RE (Events)", "RF (Functions)", "RS (Server)", "RC (Client)"},
@@ -1034,7 +1200,6 @@ local RemoteFilter = RemoteMonitorSection:Dropdown({
     end
 })
 
--- Clear logs button
 RemoteMonitorSection:Button({
     Title = "Clear Remote Logs",
     Callback = function()
@@ -1043,197 +1208,9 @@ RemoteMonitorSection:Button({
     end
 })
 
--- Remote hooking system
-local OriginalRemotes = {}
-local RemoteConnections = {}
 
-function StartRemoteMonitoring()
-    print("[DEBUG] Starting remote monitoring...")
-    
-    -- Hook semua remotes yang diketahui
-    for name, remote in pairs(Remotes) do
-        if remote and not OriginalRemotes[name] then
-            if remote:IsA("RemoteEvent") then
-                -- Hook RemoteEvent
-                OriginalRemotes[name] = remote.FireServer
-                remote.FireServer = function(self, ...)
-                    local args = {...}
-                    LogRemoteCall(name, "FireServer", args, "RE")
-                    return OriginalRemotes[name](self, ...)
-                end
-                
-            elseif remote:IsA("RemoteFunction") then
-                -- Hook RemoteFunction OnClientInvoke
-                if remote.OnClientInvoke then
-                    OriginalRemotes[name] = remote.OnClientInvoke
-                    remote.OnClientInvoke = function(...)
-                        local args = {...}
-                        LogRemoteCall(name, "OnClientInvoke", args, "RF")
-                        return OriginalRemotes[name](...)
-                    end
-                end
-                
-                -- Hook RemoteFunction InvokeServer
-                OriginalRemotes[name .. "_Invoke"] = remote.InvokeServer
-                remote.InvokeServer = function(self, ...)
-                    local args = {...}
-                    LogRemoteCall(name, "InvokeServer", args, "RF")
-                    return OriginalRemotes[name .. "_Invoke"](self, ...)
-                end
-            end
-        end
-    end
-    
-    -- Juga hook Net direktori
-    HookNetDirectory()
-    
-    MahiruUi:Notify({
-        Title = "Debug",
-        Content = "Remote monitoring started!",
-        Duration = 2,
-        Icon = "radio"
-    })
-end
+local FishingDebugSection = DebugTab:Section({Title = "Fishing Debug"})
 
-function StopRemoteMonitoring()
-    print("[DEBUG] Stopping remote monitoring...")
-    
-    -- Restore original functions
-    for name, originalFunc in pairs(OriginalRemotes) do
-        local remote = Remotes[name]
-        if remote then
-            if string.find(name, "_Invoke") then
-                local actualName = name:gsub("_Invoke", "")
-                if Remotes[actualName] then
-                    Remotes[actualName].InvokeServer = originalFunc
-                end
-            else
-                if remote:IsA("RemoteEvent") then
-                    remote.FireServer = originalFunc
-                elseif remote:IsA("RemoteFunction") and remote.OnClientInvoke then
-                    remote.OnClientInvoke = originalFunc
-                end
-            end
-        end
-    end
-    
-    OriginalRemotes = {}
-    
-    -- Disconnect connections
-    for _, conn in pairs(RemoteConnections) do
-        conn:Disconnect()
-    end
-    RemoteConnections = {}
-    
-    MahiruUi:Notify({
-        Title = "Debug",
-        Content = "Remote monitoring stopped!",
-        Duration = 2,
-        Icon = "radio-tower"
-    })
-end
-
-function HookNetDirectory()
-    -- Coba hook semua remote di Net directory
-    local function HookAllInFolder(folder, prefix)
-        for _, item in ipairs(folder:GetChildren()) do
-            if item:IsA("RemoteEvent") or item:IsA("RemoteFunction") then
-                local fullName = prefix .. item.Name
-                
-                if not DebugData.HookedRemotes[fullName] then
-                    DebugData.HookedRemotes[fullName] = true
-                    
-                    if item:IsA("RemoteEvent") then
-                        local original = item.FireServer
-                        item.FireServer = function(self, ...)
-                            local args = {...}
-                            LogRemoteCall(fullName, "FireServer", args, "RE")
-                            return original(self, ...)
-                        end
-                    elseif item:IsA("RemoteFunction") then
-                        local original = item.InvokeServer
-                        item.InvokeServer = function(self, ...)
-                            local args = {...}
-                            LogRemoteCall(fullName, "InvokeServer", args, "RF")
-                            return original(self, ...)
-                        end
-                    end
-                end
-            elseif #item:GetChildren() > 0 then
-                HookAllInFolder(item, prefix .. item.Name .. "/")
-            end
-        end
-    end
-    
-    DebugData.HookedRemotes = {}
-    HookAllInFolder(Net, "Net/")
-end
-
-function LogRemoteCall(name, method, args, type)
-    local timestamp = os.date("%H:%M:%S")
-    local argStr = ""
-    
-    -- Format arguments
-    if args and #args > 0 then
-        for i, arg in ipairs(args) do
-            if type(arg) == "table" then
-                argStr = argStr .. string.format("{table:%d} ", i)
-            elseif type(arg) == "number" then
-                argStr = argStr .. string.format("%.2f ", arg)
-            elseif type(arg) == "string" then
-                if #arg > 20 then
-                    argStr = argStr .. string.format("\"%s...\" ", arg:sub(1, 20))
-                else
-                    argStr = argStr .. string.format("\"%s\" ", arg)
-                end
-            else
-                argStr = argStr .. tostring(arg) .. " "
-            end
-        end
-    else
-        argStr = "No args"
-    end
-    
-    local logEntry = string.format("[%s] %s.%s(%s)", timestamp, name, method, argStr)
-    
-    -- Simpan log
-    table.insert(DebugData.RemoteLogs, 1, logEntry)
-    if #DebugData.RemoteLogs > 50 then
-        table.remove(DebugData.RemoteLogs, 51)
-    end
-    
-    -- Update UI jika sedang aktif
-    if RemoteMonitorToggle.Value then
-        UpdateRemoteLogDisplay()
-    end
-end
-
-function UpdateRemoteLogDisplay()
-    local filter = DebugData.RemoteFilter or "All"
-    local displayLogs = {}
-    
-    for _, log in ipairs(DebugData.RemoteLogs) do
-        if filter == "All" or 
-           (filter == "RE" and string.find(log, "%.FireServer%(")) or
-           (filter == "RF" and string.find(log, "%.InvokeServer%(")) then
-            table.insert(displayLogs, log)
-        end
-        if #displayLogs >= 10 then break end
-    end
-    
-    if #displayLogs > 0 then
-        RemoteLogPanel:SetDesc(table.concat(displayLogs, "\n"))
-    else
-        RemoteLogPanel:SetDesc("No remote activity...")
-    end
-end
-
--- ===============================
--- FISHING DEBUG SECTION
--- ===============================
-local FishingDebugSection = DebugTab:Section({Title = "🎣 Fishing Debug"})
-
--- Fishing state monitor
 local FishingStatePanel = FishingDebugSection:Paragraph({
     Title = "Fishing State",
     Desc = "Loading fishing state...",
@@ -1241,7 +1218,6 @@ local FishingStatePanel = FishingDebugSection:Paragraph({
 })
 DebugPanels.FishingState = FishingStatePanel
 
--- Auto update fishing state
 task.spawn(function()
     while task.wait(0.5) do
         if DebugTab.Visible then
@@ -1253,14 +1229,14 @@ end)
 function UpdateFishingState()
     local states = {}
     
-    -- Cek status fishing modes
+    
     table.insert(states, "=== FISHING MODES ===")
     table.insert(states, "Legit: " .. tostring(IsLegitFishing))
     table.insert(states, "Instant: " .. tostring(IsInstantFishing))
     table.insert(states, "Blatant: " .. tostring(IsBlatantFishing))
     table.insert(states, "Auto Shake: " .. tostring(IsAutoShake))
     
-    -- Cek FishingController state
+   
     if FishingController then
         table.insert(states, "\n=== CONTROLLER STATE ===")
         table.insert(states, "Current GUID: " .. tostring(FishingController:GetCurrentGUID() or "None"))
