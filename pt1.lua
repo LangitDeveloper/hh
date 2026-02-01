@@ -491,6 +491,7 @@ function StartBlatantFishing()
                 end)
                 
                 task.wait(V3_CompleteDelay)
+                task.wait(BlatantFishingDelay)
                 pcall(function()
                     Remotes.RE_Fishing:FireServer()
                 end)
