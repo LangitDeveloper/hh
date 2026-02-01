@@ -525,6 +525,7 @@ function StartBlatantFishing()
                 end)
             end)  
             task.wait(BlatantReelDelay)
+            task.wait(V3_CompleteDelay)
         end
     end)
 end
