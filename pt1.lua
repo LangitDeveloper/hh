@@ -406,7 +406,7 @@ function StartLegitFishing()
 end
 
 
-function StartInstantFishing4()
+function StartInstantFishing()
     IsInstantFishing = true
     Remotes.RF_AutoFishing:InvokeServer(true)
     
@@ -492,11 +492,12 @@ function StartBlatantFishing()
                 
                 
                 task.wait(BlatantFishingDelay)
+                task.wait(InstantFishingDelay)
                 pcall(function()
                     Remotes.RE_Fishing:FireServer()
                 end)
             end)  
-            task.wait(V3_CompleteDelay)
+            
             task.wait(BlatantReelDelay)
         end
     end)
