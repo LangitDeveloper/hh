@@ -474,28 +474,33 @@ function StartBlatantFishingV2()
     end)
 end
 
-local function StartBlatantFishing()
+function StartBlatantFishing()
+    IsBlatantFishing = true
+    Remotes.RF_AutoFishing:InvokeServer(true)
+    
     task.spawn(function()
-        pcall(function()
-            Network.Functions.Cancel:InvokeServer()
-        end)
-        
-        local serverTime = workspace:GetServerTimeNow()
-        
-        pcall(function()
-            Network.Functions.ChargeRod:InvokeServer(serverTime)
-        end)
-        
-        pcall(function()
-            Network.Functions.StartMini:InvokeServer(-1, 1.999)
-        end)
-        
-        task.wait(BlatantFishingDelay)
-        
-        pcall(function()
-            Network.Events.REFishDone:FireServer()
-        end)
-        task.wait(BlatantReelDelay)
+        while IsBlatantFishing do
+            task.spawn(function()
+                pcall(function()
+                    Remotes.RF_Cancel:InvokeServer()
+                end)
+                
+                pcall(function()
+                    Remotes.RF_Charge:InvokeServer(workspace:GetServerTimeNow())
+                end)
+                
+                pcall(function()
+                    Remotes.RF_Minigame:InvokeServer(-1, 0.999)
+                end)
+                task.wait(ShakeDelay)
+                task.wait(BlatantFishingDelay)
+                pcall(function()
+                    Remotes.RE_Fishing:FireServer()
+                end)
+            end)
+            
+            task.wait(BlatantReelDelay)
+        end
     end)
 end
 
