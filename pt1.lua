@@ -978,6 +978,669 @@ local FlyToggle = MovementSection:Toggle({
     end,
 })
 
+-- Tambahkan ini setelah deklarasi semua variable dan sebelum pembuatan Window
+
+-- ===============================
+-- DEBUG & MONITORING SYSTEM
+-- ===============================
+local DebugTab = Window:Tab({Title = "🛠️ Debug", Icon = "bug"})
+
+-- Data storage untuk monitoring
+local DebugData = {
+    LastRemotes = {},
+    RemoteLogs = {},
+    FishingStates = {},
+    Performance = {},
+    EventLogs = {}
+}
+
+-- UI Elements untuk monitoring
+local DebugPanels = {}
+
+-- ===============================
+-- REMOTE MONITORING SECTION
+-- ===============================
+local RemoteMonitorSection = DebugTab:Section({Title = "📡 Remote Monitor"})
+
+-- Toggle untuk monitoring remote
+local RemoteMonitorToggle = RemoteMonitorSection:Toggle({
+    Title = "Enable Remote Monitoring",
+    Desc = "Monitor semua remote calls real-time",
+    Value = false,
+    Callback = function(value)
+        if value then
+            StartRemoteMonitoring()
+        else
+            StopRemoteMonitoring()
+        end
+    end
+})
+
+-- Panel untuk menampilkan remote logs
+local RemoteLogPanel = RemoteMonitorSection:Paragraph({
+    Title = "Remote Logs (Last 10)",
+    Desc = "Waiting for activity...",
+    Color = "Blue"
+})
+DebugPanels.RemoteLog = RemoteLogPanel
+
+-- Filter untuk remote types
+local RemoteFilter = RemoteMonitorSection:Dropdown({
+    Title = "Filter Remote Type",
+    Values = {"All", "RE (Events)", "RF (Functions)", "RS (Server)", "RC (Client)"},
+    Value = "All",
+    Callback = function(value)
+        DebugData.RemoteFilter = value
+    end
+})
+
+-- Clear logs button
+RemoteMonitorSection:Button({
+    Title = "Clear Remote Logs",
+    Callback = function()
+        DebugData.RemoteLogs = {}
+        RemoteLogPanel:SetDesc("Logs cleared!\nWaiting for activity...")
+    end
+})
+
+-- Remote hooking system
+local OriginalRemotes = {}
+local RemoteConnections = {}
+
+function StartRemoteMonitoring()
+    print("[DEBUG] Starting remote monitoring...")
+    
+    -- Hook semua remotes yang diketahui
+    for name, remote in pairs(Remotes) do
+        if remote and not OriginalRemotes[name] then
+            if remote:IsA("RemoteEvent") then
+                -- Hook RemoteEvent
+                OriginalRemotes[name] = remote.FireServer
+                remote.FireServer = function(self, ...)
+                    local args = {...}
+                    LogRemoteCall(name, "FireServer", args, "RE")
+                    return OriginalRemotes[name](self, ...)
+                end
+                
+            elseif remote:IsA("RemoteFunction") then
+                -- Hook RemoteFunction OnClientInvoke
+                if remote.OnClientInvoke then
+                    OriginalRemotes[name] = remote.OnClientInvoke
+                    remote.OnClientInvoke = function(...)
+                        local args = {...}
+                        LogRemoteCall(name, "OnClientInvoke", args, "RF")
+                        return OriginalRemotes[name](...)
+                    end
+                end
+                
+                -- Hook RemoteFunction InvokeServer
+                OriginalRemotes[name .. "_Invoke"] = remote.InvokeServer
+                remote.InvokeServer = function(self, ...)
+                    local args = {...}
+                    LogRemoteCall(name, "InvokeServer", args, "RF")
+                    return OriginalRemotes[name .. "_Invoke"](self, ...)
+                end
+            end
+        end
+    end
+    
+    -- Juga hook Net direktori
+    HookNetDirectory()
+    
+    MahiruUi:Notify({
+        Title = "Debug",
+        Content = "Remote monitoring started!",
+        Duration = 2,
+        Icon = "radio"
+    })
+end
+
+function StopRemoteMonitoring()
+    print("[DEBUG] Stopping remote monitoring...")
+    
+    -- Restore original functions
+    for name, originalFunc in pairs(OriginalRemotes) do
+        local remote = Remotes[name]
+        if remote then
+            if string.find(name, "_Invoke") then
+                local actualName = name:gsub("_Invoke", "")
+                if Remotes[actualName] then
+                    Remotes[actualName].InvokeServer = originalFunc
+                end
+            else
+                if remote:IsA("RemoteEvent") then
+                    remote.FireServer = originalFunc
+                elseif remote:IsA("RemoteFunction") and remote.OnClientInvoke then
+                    remote.OnClientInvoke = originalFunc
+                end
+            end
+        end
+    end
+    
+    OriginalRemotes = {}
+    
+    -- Disconnect connections
+    for _, conn in pairs(RemoteConnections) do
+        conn:Disconnect()
+    end
+    RemoteConnections = {}
+    
+    MahiruUi:Notify({
+        Title = "Debug",
+        Content = "Remote monitoring stopped!",
+        Duration = 2,
+        Icon = "radio-tower"
+    })
+end
+
+function HookNetDirectory()
+    -- Coba hook semua remote di Net directory
+    local function HookAllInFolder(folder, prefix)
+        for _, item in ipairs(folder:GetChildren()) do
+            if item:IsA("RemoteEvent") or item:IsA("RemoteFunction") then
+                local fullName = prefix .. item.Name
+                
+                if not DebugData.HookedRemotes[fullName] then
+                    DebugData.HookedRemotes[fullName] = true
+                    
+                    if item:IsA("RemoteEvent") then
+                        local original = item.FireServer
+                        item.FireServer = function(self, ...)
+                            local args = {...}
+                            LogRemoteCall(fullName, "FireServer", args, "RE")
+                            return original(self, ...)
+                        end
+                    elseif item:IsA("RemoteFunction") then
+                        local original = item.InvokeServer
+                        item.InvokeServer = function(self, ...)
+                            local args = {...}
+                            LogRemoteCall(fullName, "InvokeServer", args, "RF")
+                            return original(self, ...)
+                        end
+                    end
+                end
+            elseif #item:GetChildren() > 0 then
+                HookAllInFolder(item, prefix .. item.Name .. "/")
+            end
+        end
+    end
+    
+    DebugData.HookedRemotes = {}
+    HookAllInFolder(Net, "Net/")
+end
+
+function LogRemoteCall(name, method, args, type)
+    local timestamp = os.date("%H:%M:%S")
+    local argStr = ""
+    
+    -- Format arguments
+    if args and #args > 0 then
+        for i, arg in ipairs(args) do
+            if type(arg) == "table" then
+                argStr = argStr .. string.format("{table:%d} ", i)
+            elseif type(arg) == "number" then
+                argStr = argStr .. string.format("%.2f ", arg)
+            elseif type(arg) == "string" then
+                if #arg > 20 then
+                    argStr = argStr .. string.format("\"%s...\" ", arg:sub(1, 20))
+                else
+                    argStr = argStr .. string.format("\"%s\" ", arg)
+                end
+            else
+                argStr = argStr .. tostring(arg) .. " "
+            end
+        end
+    else
+        argStr = "No args"
+    end
+    
+    local logEntry = string.format("[%s] %s.%s(%s)", timestamp, name, method, argStr)
+    
+    -- Simpan log
+    table.insert(DebugData.RemoteLogs, 1, logEntry)
+    if #DebugData.RemoteLogs > 50 then
+        table.remove(DebugData.RemoteLogs, 51)
+    end
+    
+    -- Update UI jika sedang aktif
+    if RemoteMonitorToggle.Value then
+        UpdateRemoteLogDisplay()
+    end
+end
+
+function UpdateRemoteLogDisplay()
+    local filter = DebugData.RemoteFilter or "All"
+    local displayLogs = {}
+    
+    for _, log in ipairs(DebugData.RemoteLogs) do
+        if filter == "All" or 
+           (filter == "RE" and string.find(log, "%.FireServer%(")) or
+           (filter == "RF" and string.find(log, "%.InvokeServer%(")) then
+            table.insert(displayLogs, log)
+        end
+        if #displayLogs >= 10 then break end
+    end
+    
+    if #displayLogs > 0 then
+        RemoteLogPanel:SetDesc(table.concat(displayLogs, "\n"))
+    else
+        RemoteLogPanel:SetDesc("No remote activity...")
+    end
+end
+
+-- ===============================
+-- FISHING DEBUG SECTION
+-- ===============================
+local FishingDebugSection = DebugTab:Section({Title = "🎣 Fishing Debug"})
+
+-- Fishing state monitor
+local FishingStatePanel = FishingDebugSection:Paragraph({
+    Title = "Fishing State",
+    Desc = "Loading fishing state...",
+    Color = "Green"
+})
+DebugPanels.FishingState = FishingStatePanel
+
+-- Auto update fishing state
+task.spawn(function()
+    while task.wait(0.5) do
+        if DebugTab.Visible then
+            UpdateFishingState()
+        end
+    end
+end)
+
+function UpdateFishingState()
+    local states = {}
+    
+    -- Cek status fishing modes
+    table.insert(states, "=== FISHING MODES ===")
+    table.insert(states, "Legit: " .. tostring(IsLegitFishing))
+    table.insert(states, "Instant: " .. tostring(IsInstantFishing))
+    table.insert(states, "Blatant: " .. tostring(IsBlatantFishing))
+    table.insert(states, "Auto Shake: " .. tostring(IsAutoShake))
+    
+    -- Cek FishingController state
+    if FishingController then
+        table.insert(states, "\n=== CONTROLLER STATE ===")
+        table.insert(states, "Current GUID: " .. tostring(FishingController:GetCurrentGUID() or "None"))
+        table.insert(states, "Auto Loop: " .. tostring(FishingController._autoLoop or false))
+    end
+    
+    -- Cek charge bar status
+    local chargeBar = PlayerGui:FindFirstChild("Charge")
+    if chargeBar and chargeBar:FindFirstChild("Main") then
+        table.insert(states, "\n=== CHARGE BAR ===")
+        table.insert(states, "Visible: " .. tostring(chargeBar.Enabled or chargeBar.Visible))
+    end
+    
+    -- Cek fish count
+    local fishCount = GetFishCount()
+    table.insert(states, "\n=== INVENTORY ===")
+    table.insert(states, "Fish Count: " .. tostring(fishCount))
+    
+    FishingStatePanel:SetDesc(table.concat(states, "\n"))
+end
+
+-- Fishing test buttons
+FishingDebugSection:Button({
+    Title = "Test Charge Remote",
+    Callback = function()
+        local success, result = pcall(function()
+            return Remotes.RF_Charge:InvokeServer(workspace:GetServerTimeNow())
+        end)
+        
+        if success then
+            MahiruUi:Notify({
+                Title = "Success",
+                Content = "Charge remote working!",
+                Duration = 2,
+                Icon = "check"
+            })
+            print("Charge result:", result)
+        else
+            MahiruUi:Notify({
+                Title = "Error",
+                Content = "Charge remote failed!",
+                Duration = 2,
+                Icon = "x"
+            })
+        end
+    end
+})
+
+FishingDebugSection:Button({
+    Title = "Test Cancel Remote",
+    Callback = function()
+        local success = pcall(function()
+            Remotes.RF_Cancel:InvokeServer()
+        end)
+        
+        if success then
+            MahiruUi:Notify({
+                Title = "Success",
+                Content = "Cancel remote working!",
+                Duration = 2,
+                Icon = "check"
+            })
+        else
+            MahiruUi:Notify({
+                Title = "Error",
+                Content = "Cancel remote failed!",
+                Duration = 2,
+                Icon = "x"
+            })
+        end
+    end
+})
+
+-- ===============================
+-- NETWORK DEBUG SECTION
+-- ===============================
+local NetworkDebugSection = DebugTab:Section({Title = "Network Debug"})
+
+-- Ping & Packet loss monitor
+local NetworkPanel = NetworkDebugSection:Paragraph({
+    Title = "Network Stats",
+    Desc = "Loading network info...",
+    Color = "Yellow"
+})
+DebugPanels.Network = NetworkPanel
+
+-- Update network stats
+task.spawn(function()
+    while task.wait(1) do
+        if DebugTab.Visible then
+            UpdateNetworkStats()
+        end
+    end
+end)
+
+function UpdateNetworkStats()
+    local stats = {}
+    
+    -- Ping
+    local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+    table.insert(stats, "Ping: " .. ping .. "ms")
+    
+    -- Packet loss (jika ada)
+    local success, packetLoss = pcall(function()
+        return Stats.Network.ServerStatsItem["Data PacketLoss"]:GetValue()
+    end)
+    if success then
+        table.insert(stats, "Packet Loss: " .. string.format("%.1f", packetLoss) .. "%")
+    end
+    
+    -- FPS
+    local fps = math.floor(1 / RunService.RenderStepped:Wait())
+    table.insert(stats, "FPS: " .. fps)
+    
+    -- Memory usage
+    local memory = collectgarbage("count")
+    table.insert(stats, "Memory: " .. string.format("%.1f", memory / 1024) .. "MB")
+    
+    NetworkPanel:SetDesc(table.concat(stats, "\n"))
+end
+
+-- ===============================
+-- REMOTE EXPLORER SECTION
+-- ===============================
+local RemoteExplorerSection = DebugTab:Section({Title = "🔍 Remote Explorer"})
+
+local RemoteListPanel = RemoteExplorerSection:Paragraph({
+    Title = "Available Remotes",
+    Desc = "Click 'Scan Remotes' to find...",
+    Color = "Purple"
+})
+DebugPanels.RemoteList = RemoteListPanel
+
+function ScanAllRemotes()
+    local foundRemotes = {}
+    
+    -- Scan Net directory
+    local function ScanFolder(folder, path)
+        for _, item in ipairs(folder:GetChildren()) do
+            local fullPath = path .. "/" .. item.Name
+            
+            if item:IsA("RemoteEvent") then
+                table.insert(foundRemotes, {
+                    Type = "RemoteEvent",
+                    Name = item.Name,
+                    Path = fullPath,
+                    Object = item
+                })
+            elseif item:IsA("RemoteFunction") then
+                table.insert(foundRemotes, {
+                    Type = "RemoteFunction",
+                    Name = item.Name,
+                    Path = fullPath,
+                    Object = item
+                })
+            elseif #item:GetChildren() > 0 then
+                ScanFolder(item, fullPath)
+            end
+        end
+    end
+    
+    ScanFolder(Net, "Net")
+    
+    -- Format untuk display
+    local displayText = {"=== FOUND REMOTES ==="}
+    for _, remote in ipairs(foundRemotes) do
+        table.insert(displayText, string.format("[%s] %s", remote.Type, remote.Path))
+    end
+    
+    if #foundRemotes == 0 then
+        table.insert(displayText, "No remotes found!")
+    else
+        table.insert(displayText, string.format("\nTotal: %d remotes", #foundRemotes))
+    end
+    
+    RemoteListPanel:SetDesc(table.concat(displayText, "\n"))
+    
+    -- Simpan untuk reference
+    DebugData.AvailableRemotes = foundRemotes
+    
+    return foundRemotes
+end
+
+RemoteExplorerSection:Button({
+    Title = "🔍 Scan All Remotes",
+    Callback = function()
+        local remotes = ScanAllRemotes()
+        MahiruUi:Notify({
+            Title = "Remote Scan",
+            Content = string.format("Found %d remotes!", #remotes),
+            Duration = 2,
+            Icon = "search"
+        })
+    end
+})
+
+RemoteExplorerSection:Button({
+    Title = "📋 Copy Remote List",
+    Callback = function()
+        if DebugData.AvailableRemotes then
+            local remoteText = "=== REMOTE LIST ===\n"
+            for _, remote in ipairs(DebugData.AvailableRemotes) do
+                remoteText = remoteText .. string.format("%s = Net:WaitForChild(\"%s\"),\n", 
+                    remote.Name:gsub("/", "_"):gsub("%s", ""), 
+                    remote.Path:gsub("Net/", ""))
+            end
+            
+            if setclipboard then
+                setclipboard(remoteText)
+                MahiruUi:Notify({
+                    Title = "Success",
+                    Content = "Remote list copied to clipboard!",
+                    Duration = 2,
+                    Icon = "clipboard"
+                })
+            end
+        end
+    end
+})
+
+-- ===============================
+-- PERFORMANCE MONITOR SECTION
+-- ===============================
+local PerformanceSection = DebugTab:Section({Title = "⚡ Performance Monitor"})
+
+local PerformancePanel = PerformanceSection:Paragraph({
+    Title = "Performance Metrics",
+    Desc = "Collecting metrics...",
+    Color = "Red"
+})
+DebugPanels.Performance = PerformancePanel
+
+-- Performance monitoring
+local PerformanceMetrics = {
+    ScriptMemory = 0,
+    UpdateTimes = {},
+    LastUpdate = tick()
+}
+
+task.spawn(function()
+    while task.wait(0.5) do
+        if DebugTab.Visible then
+            UpdatePerformanceMetrics()
+        end
+    end
+end)
+
+function UpdatePerformanceMetrics()
+    local metrics = {}
+    
+    -- Script memory
+    PerformanceMetrics.ScriptMemory = collectgarbage("count")
+    table.insert(metrics, string.format("Script Memory: %.2f MB", PerformanceMetrics.ScriptMemory / 1024))
+    
+    -- Update rate
+    local now = tick()
+    local delta = now - PerformanceMetrics.LastUpdate
+    PerformanceMetrics.LastUpdate = now
+    
+    table.insert(PerformanceMetrics.UpdateTimes, delta)
+    if #PerformanceMetrics.UpdateTimes > 10 then
+        table.remove(PerformanceMetrics.UpdateTimes, 1)
+    end
+    
+    local avgUpdate = 0
+    for _, time in ipairs(PerformanceMetrics.UpdateTimes) do
+        avgUpdate = avgUpdate + time
+    end
+    avgUpdate = avgUpdate / #PerformanceMetrics.UpdateTimes
+    
+    table.insert(metrics, string.format("Update Rate: %.0f Hz", 1 / avgUpdate))
+    
+    -- Active connections
+    local activeConns = 0
+    for _, conn in pairs(getconnections or {}) do
+        activeConns = activeConns + 1
+    end
+    table.insert(metrics, "Active Connections: " .. tostring(activeConns))
+    
+    -- Remote hooks
+    table.insert(metrics, "Remote Hooks: " .. tostring(#OriginalRemotes))
+    
+    PerformancePanel:SetDesc(table.concat(metrics, "\n"))
+end
+
+-- ===============================
+-- QUICK TEST SECTION
+-- ===============================
+local QuickTestSection = DebugTab:Section({Title = "🧪 Quick Tests"})
+
+-- Test semua remotes fishing sekaligus
+QuickTestSection:Button({
+    Title = "🧪 Test All Fishing Remotes",
+    Desc = "Test semua remote fishing secara berurutan",
+    Callback = function()
+        task.spawn(function()
+            local tests = {
+                {"RF_Charge", function() Remotes.RF_Charge:InvokeServer(workspace:GetServerTimeNow()) end},
+                {"RF_Cancel", function() Remotes.RF_Cancel:InvokeServer() end},
+                {"RF_AutoFishing", function() Remotes.RF_AutoFishing:InvokeServer(true) end},
+                {"RE_Fishing", function() Remotes.RE_Fishing:FireServer() end}
+            }
+            
+            for i, test in ipairs(tests) do
+                local name, func = test[1], test[2]
+                MahiruUi:Notify({
+                    Title = "Testing...",
+                    Content = string.format("(%d/%d) %s", i, #tests, name),
+                    Duration = 1,
+                    Icon = "flask-conical"
+                })
+                
+                local success, err = pcall(func)
+                if not success then
+                    print(string.format("[TEST FAILED] %s: %s", name, err))
+                end
+                
+                task.wait(1)
+            end
+            
+            MahiruUi:Notify({
+                Title = "Test Complete",
+                Content = "All tests finished!",
+                Duration = 2,
+                Icon = "check"
+            })
+        end)
+    end
+})
+
+-- Export debug data
+QuickTestSection:Button({
+    Title = "📤 Export Debug Data",
+    Callback = function()
+        local exportData = {
+            Timestamp = os.date("%Y-%m-%d %H:%M:%S"),
+            Player = LocalPlayer.Name,
+            PlaceId = game.PlaceId,
+            JobId = game.JobId,
+            RemoteLogs = DebugData.RemoteLogs,
+            FishingStates = {
+                Legit = IsLegitFishing,
+                Instant = IsInstantFishing,
+                Blatant = IsBlatantFishing,
+                AutoShake = IsAutoShake
+            },
+            AvailableRemotes = DebugData.AvailableRemotes
+        }
+        
+        local json = HttpService:JSONEncode(exportData)
+        
+        if writefile then
+            local filename = string.format("Mahiru_Debug_%s.json", os.date("%Y%m%d_%H%M%S"))
+            writefile(filename, json)
+            
+            MahiruUi:Notify({
+                Title = "Exported",
+                Content = string.format("Saved to: %s", filename),
+                Duration = 3,
+                Icon = "file-output"
+            })
+        end
+    end
+})
+
+
+local originalWarn = warn
+local originalError = error
+
+function DebugErrorHandler(msg, level)
+    local errorLog = string.format("[ERROR %s] %s", os.date("%H:%M:%S"), tostring(msg))
+    table.insert(DebugData.RemoteLogs, 1, errorLog)
+    
+    return originalError(msg, level)
+end
+
+-- Set error handler
+debug.sethook(function()
+end, "c")
+
 local ModesSection = PlayerTab:Section({Title = "Modes"})
 
 local NoAnimationToggle = ModesSection:Toggle({
