@@ -405,32 +405,6 @@ function StartLegitFishing()
     end)
 end
 
-function StartBlatantFishing56()
-    if IsBlatantFishing then return end
-    IsBlatantFishing = true
-
-    Remotes.RF_AutoFishing:InvokeServer(true)
-
-    task.spawn(function()
-        while IsBlatantFishing do
-            pcall(function()
-                Remotes.RF_Cancel:InvokeServer()
-            end)
-            task.wait(0.05)
-            pcall(function()
-                Remotes.RF_Charge:InvokeServer(workspace:GetServerTimeNow())
-            end)
-            pcall(function()
-                Remotes.RF_Minigame:InvokeServer(-1, 0.95)
-            end)
-            pcall(function()
-                Remotes.RE_Fishing:FireServer()
-            end)
-
-            task.wait(BlatantReelDelay)
-        end
-    end)
-end
 
 function StartInstantFishing4()
     IsInstantFishing = true
@@ -525,7 +499,7 @@ function StartBlatantFishing()
                 end)
             end)  
             task.wait(BlatantReelDelay)
-            task.wait(V3_CompleteDelay)
+            task.wait(BlatantFishingDelay)
         end
     end)
 end
