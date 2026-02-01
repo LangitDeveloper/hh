@@ -108,43 +108,7 @@ LogBox.BorderSizePixel = 0
 Instance.new("UICorner", LogBox).CornerRadius = UDim.new(0, 8)
 
 RemoteLogger = { Enabled = false, Logs = {} }
-local oldNamecall
-oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
-    local method = getnamecallmethod()
-    local args = {...}
 
-    if RemoteLogger.Enabled then
-        if (method == "FireServer" or method == "InvokeServer")
-            and (self:IsA("RemoteEvent") or self:IsA("RemoteFunction")) then
-            AddLog(self, method, args)
-        end
-    end
-
-    return oldNamecall(self, ...)
-end)
-
-RunService.RenderStepped:Connect(function()
-    if not RemoteLogger.Enabled then return end
-
-    if #RemoteLogger.Logs == 0 then
-        LogBox.Text = "Waiting... (start fishing)"
-        return
-    end
-
-    local text = ""
-    for i, log in ipairs(RemoteLogger.Logs) do
-        text ..= string.format(
-            "[%s] %s | %s | args:%d\n",
-            log.Time,
-            log.Name,
-            log.Method,
-            log.Args
-        )
-        if i >= 12 then break end
-    end
-
-    LogBox.Text = text
-end)
 
 local LegitFishingDelay = 0.2
 local ShakeDelay = 0.15
@@ -616,6 +580,60 @@ function StartAutoSell()
         end
     end)
 end
+
+local function AddLog(remote, method, args)
+    if not RemoteLogger.Enabled then return end
+
+    table.insert(RemoteLogger.Logs, 1, {
+        Time = os.date("%X"),
+        Name = remote.Name,
+        Method = method,
+        Args = #args
+    })
+
+    if #RemoteLogger.Logs > RemoteLogger.Max then
+        table.remove(RemoteLogger.Logs)
+    end
+end
+
+local oldNamecall
+oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+    local method = getnamecallmethod()
+    local args = {...}
+
+    if RemoteLogger.Enabled then
+        if (method == "FireServer" or method == "InvokeServer")
+            and (self:IsA("RemoteEvent") or self:IsA("RemoteFunction")) then
+            AddLog(self, method, args)
+        end
+    end
+
+    return oldNamecall(self, ...)
+end)
+
+RunService.RenderStepped:Connect(function()
+    if not RemoteLogger.Enabled then return end
+
+    if #RemoteLogger.Logs == 0 then
+        LogBox.Text = "Waiting... (start fishing)"
+        return
+    end
+
+    local text = ""
+    for i, log in ipairs(RemoteLogger.Logs) do
+        text ..= string.format(
+            "[%s] %s | %s | args:%d\n",
+            log.Time,
+            log.Name,
+            log.Method,
+            log.Args
+        )
+        if i >= 12 then break end
+    end
+
+    LogBox.Text = text
+end)
+
 
 local Lighting = game:GetService("Lighting")
 
