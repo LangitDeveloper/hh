@@ -77,7 +77,7 @@ local IsBlatantFishing = false
 local IsBlatantV3 = false
 local V3_CastDelay     = 0.3   
 local V3_CancelDelay   = 3      
-local V3_CompleteDelay= 3      
+local V3_CompleteDelay= 1.1    
 local CurrentFishCount = 0
 
 
@@ -492,7 +492,7 @@ function StartBlatantFishing()
                     Remotes.RF_Minigame:InvokeServer(-1, 0.999)
                 end)
                 
-                task.wait(BlatantFishingDelay)
+                task.wait(V3_CompleteDelay)
                 pcall(function()
                     Remotes.RE_Fishing:FireServer()
                 end)
@@ -1617,7 +1617,7 @@ local BlatantFishInput = FishingTab:Input({
     Callback = function(value)
         local num = tonumber(value)
         if num and num > 0 then
-            BlatantFishingDelay = num
+            V3_CompleteDelay = num
         end
     end,
 })
