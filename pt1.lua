@@ -820,20 +820,6 @@ local PfpsSection = PlayerTab:Section({Title = "Tools Fps Booster"})
 
 local StatsGui
 
-local PerfopToggle = PfpoSection:Toggle({
-    Title = "Enable Remote Logger",
-    Default = false,
-    Callback = function(v)
-        RemoteLogger.Enabled = v
-        LoggerGui.Enabled = v
-
-        if not v then
-            RemoteLogger.Logs = {}
-            LogBox.Text = "Waiting..."
-        end
-    end
-})
-ConfigManager:Register("PerfopToggle", PerfopToggle)
 
 local PerfomToggle = PfpsSection:Toggle({
     Title = "Show Ping & FPS",
