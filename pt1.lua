@@ -151,54 +151,6 @@ local SelectedLocation = nil
 local SelectedPlayer = nil
 local PlayerList = {}
 
-local RemoteLogger = {
-    Enabled = false,
-    Logs = {},
-    MaxLogs = 50
-}
-
-local function IsFishingRemote(remoteName, args)
-    remoteName = string.lower(remoteName)
-    if remoteName:find("fish") or remoteName:find("reel") or remoteName:find("rod") then
-        return true
-    end
-    for _, v in ipairs(args) do
-        if typeof(v) == "Instance" and v:IsA("Tool") and v.Name:lower():find("rod") then
-            return true
-        end
-    end
-    return false
-end
-
-local function AddRemoteLog(remote, method, args)
-    if not RemoteLogger.Enabled then return end
-    if not IsFishingRemote(remote.Name, args) then return end
-
-    table.insert(RemoteLogger.Logs, 1, {
-        Time = os.date("%X"),
-        Name = remote.Name,
-        Method = method,
-        Args = #args
-    })
-
-    if #RemoteLogger.Logs > RemoteLogger.MaxLogs then
-        table.remove(RemoteLogger.Logs)
-    end
-end
-
-local oldNamecall
-oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
-    local args = {...}
-    local method = getnamecallmethod()
-
-    if (method == "FireServer" or method == "InvokeServer") and self:IsA("RemoteEvent") or self:IsA("RemoteFunction") then
-        pcall(function()
-            AddRemoteLog(self, method, args)
-        end)
-    end
-
-    return oldNamecall(self, ...)
-end)
 
 local function CreatePingFPSGui()
     local gui = Instance.new("ScreenGui")
@@ -540,7 +492,7 @@ function StartBlatantFishing()
                     Remotes.RF_Minigame:InvokeServer(-1, 0.999)
                 end)
                 
-                task.wait(V3_CompleteDelay)
+                task.wait(BlatantFishingDelay)
                 pcall(function()
                     Remotes.RE_Fishing:FireServer()
                 end)
@@ -1025,54 +977,6 @@ local FlyToggle = MovementSection:Toggle({
         end
     end,
 })
-
-local RemoteTab = PlayerTab:Section({Title = "Remote Logger"})
-
-RemoteTab:Toggle({
-    Title = "Enable Fishing Logger",
-    Default = false,
-    Callback = function(v)
-        RemoteLogger.Enabled = v
-        if not v then
-            RemoteLogger.Logs = {}
-        end
-    end
-})
-
-RemoteTab:Button({
-    Title = "Clear Logs",
-    Callback = function()
-        RemoteLogger.Logs = {}
-    end
-})
-
-local LogLabel = RemoteTab:Label({Text = "Waiting..."})
-
-RunService.RenderStepped:Connect(function()
-    if not RemoteLogger.Enabled then
-        LogLabel:Set("Logger OFF")
-        return
-    end
-
-    if #RemoteLogger.Logs == 0 then
-        LogLabel:Set("Idle... (start fishing)")
-        return
-    end
-
-    local text = ""
-    for i, log in ipairs(RemoteLogger.Logs) do
-        text ..= string.format("[%s] %s | %s | args:%d\n",
-            log.Time,
-            log.Name,
-            log.Method,
-            log.Args
-        )
-        if i >= 8 then break end
-    end
-
-    LogLabel:Set(text)
-end)
-
 
 local ModesSection = PlayerTab:Section({Title = "Modes"})
 
