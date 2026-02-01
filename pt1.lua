@@ -481,9 +481,6 @@ function StartBlatantFishing()
     task.spawn(function()
         while IsBlatantFishing do
             task.spawn(function()
-                pcall(function()
-                    Remotes.RF_Cancel:InvokeServer()
-                end)
                 
                 pcall(function()
                     Remotes.RF_Charge:InvokeServer(workspace:GetServerTimeNow())
@@ -493,13 +490,12 @@ function StartBlatantFishing()
                     Remotes.RF_Minigame:InvokeServer(-1, 0.999)
                 end)
                 
-                task.wait(BlatantFishingDelay)
+                task.wait(V3_CompleteDelay)
                 pcall(function()
                     Remotes.RE_Fishing:FireServer()
                 end)
             end)  
             task.wait(BlatantReelDelay)
-            task.wait(BlatantFishingDelay)
         end
     end)
 end
