@@ -62,54 +62,6 @@ local MerchantUI = {
     RefreshMerchant = PlayerGui.Merchant.Main.Background.RefreshLabel,
 }
 
-local LoggerGui = Instance.new("ScreenGui")
-LoggerGui.Name = "RemoteLoggerGui"
-LoggerGui.ResetOnSpawn = false
-LoggerGui.Enabled = false
-LoggerGui.Parent = PlayerGui
-
-local Frame = Instance.new("Frame")
-Frame.Parent = LoggerGui
-Frame.Size = UDim2.new(0, 330, 0, 220)
-Frame.Position = UDim2.new(0.5, -165, 0.6, -110)
-Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-Frame.BorderSizePixel = 0
-Frame.Active = true
-Frame.Draggable = true
-Frame.BackgroundTransparency = 0.05
-
-local Corner = Instance.new("UICorner", Frame)
-Corner.CornerRadius = UDim.new(0, 12)
-
-local Title = Instance.new("TextLabel", Frame)
-Title.Size = UDim2.new(1, 0, 0, 30)
-Title.BackgroundTransparency = 1
-Title.Text = " Remote Logger (Fishing)"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 14
-
-local LogBox = Instance.new("TextBox", Frame)
-LogBox.Position = UDim2.new(0, 10, 0, 35)
-LogBox.Size = UDim2.new(1, -20, 1, -45)
-LogBox.ClearTextOnFocus = false
-LogBox.MultiLine = true
-LogBox.TextWrapped = false
-LogBox.TextYAlignment = Top
-LogBox.TextXAlignment = Left
-LogBox.TextEditable = false
-LogBox.Text = "Waiting..."
-LogBox.Font = Enum.Font.Code
-LogBox.TextSize = 13
-LogBox.TextColor3 = Color3.fromRGB(200, 200, 200)
-LogBox.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-LogBox.BorderSizePixel = 0
-
-Instance.new("UICorner", LogBox).CornerRadius = UDim.new(0, 8)
-
-RemoteLogger = { Enabled = false, Logs = {} }
-
-
 local LegitFishingDelay = 0.2
 local ShakeDelay = 0.15
 local InstantFishingDelay = 0.1
@@ -198,8 +150,6 @@ local BoatLookup = {}
 local SelectedLocation = nil
 local SelectedPlayer = nil
 local PlayerList = {}
-
-
 
 
 local function CreatePingFPSGui()
@@ -542,7 +492,7 @@ function StartBlatantFishing()
                 pcall(function()
                     Remotes.RF_Minigame:InvokeServer(-1, 0.999)
                 end)
-                task.wait(ShakeDelay)
+                task.wait(BlatantBaitDelay)
                 task.wait(BlatantFishingDelay)
                 pcall(function()
                     Remotes.RE_Fishing:FireServer()
@@ -580,60 +530,6 @@ function StartAutoSell()
         end
     end)
 end
-
-local function AddLog(remote, method, args)
-    if not RemoteLogger.Enabled then return end
-
-    table.insert(RemoteLogger.Logs, 1, {
-        Time = os.date("%X"),
-        Name = remote.Name,
-        Method = method,
-        Args = #args
-    })
-
-    if #RemoteLogger.Logs > RemoteLogger.Max then
-        table.remove(RemoteLogger.Logs)
-    end
-end
-
-local oldNamecall
-oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
-    local method = getnamecallmethod()
-    local args = {...}
-
-    if RemoteLogger.Enabled then
-        if (method == "FireServer" or method == "InvokeServer")
-            and (self:IsA("RemoteEvent") or self:IsA("RemoteFunction")) then
-            AddLog(self, method, args)
-        end
-    end
-
-    return oldNamecall(self, ...)
-end)
-
-RunService.RenderStepped:Connect(function()
-    if not RemoteLogger.Enabled then return end
-
-    if #RemoteLogger.Logs == 0 then
-        LogBox.Text = "Waiting... (start fishing)"
-        return
-    end
-
-    local text = ""
-    for i, log in ipairs(RemoteLogger.Logs) do
-        text ..= string.format(
-            "[%s] %s | %s | args:%d\n",
-            log.Time,
-            log.Name,
-            log.Method,
-            log.Args
-        )
-        if i >= 12 then break end
-    end
-
-    LogBox.Text = text
-end)
-
 
 local Lighting = game:GetService("Lighting")
 
