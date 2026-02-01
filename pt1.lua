@@ -405,7 +405,7 @@ function StartLegitFishing()
     end)
 end
 
-function StartBlatantFishing()
+function StartBlatantFishing56()
     if IsBlatantFishing then return end
     IsBlatantFishing = true
 
