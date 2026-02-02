@@ -577,7 +577,6 @@ function StartBlatantFishing()
                     Remotes.RF_Minigame:InvokeServer(-1, 0.999)
                 end)
                 task.wait(BlatantFishingDelay)         
-                if IsAutoShake then 
                 pcall(function()
                     Remotes.RE_Fishing:FireServer()
                 end)
