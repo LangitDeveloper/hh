@@ -150,6 +150,105 @@ local BoatLookup = {}
 local SelectedLocation = nil
 local SelectedPlayer = nil
 local PlayerList = {}
+local Enabled = false
+local MaxLogs = 50
+
+local function CreateRemoteMonitorGui()
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "MahiruRemoteMonitor"
+    gui.ResetOnSpawn = false
+    gui.Enabled = false
+    gui.Parent = game.CoreGui
+
+    local frame = Instance.new("Frame", gui)
+    frame.Size = UDim2.new(0, 260, 0, 200)
+    frame.Position = UDim2.new(0, 20, 0, 220)
+    frame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+    frame.BackgroundTransparency = 0.25
+    frame.BorderSizePixel = 0
+    frame.Active = true
+    frame.Draggable = true
+
+    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
+
+    -- title
+    local title = Instance.new("TextLabel", frame)
+    title.Size = UDim2.new(1, -10, 0, 20)
+    title.Position = UDim2.new(0, 10, 0, 5)
+    title.BackgroundTransparency = 1
+    title.Text = "Mahiru | Remote Monitor"
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 13
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.TextColor3 = Color3.fromRGB(255, 170, 170)
+
+    -- line
+    local line = Instance.new("Frame", frame)
+    line.Size = UDim2.new(1, -20, 0, 1)
+    line.Position = UDim2.new(0, 10, 0, 28)
+    line.BackgroundColor3 = Color3.fromRGB(100, 100, 120)
+    line.BorderSizePixel = 0
+
+    -- scroll log
+    local scroll = Instance.new("ScrollingFrame", frame)
+    scroll.Position = UDim2.new(0, 10, 0, 35)
+    scroll.Size = UDim2.new(1, -20, 1, -45)
+    scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+    scroll.ScrollBarImageTransparency = 0.3
+    scroll.BackgroundTransparency = 1
+    scroll.BorderSizePixel = 0
+
+    local layout = Instance.new("UIListLayout", scroll)
+    layout.Padding = UDim.new(0, 5)
+
+    layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        scroll.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 5)
+        scroll.CanvasPosition = Vector2.new(
+            0,
+            math.max(0, scroll.CanvasSize.Y.Offset - scroll.AbsoluteWindowSize.Y)
+        )
+    end)
+
+    -- add log
+    local function AddLog(text)
+        local lbl = Instance.new("TextLabel")
+        lbl.Size = UDim2.new(1, -4, 0, 36)
+        lbl.BackgroundColor3 = Color3.fromRGB(40, 40, 55)
+        lbl.BackgroundTransparency = 0.2
+        lbl.BorderSizePixel = 0
+        lbl.TextWrapped = true
+        lbl.TextYAlignment = Enum.TextYAlignment.Top
+        lbl.TextXAlignment = Enum.TextXAlignment.Left
+        lbl.Font = Enum.Font.GothamMedium
+        lbl.TextSize = 12
+        lbl.TextColor3 = Color3.fromRGB(230, 230, 230)
+        lbl.Text = text
+        lbl.Parent = scroll
+        Instance.new("UICorner", lbl).CornerRadius = UDim.new(0, 6)
+    end
+
+    -- remote hook
+    local old
+    old = hookmetamethod(game, "__namecall", function(self, ...)
+        local method = getnamecallmethod()
+
+        if gui.Enabled and (method == "FireServer" or method == "InvokeServer") then
+            if typeof(self) == "Instance"
+                and (self:IsA("RemoteEvent") or self:IsA("RemoteFunction")) then
+
+                AddLog(
+                    "[" .. os.date("%X") .. "] " ..
+                    self.Name .. "\n" ..
+                    method
+                )
+            end
+        end
+
+        return old(self, ...)
+    end)
+
+    return gui
+end
 
 
 local function CreatePingFPSGui()
@@ -488,7 +587,7 @@ function StartBlatantFishing()
                     Remotes.RF_Minigame:InvokeServer(-1, 0.999)
                 end)
                 task.wait(BlatantFishingDelay)         
-                task.wait(LegitFishingDelay)  
+                if IsAutoShake then 
                 pcall(function()
                     Remotes.RE_Fishing:FireServer()
                 end)
@@ -1036,6 +1135,17 @@ local NoAnimationToggle = ModesSection:Toggle({
     end,
 })
 ConfigManager:Register("noAnimationToggle", NoAnimationToggle)
+
+local RemoteGui = CreateRemoteMonitorGui()
+
+ModeSection:Toggle({
+    Name = "Real-Time Remote Monitor",
+    Default = false,
+    Callback = function(v)
+        RemoteGui.Enabled = v
+    end
+})
+
 
 ModesSection:Toggle({
     Title = "Hide Rod On Hand",
