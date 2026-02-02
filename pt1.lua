@@ -488,13 +488,14 @@ function StartBlatantFishing()
                     Remotes.RF_Minigame:InvokeServer(-1, 0.999)
                 end)
                 task.wait(BlatantFishingDelay)
-                task.wait(V3_CancelDelay)
+                task.wait(V3_CompleteDelay)
                 
                 pcall(function()
                     Remotes.RE_Fishing:FireServer()
                 end)
             end)
             task.wait(BlatantReelDelay)
+            task.wait(V3_CancelDelay)
         end
     end)
 end
