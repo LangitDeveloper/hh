@@ -497,7 +497,7 @@ function StartBlatantFishing()
                 end)
             end)
             task.wait(BlatantReelDelay)
-            task.wait(ShakeDelay)
+            task.wait(BlatantBaitDelay)
         end
     end)
 end
