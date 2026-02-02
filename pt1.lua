@@ -152,6 +152,7 @@ local SelectedPlayer = nil
 local PlayerList = {}
 local Enabled = false
 local MaxLogs = 50
+local RemoteGui = CreateRemoteMonitorGui()
 
 local function CreateRemoteMonitorGui()
     local gui = Instance.new("ScreenGui")
@@ -1135,10 +1136,8 @@ local NoAnimationToggle = ModesSection:Toggle({
 })
 ConfigManager:Register("noAnimationToggle", NoAnimationToggle)
 
-local RemoteGui = CreateRemoteMonitorGui()
-
 ModesSection:Toggle({
-    Name = "Real-Time Remote Monitor",
+    Title = "Real-Time Remote Monitor",
     Default = false,
     Callback = function(v)
         RemoteGui.Enabled = v
