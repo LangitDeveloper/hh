@@ -1127,7 +1127,7 @@ ConfigManager:Register("noAnimationToggle", NoAnimationToggle)
 
 local RemoteGui = CreateRemoteMonitorGui()
 
-ModeSection:Toggle({
+ModesSection:Toggle({
     Name = "Real-Time Remote Monitor",
     Default = false,
     Callback = function(v)
