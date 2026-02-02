@@ -491,7 +491,7 @@ function StartBlatantFishing()
                 pcall(function()
                     Remotes.RF_Minigame:InvokeServer(-1, 0.999)
                 end)
-                task.wait(BlatantCastDelay)
+                task.wait(BlatantBaitDelay)
                 task.wait(BlatantFishingDelay)
                 
                 pcall(function()
