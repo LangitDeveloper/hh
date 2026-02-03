@@ -1625,11 +1625,11 @@ local BlatantFishingToggle = FishingTab:Toggle({
     Title = "Blatant Fishing",
     Value = false,
     Callback = function(value)
-    Remotes.RF_AutoEnabled:InvokeServer(true)
         if value then
             StartBlatantFishing()
         else
             IsBlatantFishing = false
+            Remotes.RF_AutoEnabled:InvokeServer(true)
             Remotes.RF_AutoFishing:InvokeServer(false)
         end
     end,
