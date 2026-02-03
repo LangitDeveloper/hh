@@ -42,6 +42,7 @@ local Remotes = {
     RE_ObtainedNewFishNotification = Net:WaitForChild("RE/ObtainedNewFishNotification"),
     RE_FishingMinigameEvent = Net:WaitForChild("RE/FishingMinigameChanged"),
     RF_Trade = Net:WaitForChild("RF/InitiateTrade"),
+    AutoEnabled = GameModules.Net["RF/UpdateAutoFishingState"],
 }
 
 local Replion = require(ReplicatedStorage.Packages.Replion)
@@ -487,14 +488,14 @@ function StartBlatantFishing()
                 pcall(function()
                     Remotes.RF_Minigame:InvokeServer(-1, 0.999)
                 end)
-                task.wait(BlatantFishingDelay)
+                task.wait(BlatantBaitDelay)
                 task.wait(V3_CompleteDelay)
                 
                 pcall(function()
                     Remotes.RE_Fishing:FireServer()
                 end)
             end)
-            task.wait(BlatantFishingDelay)
+            task.wait(BlatantReelDelay)
         end
     end)
 end
@@ -1624,6 +1625,7 @@ local BlatantFishingToggle = FishingTab:Toggle({
     Title = "Blatant Fishing",
     Value = false,
     Callback = function(value)
+    Remotes.AutoEnabled:InvokeServer(enabled)
         if value then
             StartBlatantFishing()
         else
@@ -1633,6 +1635,8 @@ local BlatantFishingToggle = FishingTab:Toggle({
     end,
 })
 ConfigManager:Register("blatantToggle", BlatantFishingToggle)
+
+
 
 FishingTab:Button({
     Title = "Recovery Fishing",
