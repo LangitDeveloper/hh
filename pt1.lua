@@ -44,10 +44,6 @@ local Remotes = {
     RF_Trade = Net:WaitForChild("RF/InitiateTrade"),
 }
 
-Network.Functions = {
-    AutoEnabled = GameModules.Net["RF/UpdateAutoFishingState"],
-}
-
 local Replion = require(ReplicatedStorage.Packages.Replion)
 local FishingController = require(ReplicatedStorage.Controllers.FishingController)
 local ItemTradingController = require(ReplicatedStorage.Controllers.ItemTradingController)
@@ -81,7 +77,7 @@ local IsBlatantFishing = false
 local IsBlatantV3 = false
 local V3_CastDelay     = 0.3   
 local V3_CancelDelay   = 3      
-local V3_CompleteDelay= 0.8    
+local V3_CompleteDelay= 3      
 local CurrentFishCount = 0
 
 
@@ -409,7 +405,6 @@ function StartLegitFishing()
     end)
 end
 
-
 function StartInstantFishing()
     IsInstantFishing = true
     Remotes.RF_AutoFishing:InvokeServer(true)
@@ -482,22 +477,27 @@ function StartBlatantFishing()
     IsBlatantFishing = true
     Remotes.RF_AutoFishing:InvokeServer(true)
     
-    task.spawn(function() 
+    task.spawn(function()
         while IsBlatantFishing do
             task.spawn(function()
                 pcall(function()
+                    Remotes.RF_Cancel:InvokeServer()
+                end)
+                
+                pcall(function()
                     Remotes.RF_Charge:InvokeServer(workspace:GetServerTimeNow())
                 end)
+                
                 pcall(function()
                     Remotes.RF_Minigame:InvokeServer(-1, 0.999)
                 end)
-                task.wait(BlatantBaitDelay)
-                task.wait(V3_CompleteDelay)
                 
+                task.wait(BlatantFishingDelay)
                 pcall(function()
                     Remotes.RE_Fishing:FireServer()
                 end)
             end)
+            
             task.wait(BlatantReelDelay)
         end
     end)
@@ -818,7 +818,6 @@ ConfigManager:Register("themeToggle", ThemeToggle)
 local PfpsSection = PlayerTab:Section({Title = "Tools Fps Booster"})
 
 local StatsGui
-
 
 local PerfomToggle = PfpsSection:Toggle({
     Title = "Show Ping & FPS",
@@ -1632,14 +1631,11 @@ local BlatantFishingToggle = FishingTab:Toggle({
             StartBlatantFishing()
         else
             IsBlatantFishing = false
-            Network.Functions.AutoEnabled:InvokeServer(enabled)
             Remotes.RF_AutoFishing:InvokeServer(false)
         end
     end,
 })
 ConfigManager:Register("blatantToggle", BlatantFishingToggle)
-
-
 
 FishingTab:Button({
     Title = "Recovery Fishing",
