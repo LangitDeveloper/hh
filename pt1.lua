@@ -42,7 +42,7 @@ local Remotes = {
     RE_ObtainedNewFishNotification = Net:WaitForChild("RE/ObtainedNewFishNotification"),
     RE_FishingMinigameEvent = Net:WaitForChild("RE/FishingMinigameChanged"),
     RF_Trade = Net:WaitForChild("RF/InitiateTrade"),
-    RF_AutoEnabled = Net:WaitForChild["RF/UpdateAutoFishingState"],
+    RF_AutoEnabled = Net:WaitForChild("RF/UpdateAutoFishingState"),
 }
 
 local Replion = require(ReplicatedStorage.Packages.Replion)
