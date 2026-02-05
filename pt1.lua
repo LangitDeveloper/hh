@@ -77,7 +77,7 @@ local IsBlatantFishing = false
 local IsBlatantV3 = false
 local V3_CastDelay     = 0.3   
 local V3_CancelDelay   = 3      
-local V3_CompleteDelay= 0.8    
+local V3_CompleteDelay= 3      
 local CurrentFishCount = 0
 
 
@@ -151,6 +151,12 @@ local SelectedLocation = nil
 local SelectedPlayer = nil
 local PlayerList = {}
 
+local function mahiru(message)
+    print("[Mahiru] " .. tostring(message))
+    if MainWindow and MainWindow.Notify then
+       MainWindow:Notify(message)
+    end
+end
 
 local function CreatePingFPSGui()
     local gui = Instance.new("ScreenGui")
@@ -169,15 +175,15 @@ local function CreatePingFPSGui()
 
     Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
 
-    local title = Instance.new("TextLabel", frame)
-    title.Size = UDim2.new(1, -10, 0, 20)
-    title.Position = UDim2.new(0, 10, 0, 5)
-    title.BackgroundTransparency = 1
-    title.Text = "Mahiru"
-    title.Font = Enum.Font.GothamBold
-    title.TextSize = 14
-    title.TextXAlignment = Enum.TextXAlignment.Left
-    title.TextColor3 = Color3.fromRGB(255, 170, 170)
+    local Name = Instance.new("TextLabel", frame)
+    Name.Size = UDim2.new(1, -10, 0, 20)
+    Name.Position = UDim2.new(0, 10, 0, 5)
+    Name.BackgroundTransparency = 1
+    Name.Text = "Mahiru"
+    Name.Font = Enum.Font.GothamBold
+    Name.TextSize = 14
+    Name.TextXAlignment = Enum.TextXAlignment.Left
+    Name.TextColor3 = Color3.fromRGB(255, 170, 170)
 
     local line = Instance.new("Frame", frame)
     line.Size = UDim2.new(1, -20, 0, 1)
@@ -405,7 +411,6 @@ function StartLegitFishing()
     end)
 end
 
-
 function StartInstantFishing()
     IsInstantFishing = true
     Remotes.RF_AutoFishing:InvokeServer(true)
@@ -478,22 +483,27 @@ function StartBlatantFishing()
     IsBlatantFishing = true
     Remotes.RF_AutoFishing:InvokeServer(true)
     
-    task.spawn(function() 
+    task.spawn(function()
         while IsBlatantFishing do
             task.spawn(function()
                 pcall(function()
+                    Remotes.RF_Cancel:InvokeServer()
+                end)
+                
+                pcall(function()
                     Remotes.RF_Charge:InvokeServer(workspace:GetServerTimeNow())
                 end)
+                
                 pcall(function()
                     Remotes.RF_Minigame:InvokeServer(-1, 0.999)
                 end)
-                task.wait(BlatantBaitDelay)
-                task.wait(V3_CompleteDelay)
                 
+                task.wait(BlatantFishingDelay)
                 pcall(function()
                     Remotes.RE_Fishing:FireServer()
                 end)
             end)
+            
             task.wait(BlatantReelDelay)
         end
     end)
@@ -623,30 +633,24 @@ end)
 
 local VirtualUserRef = cloneref(game:GetService("VirtualUser")) or game:GetService("VirtualUser")
 LocalPlayer.Idled:Connect(function()
-   VirtualUserRef:CaptureController()
-  VirtualUserRef:ClickButton2(Vector2.new())
+    VirtualUserRef:CaptureController()
+    VirtualUserRef:ClickButton2(Vector2.new())
 end)
 
 local MahiruUi = loadstring(game:HttpGet("https://raw.githubusercontent.com/TesterX14/XXXX/refs/heads/main/Library"))()
-local Window = ({
-    Title = "Mahiru",
-    Icon = "rbxassetid://78018573702743",
-    Author = "LangitDev",
-    Folder = "Mahiru",
-    Size = UDim2.fromOffset(380, 260),
-    MinSize = Vector2.new(560, 350),
-    MaxSize = Vector2.new(850, 560),
-    Transparent = true,
-    Theme = "Dark",
-    Resizable = true,
-    SideBarWidth = 200,
-    BackgroundImageTransparency = 0.42,
-    HideSearchBar = true,
-    ScrollBarEnabled = false,
-})
 
-local ConfigManager = Window.ConfigManager:CreateConfig("mahiruconfig")
+local WindowConfig = {
+    Name = "Mahiru Script",
+    Footer = "Version 1.0.0",
+    Image = "78018573702743",
+    Color = Color3.fromRGB(0, 208, 255),
+    Theme = 9542022979,
+    Version = 4,
+}
 
+local MainWindow = MahiruUi:Window(WindowConfig)
+if MainWindow then
+end
 local function CreateToggleButton()
     local screenGui = Instance.new("ScreenGui")
     screenGui.Parent = game:GetService("CoreGui")
@@ -658,7 +662,7 @@ local function CreateToggleButton()
     button.Size = UDim2.new(0, 40, 0, 40)
     button.Position = UDim2.new(0, 20, 0, 100)
     button.BackgroundTransparency = 1
-    button.Image = "rbxassetid://78018573702743"
+    button.Image = "rbxassetid://91069103989932"
     button.ScaleType = Enum.ScaleType.Fit
     
     local corner = Instance.new("UICorner")
@@ -695,52 +699,18 @@ local function CreateToggleButton()
 end
 
 CreateToggleButton()
+local Tabs = {}
+Tabs.Info = MainWindow:AddTab({Name = "Info", Icon = "info"})
+Tabs.Player = MainWindow:AddTab({Name = "Player", Icon = "users"})
+Tabs.Fishing = MainWindow:AddTab({Name = "Fishing", Icon = "rbxassetid://103247953194129"})
+Tabs.Automatic = MainWindow:AddTab({Name = "Automatic", Icon = "rbxassetid://12662718374"})
+Tabs.Webhook = MainWindow:AddTab({Name = "Webhook", Icon = "rbxassetid://137601480983962"})
+Tabs.Quest = MainWindow:AddTab({Name = "Quest", Icon = "rbxassetid://114127804740858"})
+Tabs.Utilities = MainWindow:AddTab({Name = "Utilities", Icon = "box"})
+Tabs.Shop = MainWindow:AddTab({Name = "Shop", Icon = "shopping-cart"})
+Tabs.Teleport = MainWindow:AddTab({Name = "Teleport", Icon = "map"})
 
-Window:SetToggleKey(Enum.KeyCode.F3)
-Window:IsResizable(true)
-
-local InfoTab = Window:AddTab({Name = "Info", Icon = "info"})
-local PlayerTab = Window:AddTab({Name = "Player", Icon = "users"})
-local FishingTab = Window:AddTab({Name = "Fishing", Icon = "rbxassetid://103247953194129"})
-local AutomaticTab = Window:AddTab({Name = "Automatic", Icon = "rbxassetid://12662718374"})
-local WebhookTab = Window:AddTab({Name = "Webhook", Icon = "rbxassetid://137601480983962"})
-local QuestTab = Window:AddTab({Name = "Quest", Icon = "rbxassetid://114127804740858"})
-local UtilitiesTab = Window:AddTab({Name = "Utilities", Icon = "box"})
-local ShopTab = Window:AddTab({Name = "Shop", Icon = "shopping-cart"})
-local TeleportTab = Window:AdfTab({Name = "Teleport", Icon = "map"})
-
-InfoTab:Paragraph({
-    Title = "Mahiru Alert!",
-    Desc = "Welcome To Script Mahiru, By LangitDev",
-    Color = "Green",
-    Image = "rbxassetid://12633176980",
-    ImageSize = 30,
-})
-
-InfoTab:Button({
-    Title = "Need Help?",
-    Desc = "Click This To Copy Discord Link.\nJoin to <font color=\"#FF90E3\">Discord Mahiru</font>!",
-    Callback = function()
-        if setclipboard then
-            setclipboard("discord.gg/mahiruscript")
-            MahiruUi:Notify({
-                Title = "Success",
-                Content = "Discord link copied to clipboard!",
-                Duration = 3,
-                Icon = "laptop-minimal-check",
-            })
-        else
-            MahiruUi:Notify({
-                Title = "Error",
-                Content = "Executor doesn't support clipboard!",
-                Duration = 3,
-                Icon = "circle-x",
-            })
-        end
-    end,
-})
-
-InfoTab:Space()
+local Info = Tabs.Info:AddSection("Info Support")
 
 local function RejoinServer()
     TeleportService:Teleport(game.PlaceId, LocalPlayer)
@@ -776,48 +746,41 @@ local function ServerHop()
     if #servers > 0 then
         TeleportService:TeleportToPlaceInstance(placeId, servers[math.random(1, #servers)], LocalPlayer)
     else
-        MahiruUi:Notify({
-            Title = "Error",
-            Content = "No servers available or all are full",
-            Duration = 2.5,
-            Icon = "circle-x",
-        })
+        mahiru("error")
     end
 end
 
-InfoTab:Button({
-    Title = "Rejoin Server",
+Info:AddButton({
+    Name = "Rejoin Server",
     Callback = RejoinServer
 })
 
-InfoTab:Button({
-    Title = "Server Hop",
-    Desc = "Join a new server",
+Info:AddButton({
+    Name = "Server Hop",
+    Description = "Join a new server",
     Callback = ServerHop
 })
 
-local InterfaceSection = PlayerTab:Section({Title = "User Interface"})
-local ThemeToggle = InterfaceSection:Toggle({
-    Title = "Change Theme",
-    Desc = "Dark = OFF | Light = ON",
+local InterfaceSection = Tabs.Player:AddSection({"User Interface"})
+local ThemeToggle = InterfaceSection:AddToggle({
+    Name = "Change Theme",
+    Description = "Dark = OFF | Light = ON",
     Value = false,
     Callback = function(value)
         if value then
-            MahiruUi:SetTheme("Light Theme")
+            MainWindow:SetTheme("Light Theme")
         else
-            MahiruUi:SetTheme("Dark Theme")
+            MainWindow:SetTheme("Dark Theme")
         end
     end,
 })
-ConfigManager:Register("themeToggle", ThemeToggle)
 
-local PfpsSection = PlayerTab:Section({Title = "Tools Fps Booster"})
+local PfpsSection = Tabs.Player:AddSection({"Tools Fps Booster"})
 
 local StatsGui
 
-
-local PerfomToggle = PfpsSection:Toggle({
-    Title = "Show Ping & FPS",
+local PerfomToggle = PfpsSection:AddToggle({
+    Name = "Show Ping & FPS",
     Default = false,
     Callback = function(state)
         if state then
@@ -830,10 +793,9 @@ local PerfomToggle = PfpsSection:Toggle({
         end
     end
 })
-ConfigManager:Register("PerfomToggle", PerfomToggle)
 
-local FPSBoostToggle = PfpsSection:Toggle({
-    Title = "FPS Booster",
+local FPSBoostToggle = PfpsSection:AddToggle({
+    Name = "FPS Booster",
     Default = false,
     Callback = function(state)
         if state then
@@ -844,12 +806,9 @@ local FPSBoostToggle = PfpsSection:Toggle({
     end
 })
 
-ConfigManager:Register("FPSBoostToggle", FPSBoostToggle)
-
-
-local MovementSection = PlayerTab:Section({Title = "Movement"})
-local WalkSpeedSlider = MovementSection:Slider({
-    Title = "WalkSpeed",
+local MovementSection = Tabs.Player:AddSection({"Movement"})
+local WalkSpeedSlider = MovementSection:AddSlider({
+    Name = "WalkSpeed",
     Step = 1,
     Value = {Min = 16, Max = 200, Default = 16},
     Callback = function(value)
@@ -859,8 +818,8 @@ local WalkSpeedSlider = MovementSection:Slider({
     end,
 })
 
-local JumpPowerSlider = MovementSection:Slider({
-    Title = "JumpPower",
+local JumpPowerSlider = MovementSection:AddSlider({
+    Name = "JumpPower",
     Step = 1,
     Value = {Min = 50, Max = 500, Default = 50},
     Callback = function(value)
@@ -870,28 +829,22 @@ local JumpPowerSlider = MovementSection:Slider({
     end,
 })
 
-MovementSection:Button({
-    Title = "Reset Speed And Jump",
+MovementSection:AddButton({
+    Name = "Reset Speed And Jump",
     Callback = function()
         if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
             LocalPlayer.Character.Humanoid.WalkSpeed = 16
             LocalPlayer.Character.Humanoid.JumpPower = 50
             WalkSpeedSlider:Set(16)
             JumpPowerSlider:Set(50)
-            MahiruUi:Notify({
-                Title = "Success",
-                Content = "Speed and jump reset successfully",
-                Duration = 2.5,
-                Icon = "laptop-minimal-check",
-            })
+            mahiru("succes")
         end
     end,
 })
 
-MovementSection:Divider()
 
-local FlySpeedSlider = MovementSection:Slider({
-    Title = "Fly Speed",
+local FlySpeedSlider = MovementSection:AddSlider({
+    Name = "Fly Speed",
     Step = 1,
     Value = {Min = 1, Max = 10, Default = 1},
     Callback = function(value)
@@ -899,8 +852,8 @@ local FlySpeedSlider = MovementSection:Slider({
     end,
 })
 
-local FlyToggle = MovementSection:Toggle({
-    Title = "Enable Fly",
+local FlyToggle = MovementSection:AddToggle({
+    Name = "Enable Fly",
     Value = false,
     Callback = function(value)
         if value then
@@ -975,10 +928,10 @@ local FlyToggle = MovementSection:Toggle({
     end,
 })
 
-local ModesSection = PlayerTab:Section({Title = "Modes"})
+local ModesSection = Tabs.Player:AddSection({"Modes"})
 
-local NoAnimationToggle = ModesSection:Toggle({
-    Title = "No Animations",
+local NoAnimationToggle = ModesSection:AddToggle({
+    Name = "No Animations",
     Value = false,
     Callback = function(value)
         IsNoAnimation = value
@@ -1008,12 +961,7 @@ local NoAnimationToggle = ModesSection:Toggle({
                 end
             end
             
-            MahiruUi:Notify({
-                Title = "No Animation",
-                Content = "Animations disabled",
-                Duration = 2,
-                Icon = "square-slash",
-            })
+            mahiru("no animation off")
         else
             if NoAnimationConnection then
                 NoAnimationConnection:Disconnect()
@@ -1027,20 +975,14 @@ local NoAnimationToggle = ModesSection:Toggle({
                 end
             end
             
-            MahiruUi:Notify({
-                Title = "No Animation",
-                Content = "Animations enabled",
-                Duration = 2,
-                Icon = "square-play",
-            })
+            mahiru("no animasi on")
         end
     end,
 })
-ConfigManager:Register("noAnimationToggle", NoAnimationToggle)
 
-ModesSection:Toggle({
-    Title = "Hide Rod On Hand",
-    Desc = "This feature makes rod invisible! and hides other player's rods too",
+ModesSection:AddToggle({
+    Name = "Hide Rod On Hand",
+    Description = "This feature makes rod invisible! and hides other player's rods too",
     Value = false,
     Callback = function(value)
         IsHideRod = value
@@ -1062,8 +1004,8 @@ ModesSection:Toggle({
 
 ModesSection:Divider()
 
-local InfiniteJumpToggle = ModesSection:Toggle({
-    Title = "Infinite Jump",
+local InfiniteJumpToggle = ModesSection:AddToggle({
+    Name = "Infinite Jump",
     Value = false,
     Callback = function(value)
         IsInfiniteJump = value
@@ -1076,18 +1018,13 @@ UserInputService.JumpRequest:Connect(function()
     end
 end)
 
-local NoClipToggle = ModesSection:Toggle({
-    Title = "Noclip",
+local NoClipToggle = ModesSection:AddToggle({
+    Name = "Noclip",
     Value = false,
     Callback = function(value)
         IsNoClip = value
         if value then
-            MahiruUi:Notify({
-                Title = "Success",
-                Content = "Noclip enabled",
-                Duration = 2.5,
-                Icon = "laptop-minimal-check",
-            })
+            mahiru("succes")
         end
     end,
 })
@@ -1102,8 +1039,8 @@ RunService.Stepped:Connect(function()
     end
 end)
 
-local WalkOnWaterToggle = ModesSection:Toggle({
-    Title = "Walk On Water",
+local WalkOnWaterToggle = ModesSection:AddToggle({
+    Name = "Walk On Water",
     Value = false,
     Callback = function(value)
         IsWalkOnWater = value
@@ -1131,9 +1068,9 @@ local WalkOnWaterToggle = ModesSection:Toggle({
     end,
 })
 
-local MaxZoomToggle = ModesSection:Toggle({
-    Title = "Max Zoom 1000",
-    Desc = "Increase max camera distance",
+local MaxZoomToggle = ModesSection:AddToggle({
+    Name = "Max Zoom 1000",
+    Description = "Increase max camera distance",
     Value = false,
     Callback = function(value)
         if value then
@@ -1152,10 +1089,10 @@ local MaxZoomToggle = ModesSection:Toggle({
     end,
 })
 
-local BoostSection = PlayerTab:Section({Title = "Boost Player"})
+local BoostSection = Tabs.Player:AddSection({"Boost Player"})
 
-local DisableVFXToggle = BoostSection:Toggle({
-    Title = "Disable VFX",
+local DisableVFXToggle = BoostSection:AddToggle({
+    Name = "Disable VFX",
     Value = false,
     Callback = function(value)
         IsDisableVFX = value
@@ -1175,8 +1112,8 @@ local DisableVFXToggle = BoostSection:Toggle({
     end,
 })
 
-local DisableCutsceneToggle = BoostSection:Toggle({
-    Title = "Disable Cutscene",
+local DisableCutsceneToggle = BoostSection:AddToggle({
+    Name = "Disable Cutscene",
     Value = false,
     Callback = function(value)
         IsDisableCutscene = value
@@ -1190,10 +1127,10 @@ local DisableCutsceneToggle = BoostSection:Toggle({
         end
     end,
 })
-ConfigManager:Register("cutsceneToggle", DisableCutsceneToggle)
 
-local DisableFishNotificationToggle = BoostSection:Toggle({
-    Title = "Disable Obtained Fish",
+
+local DisableFishNotificationToggle = BoostSection:AddToggle({
+    Name = "Disable Obtained Fish",
     Value = false,
     Callback = function(value)
         IsDisableFishNotification = value
@@ -1203,13 +1140,13 @@ local DisableFishNotificationToggle = BoostSection:Toggle({
         end
     end,
 })
-ConfigManager:Register("obtainedFishToggle", DisableFishNotificationToggle)
 
-local RenderSection = PlayerTab:Section({Title = "Rendering"})
 
-RenderSection:Toggle({
-    Title = "Reduce Map",
-    Desc = "Don't turn this on with Disable 3D Render",
+local RenderSection = Tabs.Player:AddSection({"Rendering"})
+
+RenderSection:AddToggle({
+    Name = "Reduce Map",
+    Description = "Don't turn this on with Disable 3D Render",
     Value = false,
     Callback = function(value)
         if value then
@@ -1241,13 +1178,13 @@ RenderSection:Toggle({
     end,
 })
 
-RenderSection:Toggle({
-    Title = "Disable 3D Rendering",
+RenderSection:AddToggle({
+    Name = "Disable 3D Rendering",
     Value = false,
     Callback = function(value)
         RunService:Set3dRenderingEnabled(not value)
-        MahiruUi:Notify({
-            Title = value and "Disabled" or "Enabled",
+        MainWindow:Notify({
+            Name = value and "Disabled" or "Enabled",
             Content = value and "3D Render disabled" or "3D Render enabled",
             Duration = 2.5,
             Icon = value and "circle-x" or "laptop-minimal-check",
@@ -1255,8 +1192,8 @@ RenderSection:Toggle({
     end,
 })
 
-local ESPToggle = RenderSection:Toggle({
-    Title = "Player ESP",
+local ESPToggle = RenderSection:AddToggle({
+    Name = "Player ESP",
     Value = false,
     Callback = function(value)
         ESPEnabled = value
@@ -1319,17 +1256,17 @@ local ESPToggle = RenderSection:Toggle({
     end,
 })
 
-local HideIdentSection = PlayerTab:Section({Title = "Identity"})
+local HideIdentSection = Tabs.Player:AddSection({"Identity"})
 
 local function SetupIdentity()
     local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
     local overhead = character:WaitForChild("HumanoidRootPart"):WaitForChild("Overhead")
     
     IdentityElements = {
-        Title = overhead.TitleContainer:WaitForChild("Label"),
+        Name = overhead.NameContainer:WaitForChild("Label"),
         Header = overhead.Content:WaitForChild("Header"),
         Level = overhead.LevelContainer:WaitForChild("Label"),
-        Grad = overhead.TitleContainer.Label:FindFirstChildOfClass("UIGradient") or Instance.new("UIGradient", overhead.TitleContainer.Label),
+        Grad = overhead.NameContainer.Label:FindFirstChildOfClass("UIGradient") or Instance.new("UIGradient", overhead.NameContainer.Label),
         Watermark = overhead:FindFirstChild("MahiruWatermark")
     }
     
@@ -1347,7 +1284,7 @@ local function SetupIdentity()
     end
     
     OriginalIdentity = {
-        Title = IdentityElements.Title.Text,
+        Name = IdentityElements.Name.Text,
         Header = IdentityElements.Header.Text,
         Level = IdentityElements.Level.Text,
         Grad = IdentityElements.Grad.Color,
@@ -1357,9 +1294,9 @@ local function SetupIdentity()
 end
 
 local function HideIdentity()
-    if not IdentityElements.Title then return end
+    if not IdentityElements.Name then return end
     
-    IdentityElements.Title.Text = "Mahiru"
+    IdentityElements.Name.Text = "Mahiru"
     IdentityElements.Header.Text = OriginalIdentity.NewHeader or OriginalIdentity.Header
     IdentityElements.Level.Text = OriginalIdentity.NewLevel or OriginalIdentity.Level
     IdentityElements.Grad.Color = ColorSequence.new({
@@ -1372,9 +1309,9 @@ local function HideIdentity()
 end
 
 local function ShowIdentity()
-    if not IdentityElements.Title then return end
+    if not IdentityElements.Name then return end
     
-    IdentityElements.Title.Text = OriginalIdentity.Title
+    IdentityElements.Name.Text = OriginalIdentity.Name
     IdentityElements.Header.Text = OriginalIdentity.Header
     IdentityElements.Level.Text = OriginalIdentity.Level
     IdentityElements.Grad.Color = OriginalIdentity.Grad
@@ -1382,28 +1319,26 @@ local function ShowIdentity()
     IdentityElements.Watermark.Visible = false
 end
 
-local NameChangerInput = HideIdentSection:Input({
-    Title = "Name Changer",
+local NameChangerInput = HideIdentSection:AddInput({
+    Name = "Name Changer",
     Value = "",
     Placeholder = "Mahiru",
     Callback = function(value)
         OriginalIdentity.NewHeader = value
     end,
 })
-ConfigManager:Register("nameChangerInput", NameChangerInput)
 
-local LevelChangerInput = HideIdentSection:Input({
-    Title = "Level Changer",
+local LevelChangerInput = HideIdentSection:AddInput({
+    Name = "Level Changer",
     Value = "",
     Placeholder = "Lvl: ",
     Callback = function(value)
         OriginalIdentity.NewLevel = value
     end,
 })
-ConfigManager:Register("levelChangerInput", LevelChangerInput)
 
-local IdentityToggle = HideIdentSection:Toggle({
-    Title = "Start Hide Identity",
+local IdentityToggle = HideIdentSection:AddToggle({
+    Name = "Start Hide Identity",
     Value = false,
     Callback = function(value)
         OriginalIdentity.ToggleState = value
@@ -1420,7 +1355,6 @@ local IdentityToggle = HideIdentSection:Toggle({
         end
     end,
 })
-ConfigManager:Register("startIdentityToggle", IdentityToggle)
 
 LocalPlayer.CharacterAdded:Connect(function()
     task.wait(0.1)
@@ -1430,8 +1364,8 @@ LocalPlayer.CharacterAdded:Connect(function()
     end
 end)
 
-HideIdentSection:Button({
-    Title = "Reset Character In Place",
+HideIdentSection:AddButton({
+    Name = "Reset Character In Place",
     Callback = function()
         local character = LocalPlayer.Character
         if not character then return end
@@ -1446,8 +1380,8 @@ HideIdentSection:Button({
         task.wait(0.2)
         LocalPlayer.Character:WaitForChild("HumanoidRootPart").CFrame = position
         
-        MahiruUi:Notify({
-            Title = "Success",
+        MainWindow:Notify({
+            Name = "Success",
             Content = "Character reset in same location!",
             Duration = 2.5,
             Icon = "laptop-minimal-check",
@@ -1457,11 +1391,11 @@ HideIdentSection:Button({
 
 SetupIdentity()
 
-local FishingSection = FishingTab:Section({Title = "Auto Fishing"})
+local FishingSection = Tabs.Fishing:AddSection({"Auto Fishing"})
 
-local LegitDelayInput = FishingSection:Input({
-    Title = "Legit Delay",
-    Desc = "Delay complete fishing!",
+local LegitDelayInput = FishingSection:AddInput({
+    Name = "Legit Delay",
+    Description = "Delay complete fishing!",
     Value = "",
     Placeholder = "Default: 0.2",
     Callback = function(value)
@@ -1471,10 +1405,10 @@ local LegitDelayInput = FishingSection:Input({
         end
     end,
 })
-ConfigManager:Register("legitInput", LegitDelayInput)
 
-local ShakeDelayInput = FishingSection:Input({
-    Title = "Shake Delay",
+
+local ShakeDelayInput = FishingSection:AddInput({
+    Name = "Shake Delay",
     Value = "",
     Placeholder = "Default: 0.15",
     Callback = function(value)
@@ -1484,10 +1418,10 @@ local ShakeDelayInput = FishingSection:Input({
         end
     end,
 })
-ConfigManager:Register("shakeInput", ShakeDelayInput)
 
-local LegitFishingToggle = FishingSection:Toggle({
-    Title = "Legit Fishing",
+
+local LegitFishingToggle = FishingSection:AddToggle({
+    Name = "Legit Fishing",
     Value = false,
     Callback = function(value)
         if value then
@@ -1498,11 +1432,10 @@ local LegitFishingToggle = FishingSection:Toggle({
         end
     end,
 })
-ConfigManager:Register("LegitFishingToggle", LegitFishingToggle)
 
-local AutoShakeToggle = FishingSection:Toggle({
-    Title = "Auto Shake",
-    Desc = "Spam click during fishing (only legit)",
+local AutoShakeToggle = FishingSection:AddToggle({
+    Name = "Auto Shake",
+    Description = "Spam click during fishing (only legit)",
     Value = false,
     Callback = function(value)
         IsAutoShake = value
@@ -1523,20 +1456,20 @@ local AutoShakeToggle = FishingSection:Toggle({
         end
     end,
 })
-ConfigManager:Register("autoShakeToggle", AutoShakeToggle)
 
-FishingTab:Section({Title = "Instant Fishing"})
 
-FishingTab:Paragraph({
-    Title = "Instant Fishing Settings",
-    Desc = "For instant fishing, you must first set the completion delay. The default is 0.1.",
+Tabs.Fishing:AddSection({"Instant Fishing"})
+
+Tabs.Fishing:AddParagraph({
+    Name = "Instant Fishing Settings",
+    Description = "For instant fishing, you must first set the completion delay. The default is 0.1.",
     Color = "Green",
     Image = "rbxassetid://103247953194129",
     ImageSize = 30,
 })
 
-local InstantDelayInput = FishingTab:Input({
-    Title = "Delay Complete",
+local InstantDelayInput = Tabs.Fishing:AddInput({
+    Name = "Delay Complete",
     Value = "",
     Placeholder = "Default: 0.1",
     Callback = function(value)
@@ -1546,11 +1479,10 @@ local InstantDelayInput = FishingTab:Input({
         end
     end,
 })
-ConfigManager:Register("instantDelayCompleteValue", InstantDelayInput)
 
-local InstantFishingToggle = FishingTab:Toggle({
-    Title = "Instant Fishing",
-    Desc = "Auto instantly catch fish",
+local InstantFishingToggle = Tabs.Fishing:AddToggle({
+    Name = "Instant Fishing",
+    Description = "Auto instantly catch fish",
     Value = false,
     Callback = function(value)
         if value then
@@ -1561,11 +1493,10 @@ local InstantFishingToggle = FishingTab:Toggle({
         end
     end,
 })
-ConfigManager:Register("instantToggle", InstantFishingToggle)
 
-FishingTab:Toggle({
-    Title = "Talon Fishing",
-    Desc = "Auto In Game Fishing + Auto Shake",
+Tabs.Fishing:AddToggle({
+    Name = "Talon Fishing",
+    Description = "Auto In Game Fishing + Auto Shake",
     Value = false,
     Callback = function(value)
         IsAutoShake = value
@@ -1590,11 +1521,11 @@ FishingTab:Toggle({
     end,
 })
 
-FishingTab:Section({Title = "Blatant V1"})
+Tabs.Fishing:AddSection({"Blatant V1"})
 
-local BlatantReelInput = FishingTab:Input({
-    Title = "Delay Reel",
-    Desc = "Reel Timing (e.g. 1.9)",
+local BlatantReelInput = Tabs.Fishing:AddInput({
+    Name = "Delay Reel",
+    Description = "Reel Timing (e.g. 1.9)",
     Value = "",
     Placeholder = "Default: 1.9",
     Callback = function(value)
@@ -1604,11 +1535,10 @@ local BlatantReelInput = FishingTab:Input({
         end
     end,
 })
-ConfigManager:Register("blatantReelInput", BlatantReelInput)
 
-local BlatantFishInput = FishingTab:Input({
-    Title = "Delay Fishing",
-    Desc = "Fishing Timing (e.g. 1.1)",
+local BlatantFishInput = Tabs.Fishing:AddInput({
+    Name = "Delay Fishing",
+    Description = "Fishing Timing (e.g. 1.1)",
     Value = "",
     Placeholder = "Default: 1.1",
     Callback = function(value)
@@ -1618,10 +1548,9 @@ local BlatantFishInput = FishingTab:Input({
         end
     end,
 })
-ConfigManager:Register("blatantFishInput", BlatantFishInput)
 
-local BlatantFishingToggle = FishingTab:Toggle({
-    Title = "Blatant Fishing",
+local BlatantFishingToggle = Tabs.Fishing:AddToggle({
+    Name = "Blatant Fishing",
     Value = false,
     Callback = function(value)
         if value then
@@ -1632,12 +1561,9 @@ local BlatantFishingToggle = FishingTab:Toggle({
         end
     end,
 })
-ConfigManager:Register("blatantToggle", BlatantFishingToggle)
 
-
-
-FishingTab:Button({
-    Title = "Recovery Fishing",
+Tabs.Fishing:AddButton({
+    Name = "Recovery Fishing",
     Callback = function()
         pcall(function()
             Remotes.RF_Cancel:InvokeServer()
@@ -1645,11 +1571,11 @@ FishingTab:Button({
     end,
 })
 
-FishingTab:Section({Title = "Blatant V2"})
+Tabs.Fishing:AddSection({"Blatant V2"})
 
-local BlatantBaitInput = FishingTab:Input({
-    Title = "Bait Delay",
-    Desc = "Delay sebelum charge (e.g. 0.05 = ultra fast)",
+local BlatantBaitInput = Tabs.Fishing:AddInput({
+    Name = "Bait Delay",
+    Description = "Delay sebelum charge (e.g. 0.05 = ultra fast)",
     Value = "0.3",
     Placeholder = "0.3",
     Callback = function(value)
@@ -1659,11 +1585,11 @@ local BlatantBaitInput = FishingTab:Input({
         end
     end,
 })
-ConfigManager:Register("blatantBaitInput", BlatantBaitInput)
 
-local BlatantCastInput = FishingTab:Input({
-    Title = "Cast Delay", 
-    Desc = "Delay sebelum minigame (e.g. 0.1 = instant)",
+
+local BlatantCastInput = Tabs.Fishing:AddInput({
+    Name = "Cast Delay", 
+    Description = "Delay sebelum minigame (e.g. 0.1 = instant)",
     Value = "0.70",
     Placeholder = "0.70",
     Callback = function(value)
@@ -1673,10 +1599,9 @@ local BlatantCastInput = FishingTab:Input({
         end
     end,
 })
-ConfigManager:Register("blatantCastInput", BlatantCastInput)
 
-local BlatantFishingV2Toggle = FishingTab:Toggle({
-    Title = "Blatant Fishing",
+local BlatantFishingV2Toggle = Tabs.Fishing:AddToggle({
+    Name = "Blatant Fishing",
     Value = false,
     Callback = function(value)
         if value then
@@ -1687,13 +1612,12 @@ local BlatantFishingV2Toggle = FishingTab:Toggle({
         end
     end,
 })
-ConfigManager:Register("blatantV2Toggle", BlatantFishingV2Toggle)
 
-FishingTab:Section({Title = "Blatant V3"})
+Tabs.Fishing:AddSection({"Blatant V3"})
 
-local BlatantcancelInput = FishingTab:Input({
-    Title = "Cancel Delay",
-    Desc = "Delay sebelum charge (e.g. 0.05 = ultra fast)",
+local BlatantcancelInput = Tabs.Fishing:AddInput({
+    Name = "Cancel Delay",
+    Description = "Delay sebelum charge (e.g. 0.05 = ultra fast)",
     Value = "0.3",
     Placeholder = "0.3",
     Callback = function(value)
@@ -1703,11 +1627,10 @@ local BlatantcancelInput = FishingTab:Input({
         end
     end,
 })
-ConfigManager:Register("blatantcancelInput", BlatantBaitInput)
 
-local BlatantCompleteInput = FishingTab:Input({
-    Title = "Complete Delay", 
-    Desc = "Delay sebelum minigame (e.g. 0.1 = instant)",
+local BlatantCompleteInput = Tabs.Fishing:AddInput({
+    Name = "Complete Delay", 
+    Description = "Delay sebelum minigame (e.g. 0.1 = instant)",
     Value = "0.70",
     Placeholder = "0.70",
     Callback = function(value)
@@ -1717,10 +1640,9 @@ local BlatantCompleteInput = FishingTab:Input({
         end
     end,
 })
-ConfigManager:Register("blatantCompleteInput", BlatantCastInput)
 
-local BlatantFishingV3Toggle = FishingTab:Toggle({
-    Title = "Blatant Fishing V3",
+local BlatantFishingV3Toggle = Tabs.Fishing:AddToggle({
+    Name = "Blatant Fishing V3",
     Value = false,
     Callback = function(value)
         if value then
@@ -1731,12 +1653,11 @@ local BlatantFishingV3Toggle = FishingTab:Toggle({
         end
     end,
 })
-ConfigManager:Register("blatantV3Toggle", BlatantFishingV3Toggle)
 
-local SellSection = AutomaticTab:Section({Title = "Auto Sell"})
+local SellSection = Tabs.Automatic:AddSection({"Auto Sell"})
 
-SellSection:Dropdown({
-    Title = "Select Sell Mode",
+SellSection:AddDropdown({
+    Name = "Select Sell Mode",
     Values = {"Delay", "Count"},
     Value = "Delay",
     Callback = function(value)
@@ -1744,9 +1665,9 @@ SellSection:Dropdown({
     end,
 })
 
-SellSection:Input({
-    Title = "Sell Value",
-    Desc = "Delay = Minute | Count = Fish Count",
+SellSection:AddInput({
+    Name = "Sell Value",
+    Description = "Delay = Minute | Count = Fish Count",
     Value = "60",
     Callback = function(value)
         local num = tonumber(value) or 1
@@ -1758,8 +1679,8 @@ SellSection:Input({
     end,
 })
 
-SellSection:Toggle({
-    Title = "Auto Sell All",
+SellSection:AddToggle({
+    Name = "Auto Sell All",
     Value = false,
     Callback = function(value)
         if value then
@@ -1770,11 +1691,11 @@ SellSection:Toggle({
     end,
 })
 
-local WeatherSection = AutomaticTab:Section({Title = "Auto Buy Weather"})
+local WeatherSection = Tabs.Automatic:AddSection({"Auto Buy Weather"})
 
-local WeatherDropdown = WeatherSection:Dropdown({
-    Title = "Select Weather",
-    Desc = "",
+local WeatherDropdown = WeatherSection:AddDropdown({
+    Name = "Select Weather",
+    Description = "",
     Values = {
         "Cloudy ($10,000)",
         "Wind ($10,000)",
@@ -1795,10 +1716,9 @@ local WeatherDropdown = WeatherSection:Dropdown({
         end
     end,
 })
-ConfigManager:Register("weatherDropdown", WeatherDropdown)
 
-local WeatherToggle = WeatherSection:Toggle({
-    Title = "Auto Buy Weather",
+local WeatherToggle = WeatherSection:AddToggle({
+    Name = "Auto Buy Weather",
     Value = false,
     Callback = function(value)
         IsAutoWeather = value
@@ -1829,9 +1749,8 @@ local WeatherToggle = WeatherSection:Toggle({
         end
     end,
 })
-ConfigManager:Register("weatherToggle", WeatherToggle)
 
-local EventSection = AutomaticTab:Section({Title = "Event Features"})
+local EventSection = Tabs.Automatic:AddSection({"Event Features"})
 
 local function GetActiveEvents()
     local events = {}
@@ -1904,16 +1823,16 @@ local function FindEventPart(eventName)
     return nil
 end
 
-local EventDropdown = EventSection:Dropdown({
-    Title = "Select Event",
+local EventDropdown = EventSection:AddDropdown({
+    Name = "Select Event",
     Values = GetActiveEvents() or {},
     Callback = function(value)
         SelectedEvent = value
     end,
 })
 
-local EventToggle = EventSection:Toggle({
-    Title = "Auto Event",
+local EventToggle = EventSection:AddToggle({
+    Name = "Auto Event",
     Value = false,
     Callback = function(value)
         IsAutoEvent = value
@@ -1953,7 +1872,7 @@ local EventToggle = EventSection:Toggle({
     end,
 })
 
-local FavoriteSection = AutomaticTab:Section({Title = "Favorite Features"})
+local FavoriteSection = Tabs.Automatic:AddSection({"Favorite Features"})
 
 local FishNames = {}
 for _, fish in pairs(FishData) do
@@ -1961,9 +1880,9 @@ for _, fish in pairs(FishData) do
 end
 table.sort(FishNames)
 
-local NameDropdown = FavoriteSection:Dropdown({
-    Title = "Name",
-    Desc = "Favorite By Name Fish (Recommended)",
+local NameDropdown = FavoriteSection:AddDropdown({
+    Name = "Name",
+    Description = "Favorite By Name Fish (Recommended)",
     Values = #FishNames > 0 and FishNames or {"No Fish Found"},
     Multi = true,
     AllowNone = true,
@@ -1977,16 +1896,16 @@ local NameDropdown = FavoriteSection:Dropdown({
     end,
 })
 
-FavoriteSection:Button({
-    Title = "Refresh Fish",
+FavoriteSection:AddButton({
+    Name = "Refresh Fish",
     Callback = function()
         NameDropdown:Refresh(FishNames)
     end,
 })
 
-FavoriteSection:Dropdown({
-    Title = "Rarity",
-    Desc = "Favorite By Rarity (Optional)",
+FavoriteSection:AddDropdown({
+    Name = "Rarity",
+    Description = "Favorite By Rarity (Optional)",
     Values = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic", "Secret"},
     Multi = true,
     AllowNone = true,
@@ -2000,9 +1919,9 @@ FavoriteSection:Dropdown({
     end,
 })
 
-FavoriteSection:Dropdown({
-    Title = "Variant",
-    Desc = "Favorite By Variant (Only works with Name)",
+FavoriteSection:AddDropdown({
+    Name = "Variant",
+    Description = "Favorite By Variant (Only works with Name)",
     Values = {"Galaxy", "Corrupt", "Gemstone", "Ghost", "Lightning", "Fairy Dust", "Gold", "Midnight", "Radioactive", "Stone", "Holographic", "Albino", "Bloodmoon", "Sandy", "Acidic", "Color Burn", "Festive", "Frozen"},
     Multi = true,
     AllowNone = true,
@@ -2021,8 +1940,8 @@ FavoriteSection:Dropdown({
     end,
 })
 
-local AutoFavoriteToggle = FavoriteSection:Toggle({
-    Title = "Auto Favorite",
+local AutoFavoriteToggle = FavoriteSection:AddToggle({
+    Name = "Auto Favorite",
     Value = false,
     Callback = function(value)
         AutoFavoriteConfig.Enabled = value
@@ -2077,8 +1996,8 @@ local AutoFavoriteToggle = FavoriteSection:Toggle({
     end,
 })
 
-FavoriteSection:Button({
-    Title = "Unfavorite All",
+FavoriteSection:AddButton({
+    Name = "Unfavorite All",
     Callback = function()
         local inventory = PlayerData:GetExpect({"Inventory", "Items"}) or {}
         for _, item in ipairs(inventory) do
@@ -2090,11 +2009,11 @@ FavoriteSection:Button({
     end,
 })
 
-local SPSection = AutomaticTab:Section({Title = "Save Position Features"})
+local SPSection = Tabs.Automatic:AddSection({"Save Position Features"})
 
-SPSection:Paragraph({
-    Title = "Guide Teleport",
-    Desc = [[
+SPSection:AddParagraph({
+    Name = "Guide Teleport",
+    Description = [[
 <b><font color="rgb(0,162,255)">AUTO TELEPORT?</font></b>
 Click <b><font color="rgb(0,162,255)">Save Position</font></b> to save your current position!
 
@@ -2136,34 +2055,34 @@ local function TeleportToLastPosition()
     if savedPosition then
         task.wait(2)
         rootPart.CFrame = savedPosition
-        MahiruUi:Notify({
-            Title = "Teleported to your last position...",
+        MainWindow:Notify({
+            Name = "Teleported to your last position...",
         })
     end
 end
 
-SPSection:Button({
-    Title = "Save Position",
+SPSection:AddButton({
+    Name = "Save Position",
     Callback = function()
         local character = LocalPlayer.Character
         local rootPart = character and character:FindFirstChild("HumanoidRootPart")
         if rootPart then
             SavePosition(rootPart.CFrame)
-            MahiruUi:Notify({
-                Title = "Position saved successfully!",
+            MainWindow:Notify({
+                Name = "Position saved successfully!",
             })
         end
     end,
 })
 
-SPSection:Button({
-    Title = "Reset Position",
+SPSection:AddButton({
+    Name = "Reset Position",
     Callback = function()
         if isfile("Mahiru/FishIt/Position.json") then
             delfile("Mahiru/FishIt/Position.json")
         end
-        MahiruUi:Notify({
-            Title = "Last position has been reset!",
+        MainWindow:Notify({
+            Name = "Last position has been reset!",
         })
     end,
 })
@@ -2173,11 +2092,11 @@ if LocalPlayer.Character then
     TeleportToLastPosition()
 end
 
-local EnchantSection = AutomaticTab:Section({Title = "Enchant Features"})
+local EnchantSection = Tabs.Automatic:AddSection({"Enchant Features"})
 
-local EnchantStatus = EnchantSection:Paragraph({
-    Title = "Enchant Status",
-    Desc = "Current Rod : None\nCurrent Enchant : None\nEnchant Stones Left : 0",
+local EnchantStatus = EnchantSection:AddParagraph({
+    Name = "Enchant Status",
+    Description = "Current Rod : None\nCurrent Enchant : None\nEnchant Stones Left : 0",
 })
 
 local function GetEnchantInfo(stoneId)
@@ -2220,8 +2139,8 @@ local function GetEnchantInfo(stoneId)
     return rodName, enchantName, stoneCount, stoneUUIDs
 end
 
-EnchantSection:Button({
-    Title = "Click Enchant",
+EnchantSection:AddButton({
+    Name = "Click Enchant",
     Callback = function()
         task.spawn(function()
             local rodName, enchantName, stoneCount, stoneUUIDs = GetEnchantInfo(10)
@@ -2266,8 +2185,8 @@ EnchantSection:Button({
     end,
 })
 
-EnchantSection:Button({
-    Title = "Teleport Enchant Altar",
+EnchantSection:AddButton({
+    Name = "Teleport Enchant Altar",
     Callback = function()
         local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
         local rootPart = character:FindFirstChild("HumanoidRootPart")
@@ -2284,9 +2203,9 @@ EnchantSection:Button({
 
 EnchantSection:Divider()
 
-EnchantSection:Button({
-    Title = "Click Double Enchant",
-    Desc = "Starting Double Enchanting",
+EnchantSection:AddButton({
+    Name = "Click Double Enchant",
+    Description = "Starting Double Enchanting",
     Callback = function()
         task.spawn(function()
             local rodName, enchantName, stoneCount, stoneUUIDs = GetEnchantInfo(246)
@@ -2331,8 +2250,8 @@ EnchantSection:Button({
     end,
 })
 
-EnchantSection:Button({
-    Title = "Teleport Second Enchant Altar",
+EnchantSection:AddButton({
+    Name = "Teleport Second Enchant Altar",
     Callback = function()
         local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
         local rootPart = character:FindFirstChild("HumanoidRootPart")
@@ -2347,20 +2266,20 @@ EnchantSection:Button({
     end,
 })
 
-WebhookTab:Section({Title = "Webhook Fish Caught"})
+Tabs.Webhook:AddSection({"Webhook Fish Caught"})
 
-local WebhookURLInput = WebhookTab:Input({
-    Title = "Webhook URL",
+local WebhookURLInput = Tabs.Webhook:AddInput({
+    Name = "Webhook URL",
     Value = "",
     Placeholder = "Input Here",
     Callback = function(value)
         WebhookConfig.URL = value
     end,
 })
-ConfigManager:Register("webhookURLInput", WebhookURLInput)
 
-WebhookTab:Dropdown({
-    Title = "Tier Filter",
+
+Tabs.Webhook:AddDropdown({
+    Name = "Tier Filter",
     Values = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic", "Secret"},
     Value = {"Mythic", "Secret"},
     Multi = true,
@@ -2370,8 +2289,8 @@ WebhookTab:Dropdown({
     end,
 })
 
-local FishNameDropdown = WebhookTab:Dropdown({
-    Title = "Name Filter",
+local FishNameDropdown = Tabs.Webhook:AddDropdown({
+    Name = "Name Filter",
     Values = #FishNames > 0 and FishNames or {"No Fish Found"},
     Multi = true,
     AllowNone = true,
@@ -2380,36 +2299,36 @@ local FishNameDropdown = WebhookTab:Dropdown({
     end,
 })
 
-WebhookTab:Button({
-    Title = "Refresh Fish",
+Tabs.Webhook:AddButton({
+    Name = "Refresh Fish",
     Callback = function()
         FishNameDropdown:Refresh(FishNames)
     end,
 })
 
-local WebhookNameInput = WebhookTab:Input({
-    Title = "Hide Identity",
+local WebhookNameInput = Tabs.Webhook:AddInput({
+    Name = "Hide Identity",
     Value = "",
     Placeholder = "Input Here",
     Callback = function(value)
         WebhookConfig.HideName = value
     end,
 })
-ConfigManager:Register("webhookNameInput", WebhookNameInput)
 
-local WebhookToggle = WebhookTab:Toggle({
-    Title = "Send Fish Webhook",
+
+local WebhookToggle = Tabs.Webhook:AddToggle({
+    Name = "Send Fish Webhook",
     Value = false,
     Callback = function(value)
         WebhookConfig.Enabled = value
     end,
 })
-ConfigManager:Register("webhookToggle", WebhookToggle)
 
-WebhookTab:Divider()
 
-WebhookTab:Button({
-    Title = "Test Webhook Connection",
+Tabs.Webhook:Divider()
+
+Tabs.Webhook:AddButton({
+    Name = "Test Webhook Connection",
     Callback = function()
         if not WebhookConfig.URL or not WebhookConfig.URL:match("discord.com/api/webhooks") then
             warn("[Webhook Test] Invalid or missing webhook URL.")
@@ -2442,15 +2361,15 @@ WebhookTab:Button({
             end)
             
             if success then
-                MahiruUi:Notify({
-                    Title = "Success",
+                MainWindow:Notify({
+                    Name = "Success",
                     Content = "Webhook test sent successfully!",
                     Duration = 3,
                     Icon = "laptop-minimal-check",
                 })
             else
-                MahiruUi:Notify({
-                    Title = "Error",
+                MainWindow:Notify({
+                    Name = "Error",
                     Content = "Failed to send webhook: " .. tostring(errorMsg),
                     Duration = 3,
                     Icon = "circle-x",
@@ -2460,11 +2379,11 @@ WebhookTab:Button({
     end,
 })
 
-local SisyphusSection = QuestTab:Section({Title = "Sisyphus State Quest"})
+local SisyphusSection = Tabs.Quest:AddSection({"Sisyphus State Quest"})
 
-local DeepSeaPanel = SisyphusSection:Paragraph({
-    Title = "Deep Sea Panel",
-    Desc = "Loading...",
+local DeepSeaPanel = SisyphusSection:AddParagraph({
+    Name = "Deep Sea Panel",
+    Description = "Loading...",
 })
 
 local function GetQuestInfo(questName)
@@ -2501,9 +2420,9 @@ local function TeleportTo(x, y, z, rotation)
     end
 end
 
-SisyphusSection:Toggle({
-    Title = "Auto Deep Sea Quest",
-    Desc = "Automatically complete Deep Sea Quest!",
+SisyphusSection:AddToggle({
+    Name = "Auto Deep Sea Quest",
+    Description = "Automatically complete Deep Sea Quest!",
     Value = false,
     Callback = function(value)
         IsAutoDeepSeaQuest = value
@@ -2523,30 +2442,32 @@ SisyphusSection:Toggle({
     end,
 })
 
-SisyphusSection:Button({
-    Title = "Treasure Room",
+
+
+SisyphusSection:AddButton({
+    Name = "Treasure Room",
     Callback = function()
         TeleportTo(-3601, -283, -1611)
     end,
 })
 
-SisyphusSection:Button({
-    Title = "Sisyphus Statue",
+SisyphusSection:AddButton({
+    Name = "Sisyphus Statue",
     Callback = function()
         TeleportTo(-3698, -135, -1008)
     end,
 })
 
-local ElementSection = QuestTab:Section({Title = "Element Quest"})
+local ElementSection = Tabs.Quest:AddSection({"Element Quest"})
 
-local ElementPanel = ElementSection:Paragraph({
-    Title = "Element Panel",
-    Desc = "Loading...",
+local ElementPanel = ElementSection:AddParagraph({
+    Name = "Element Panel",
+    Description = "Loading...",
 })
 
-ElementSection:Toggle({
-    Title = "Auto Element Quest",
-    Desc = "Automatically teleport through Element Quest Stages!",
+ElementSection:AddToggle({
+    Name = "Auto Element Quest",
+    Description = "Automatically teleport through Element Quest Stages!",
     Value = false,
     Callback = function(value)
         IsAutoElementQuest = value
@@ -2580,22 +2501,22 @@ ElementSection:Toggle({
     end,
 })
 
-ElementSection:Button({
-    Title = "Secret Temple",
+ElementSection:AddButton({
+    Name = "Secret Temple",
     Callback = function()
         TeleportTo(1453, -22, -636)
     end,
 })
 
-ElementSection:Button({
-    Title = "Underground Cellar",
+ElementSection:AddButton({
+    Name = "Underground Cellar",
     Callback = function()
         TeleportTo(2136, -91, -701)
     end,
 })
 
-ElementSection:Button({
-    Title = "Transcended Stones",
+ElementSection:AddButton({
+    Name = "Transcended Stones",
     Callback = function()
         TeleportTo(1480, 128, -593)
     end,
@@ -2608,11 +2529,11 @@ task.spawn(function()
     end
 end)
 
-local ServerUtilitySection = UtilitiesTab:Section({Title = "Server Utility"})
+local ServerUtilitySection = Tabs.Utilities:AddSection({"Server Utility"})
 
-local AntiStaffToggle = ServerUtilitySection:Toggle({
-    Title = "Anti Staff",
-    Desc = "Auto kick if staff/developer joins the server",
+local AntiStaffToggle = ServerUtilitySection:AddToggle({
+    Name = "Anti Staff",
+    Description = "Auto kick if staff/developer joins the server",
     Value = false,
     Callback = function(value)
         if value then
@@ -2651,11 +2572,10 @@ local AntiStaffToggle = ServerUtilitySection:Toggle({
         end
     end,
 })
-ConfigManager:Register("antiStaffToggle", AntiStaffToggle)
 
-local StreamerModeToggle = ServerUtilitySection:Toggle({
-    Title = "Streamer Mode",
-    Desc = "This will hide the location, character, and coins.",
+local StreamerModeToggle = ServerUtilitySection:AddToggle({
+    Name = "Streamer Mode",
+    Description = "This will hide the location, character, and coins.",
     Value = false,
     Callback = function(value)
         local eventsFrame = PlayerGui.Events.Frame
@@ -2691,12 +2611,11 @@ local StreamerModeToggle = ServerUtilitySection:Toggle({
         end
     end,
 })
-ConfigManager:Register("streamerModeToggle", StreamerModeToggle)
 
-UtilitiesTab:Divider()
+Tabs.Utilities:Divider()
 
-local RadarToggle = UtilitiesTab:Toggle({
-    Title = "Bypass Radar",
+local RadarToggle = Tabs.Utilities:AddToggle({
+    Name = "Bypass Radar",
     Value = false,
     Callback = function(value)
         pcall(function()
@@ -2704,10 +2623,10 @@ local RadarToggle = UtilitiesTab:Toggle({
         end)
     end,
 })
-ConfigManager:Register("radarToggle", RadarToggle)
 
-local DivingGearToggle = UtilitiesTab:Toggle({
-    Title = "Bypass Diving Gear",
+
+local DivingGearToggle = Tabs.Utilities:AddToggle({
+    Name = "Bypass Diving Gear",
     Value = false,
     Callback = function(value)
         if not value then
@@ -2724,13 +2643,12 @@ local DivingGearToggle = UtilitiesTab:Toggle({
         end
     end,
 })
-ConfigManager:Register("divingGearToggle", DivingGearToggle)
 
-local MerchantShopSection = ShopTab:Section({Title = "Merchant Shop"})
+local MerchantShopSection = Tabs.Shop:AddSection({"Merchant Shop"})
 
-local MerchantPanel = MerchantShopSection:Paragraph({
-    Title = "MERCHANT STOCK PANEL",
-    Desc = "Loading...",
+local MerchantPanel = MerchantShopSection:AddParagraph({
+    Name = "MERCHANT STOCK PANEL",
+    Description = "Loading...",
 })
 
 local function UpdateMerchantInfo()
@@ -2754,8 +2672,8 @@ local function UpdateMerchantInfo()
     end
 end
 
-MerchantShopSection:Button({
-    Title = "Open/Close Merchant",
+MerchantShopSection:AddButton({
+    Name = "Open/Close Merchant",
     Callback = function()
         local merchant = PlayerGui:FindFirstChild("Merchant")
         if not merchant then return end
@@ -2779,8 +2697,8 @@ task.spawn(function()
     end
 end)
 
-MerchantShopSection:Button({
-    Title = "Teleport To Merchant",
+MerchantShopSection:AddButton({
+    Name = "Teleport To Merchant",
     Callback = function()
         local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
         local rootPart = character:FindFirstChild("HumanoidRootPart")
@@ -2790,7 +2708,7 @@ MerchantShopSection:Button({
     end,
 })
 
-local RodSection = ShopTab:Section({Title = "Purchase Rod"})
+local RodSection = Tabs.Shop:AddSection({"Purchase Rod"})
 
 local Rods = {
     ["Chrome Rod (43.7K)"] = {Id = 7, Price = 43700},
@@ -2832,20 +2750,20 @@ for name, data in pairs(Rods) do
 end
 table.sort(RodOptions)
 
-local RodDropdown = RodSection:Dropdown({
-    Title = "Select Rod",
+local RodDropdown = RodSection:AddDropdown({
+    Name = "Select Rod",
     Values = RodOptions,
     Callback = function(value)
         SelectedRod = value
     end,
 })
 
-RodSection:Button({
-    Title = "Purchase",
+RodSection:AddButton({
+    Name = "Purchase",
     Callback = function()
         if not SelectedRod then
-            MahiruUi:Notify({
-                Title = "Error",
+            MainWindow:Notify({
+                Name = "Error",
                 Content = "Select Rod First!",
                 Duration = 2.5,
                 Icon = "circle-x",
@@ -2855,8 +2773,8 @@ RodSection:Button({
         
         local rodData = Rods[SelectedRod]
         if not rodData then
-            MahiruUi:Notify({
-                Title = "Error",
+            MainWindow:Notify({
+                Name = "Error",
                 Content = "Rod ID Not Found!",
                 Duration = 2.5,
                 Icon = "circle-x",
@@ -2870,7 +2788,7 @@ RodSection:Button({
     end,
 })
 
-local BaitSection = ShopTab:Section({Title = "Purchase Bait"})
+local BaitSection = Tabs.Shop:AddSection({"Purchase Bait"})
 
 local Baits = {
     ["Starter Bait (0)"] = {Id = 1, Price = 0},
@@ -2910,20 +2828,20 @@ for name, data in pairs(Baits) do
 end
 table.sort(BaitOptions)
 
-local BaitDropdown = BaitSection:Dropdown({
-    Title = "Select Bait",
+local BaitDropdown = BaitSection:AddDropdown({
+    Name = "Select Bait",
     Values = BaitOptions,
     Callback = function(value)
         SelectedBait = value
     end,
 })
 
-BaitSection:Button({
-    Title = "Purchase",
+BaitSection:AddButton({
+    Name = "Purchase",
     Callback = function()
         if not SelectedBait then
-            MahiruUi:Notify({
-                Title = "Error",
+            MainWindow:Notify({
+                Name = "Error",
                 Content = "Select Bait First!",
                 Duration = 2.5,
                 Icon = "circle-x",
@@ -2933,8 +2851,8 @@ BaitSection:Button({
         
         local baitData = Baits[SelectedBait]
         if not baitData then
-            MahiruUi:Notify({
-                Title = "Error",
+            MainWindow:Notify({
+                Name = "Error",
                 Content = "Bait ID Not Found!",
                 Duration = 2.5,
                 Icon = "circle-x",
@@ -2948,7 +2866,7 @@ BaitSection:Button({
     end,
 })
 
-local BoatSection = ShopTab:Section({Title = "Purchase Boat"})
+local BoatSection = Tabs.Shop:AddSection({"Purchase Boat"})
 
 local Boats = {
     ["Small Boat (300)"] = {Id = 1, Price = 300},
@@ -2965,20 +2883,20 @@ for name, data in pairs(Boats) do
     table.insert(BoatOptions, name)
 end
 
-local BoatDropdown = BoatSection:Dropdown({
-    Title = "Select Boat",
+local BoatDropdown = BoatSection:AddDropdown({
+    Name = "Select Boat",
     Values = BoatOptions,
     Callback = function(value)
         SelectedBoat = value
     end,
 })
 
-BoatSection:Button({
-    Title = "Purchase",
+BoatSection:AddButton({
+    Name = "Purchase",
     Callback = function()
         if not SelectedBoat then
-            MahiruUi:Notify({
-                Title = "Error",
+            MainWindow:Notify({
+                Name = "Error",
                 Content = "Select Boat First!",
                 Duration = 2.5,
                 Icon = "circle-x",
@@ -2988,8 +2906,8 @@ BoatSection:Button({
         
         local boatData = Boats[SelectedBoat]
         if not boatData then
-            MahiruUi:Notify({
-                Title = "Error",
+            MainWindow:Notify({
+                Name = "Error",
                 Content = "Boat ID Not Found!",
                 Duration = 2.5,
                 Icon = "circle-x",
@@ -3003,7 +2921,7 @@ BoatSection:Button({
     end,
 })
 
-local LocationSection = TeleportTab:Section({Title = "Location"})
+local LocationSection = Tabs.Teleport:AddSection({"Location"})
 
 local Locations = {
     "Ancient Jungle",
@@ -3065,22 +2983,22 @@ local LocationCoordinates = {
     ["Pirate Cove"] = Vector3.new(3207.78, 9.10, 3546.13),
 }
 
-local LocationDropdown = LocationSection:Dropdown({
-    Title = "Choose Location",
+local LocationDropdown = LocationSection:AddDropdown({
+    Name = "Choose Location",
     Values = Locations,
     Value = "Ancient Jungle",
     Callback = function(value)
         SelectedLocation = value
     end,
 })
-ConfigManager:Register("tpLocationDropdown", LocationDropdown)
 
-LocationSection:Button({
-    Title = "Teleport",
+
+LocationSection:AddButton({
+    Name = "Teleport",
     Callback = function()
         if not SelectedLocation then
-            MahiruUi:Notify({
-                Title = "Error",
+            MainWindow:Notify({
+                Name = "Error",
                 Content = "Select location first!",
                 Duration = 2.5,
                 Icon = "circle-x",
@@ -3098,7 +3016,7 @@ LocationSection:Button({
     end,
 })
 
-local PlayerSection = TeleportTab:Section({Title = "Player"})
+local PlayerSection = Tabs.Teleport:AddSection({"Player"})
 
 local function GetPlayerList()
     local players = {}
@@ -3108,20 +3026,20 @@ local function GetPlayerList()
     return players
 end
 
-local PlayerDropdown = PlayerSection:Dropdown({
-    Title = "Select Player",
+local PlayerDropdown = PlayerSection:AddDropdown({
+    Name = "Select Player",
     Values = GetPlayerList(),
     Callback = function(value)
         SelectedPlayer = value
     end,
 })
 
-PlayerSection:Button({
-    Title = "Refresh",
+PlayerSection:AddButton({
+    Name = "Refresh",
     Callback = function()
         PlayerDropdown:Refresh(GetPlayerList())
-        MahiruUi:Notify({
-            Title = "Success",
+        MainWindow:Notify({
+            Name = "Success",
             Content = "Player list refreshed successfully",
             Duration = 2.5,
             Icon = "laptop-minimal-check",
@@ -3129,12 +3047,12 @@ PlayerSection:Button({
     end,
 })
 
-PlayerSection:Button({
-    Title = "Go",
+PlayerSection:AddButton({
+    Name = "Go",
     Callback = function()
         if not SelectedPlayer then
-            MahiruUi:Notify({
-                Title = "Error",
+            MainWindow:Notify({
+                Name = "Error",
                 Content = "Select player first!",
                 Duration = 2.5,
                 Icon = "circle-x",
@@ -3144,8 +3062,8 @@ PlayerSection:Button({
         
         local targetPlayer = Players:FindFirstChild(SelectedPlayer)
         if not targetPlayer or not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            MahiruUi:Notify({
-                Title = "Error",
+            MainWindow:Notify({
+                Name = "Error",
                 Content = "Invalid player!",
                 Duration = 2.5,
                 Icon = "circle-x",
@@ -3160,8 +3078,7 @@ PlayerSection:Button({
     end,
 })
 
-Window:OnDestroy(function()
-    ConfigManager:Save()
+MainWindow:OnDestroy(function()
     
     if LegitFishingToggle then LegitFishingToggle:Set(false) end
     if AutoShakeToggle then AutoShakeToggle:Set(false) end
@@ -3235,7 +3152,6 @@ Window:OnDestroy(function()
     print("Mahiru cleaned up successfully!")
 end)
 
-ConfigManager:Load()
 
 print("Mahiru Loaded Successfully...")
 print("Happy Fishing Brotherrrrr...")
