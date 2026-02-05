@@ -621,11 +621,11 @@ task.spawn(function()
     end)
 end)
 
-local VirtualUserRef = cloneref(game:GetService("VirtualUser")) or game:GetService("VirtualUser")
-LocalPlayer.Idled:Connect(function()
-    VirtualUserRef:CaptureController()
-    VirtualUserRef:ClickButton2(Vector2.new())
-end)
+--local VirtualUserRef = cloneref(game:GetService("VirtualUser")) or game:GetService("VirtualUser")
+--LocalPlayer.Idled:Connect(function()
+--    VirtualUserRef:CaptureController()
+--    VirtualUserRef:ClickButton2(Vector2.new())
+--end)
 
 local MahiruUi = loadstring(game:HttpGet("https://raw.githubusercontent.com/LangitDeveloper/hh/main/mahiruui.lua"))()
 local Window = MahiruUi:CreateWindow({
