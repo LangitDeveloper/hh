@@ -628,7 +628,7 @@ LocalPlayer.Idled:Connect(function()
 end)
 
 local MahiruUi = loadstring(game:HttpGet("https://raw.githubusercontent.com/TesterX14/XXXX/refs/heads/main/Library"))()
-local Window = MahiruUi:CreateWindow({
+local Window = ({
     Title = "Mahiru",
     Icon = "rbxassetid://78018573702743",
     Author = "LangitDev",
@@ -699,15 +699,15 @@ CreateToggleButton()
 Window:SetToggleKey(Enum.KeyCode.F3)
 Window:IsResizable(true)
 
-local InfoTab = Window:Tab({Title = "Info", Icon = "info"})
-local PlayerTab = Window:Tab({Title = "Player", Icon = "users"})
-local FishingTab = Window:Tab({Title = "Fishing", Icon = "rbxassetid://103247953194129"})
-local AutomaticTab = Window:Tab({Title = "Automatic", Icon = "rbxassetid://12662718374"})
-local WebhookTab = Window:Tab({Title = "Webhook", Icon = "rbxassetid://137601480983962"})
-local QuestTab = Window:Tab({Title = "Quest", Icon = "rbxassetid://114127804740858"})
-local UtilitiesTab = Window:Tab({Title = "Utilities", Icon = "box"})
-local ShopTab = Window:Tab({Title = "Shop", Icon = "shopping-cart"})
-local TeleportTab = Window:Tab({Title = "Teleport", Icon = "map"})
+local InfoTab = Window:AddTab({Name = "Info", Icon = "info"})
+local PlayerTab = Window:AddTab({Name = "Player", Icon = "users"})
+local FishingTab = Window:AddTab({Name = "Fishing", Icon = "rbxassetid://103247953194129"})
+local AutomaticTab = Window:AddTab({Name = "Automatic", Icon = "rbxassetid://12662718374"})
+local WebhookTab = Window:AddTab({Name = "Webhook", Icon = "rbxassetid://137601480983962"})
+local QuestTab = Window:AddTab({Name = "Quest", Icon = "rbxassetid://114127804740858"})
+local UtilitiesTab = Window:AddTab({Name = "Utilities", Icon = "box"})
+local ShopTab = Window:AddTab({Name = "Shop", Icon = "shopping-cart"})
+local TeleportTab = Window:AdfTab({Name = "Teleport", Icon = "map"})
 
 InfoTab:Paragraph({
     Title = "Mahiru Alert!",
