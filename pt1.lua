@@ -13,7 +13,7 @@ local Stats = game:GetService("Stats")
 local Net = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net
 local Remotes = {
     RE_FishCaught = Net:WaitForChild("RE/FishCaught"),
-    RE_Fishing = Net:WaitForChild("RE/CatchFishCompleted"),
+    RF_Fishing = Net:WaitForChild("RF/CatchFishCompleted"),
     RF_Charge = Net:WaitForChild("RF/ChargeFishingRod"),
     RF_Minigame = Net:WaitForChild("RF/RequestFishingMinigameStarted"),
     RF_Cancel = Net:WaitForChild("RF/CancelFishingInputs"),
@@ -388,7 +388,7 @@ function StartLegitFishing()
                 
                 task.wait(LegitFishingDelay)
                 pcall(function()
-                    Remotes.RE_Fishing:FireServer()
+                    Remotes.RF_Fishing:FireServer()
                 end)
 
                 task.wait(1.3)
@@ -418,7 +418,7 @@ function StartInstantFishing()
                 
                 task.wait(InstantFishingDelay)
                 pcall(function()
-                    Remotes.RE_Fishing:FireServer()
+                    Remotes.RF_Fishing:FireServer()
                 end)
             end
             
@@ -443,7 +443,7 @@ function StartBlatantFishingV3()
                 
                 task.wait(CancelDelay)
                 pcall(function()
-                    Remotes.RE_Fishing:FireServer()
+                    Remotes.RF_Fishing:FireServer()
                 end)
             
             task.wait(CompleteDelay)
@@ -462,7 +462,7 @@ function StartBlatantFishingV2()
             local _, _, power = Remotes.RF_Charge:InvokeServer(workspace:GetServerTimeNow())
             Remotes.RF_Minigame:InvokeServer(-1, 0.999, power)
             task.wait(BlatantBaitDelay)
-            Remotes.RE_Fishing:FireServer()
+            Remotes.RF_Fishing:FireServer()
             task.wait(BlatantCastDelay)
         end
     end)
@@ -485,7 +485,7 @@ function StartBlatantFishing()
                 task.wait(CompleteDelay)
                 
                 pcall(function()
-                    Remotes.RE_Fishing:FireServer()
+                    Remotes.RF_Fishing:FireServer()
                 end)
             end)
             task.wait(BlatantReelDelay)
