@@ -482,9 +482,8 @@ function StartBlatantFishing()
                 pcall(function()
                     Remotes.RF_Minigame:InvokeServer(-1, 0.999)
                 end)
-                task.wait(BlatantBaitDelay)
                 task.wait(CompleteDelay)
-                
+                task.wait(BlatantBaitDelay)
                 pcall(function()
                     Remotes.RF_Fishing:FireServer()
                 end)
@@ -1619,7 +1618,6 @@ local BlatantFishingToggle = FishingTab:Toggle({
     Title = "Blatant Fishing",
     Value = false,
     Callback = function(value)
-    Remotes.RF_AutoEnabled:InvokeServer(value)
         if value then
             StartBlatantFishing()
         else
