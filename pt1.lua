@@ -1,6 +1,3 @@
-
--- DECRYPT BY MAHIRU 
-
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -16,7 +13,7 @@ local Stats = game:GetService("Stats")
 local Net = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net
 local Remotes = {
     RE_FishCaught = Net:WaitForChild("RE/FishCaught"),
-    RE_Fishing = Net:WaitForChild("RE/FishingCompleted"),
+    RE_Fishing = Net:WaitForChild("RE/CatchFishCompleted"),
     RF_Charge = Net:WaitForChild("RF/ChargeFishingRod"),
     RF_Minigame = Net:WaitForChild("RF/RequestFishingMinigameStarted"),
     RF_Cancel = Net:WaitForChild("RF/CancelFishingInputs"),
@@ -75,9 +72,9 @@ local IsInstantFishing = false
 local IsBlatantFishing = false
 
 local IsBlatantV3 = false
-local V3_CastDelay     = 0.3   
-local V3_CancelDelay   = 3      
-local V3_CompleteDelay= 0.8    
+local CastDelay   = 0.3   
+local CancelDelay   = 3      
+local CompleteDelay = 0.8    
 local CurrentFishCount = 0
 
 
@@ -86,10 +83,7 @@ local AutoSellValue = 60
 local IsAutoSell = false
 local LastSellTick = 0
 
-local IsengV1_Enabled = false
-local IsengV2_Enabled = false
 local SelectedVictim = nil
-local IsengV3_Enabled = false
 local FrozenPlayers = {}
 
 local WebhookConfig = {
@@ -447,12 +441,12 @@ function StartBlatantFishingV3()
                     Remotes.RF_Minigame:InvokeServer(-1, 0.999)
                 end)
                 
-                task.wait(V3_CancelDelay)
+                task.wait(CancelDelay)
                 pcall(function()
                     Remotes.RE_Fishing:FireServer()
                 end)
             
-            task.wait(V3_CompleteDelay)
+            task.wait(CompleteDelay)
         end
     end)
 end
@@ -488,7 +482,7 @@ function StartBlatantFishing()
                     Remotes.RF_Minigame:InvokeServer(-1, 0.999)
                 end)
                 task.wait(BlatantBaitDelay)
-                task.wait(V3_CompleteDelay)
+                task.wait(CompleteDelay)
                 
                 pcall(function()
                     Remotes.RE_Fishing:FireServer()
@@ -1699,7 +1693,7 @@ local BlatantcancelInput = FishingTab:Input({
     Callback = function(value)
         local num = tonumber(value)
         if num and num >= 0 then
-            V3_CancelDelay = num
+            CancelDelay = num
         end
     end,
 })
@@ -1713,7 +1707,7 @@ local BlatantCompleteInput = FishingTab:Input({
     Callback = function(value)
         local num = tonumber(value)
         if num and num >= 0 then
-            V3_CompleteDelay = num
+            CompleteDelay = num
         end
     end,
 })
@@ -3238,4 +3232,3 @@ end)
 ConfigManager:Load()
 
 print("Mahiru Loaded Successfully...")
-print("Happy Fishing Brotherrrrr...")
