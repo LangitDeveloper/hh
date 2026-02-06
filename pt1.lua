@@ -11,7 +11,6 @@ local VirtualInputManager = game:GetService("VirtualInputManager")
 local TeleportService = game:GetService("TeleportService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
-local Stats = game:GetService("Stats")
 
 local Net = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net
 local Remotes = {
@@ -67,17 +66,10 @@ local ShakeDelay = 0.15
 local InstantFishingDelay = 0.1
 local BlatantReelDelay = 1.9
 local BlatantFishingDelay = 1.1
-local BlatantBaitDelay = 0.3 
-local BlatantCastDelay = 0.70    
 local IsLegitFishing = false
 local IsAutoShake = false
 local IsInstantFishing = false
 local IsBlatantFishing = false
-
-local IsBlatantV3 = false
-local V3_CastDelay     = 0.3   
-local V3_CancelDelay   = 3      
-local V3_CompleteDelay= 0.8    
 local CurrentFishCount = 0
 
 
@@ -86,11 +78,6 @@ local AutoSellValue = 60
 local IsAutoSell = false
 local LastSellTick = 0
 
-local IsengV1_Enabled = false
-local IsengV2_Enabled = false
-local SelectedVictim = nil
-local IsengV3_Enabled = false
-local FrozenPlayers = {}
 
 local WebhookConfig = {
     Enabled = false,
@@ -151,154 +138,6 @@ local SelectedLocation = nil
 local SelectedPlayer = nil
 local PlayerList = {}
 
-
-local function CreatePingFPSGui()
-    local gui = Instance.new("ScreenGui")
-    gui.Name = "MahiruPingFPS"
-    gui.ResetOnSpawn = false
-    gui.Parent = game.CoreGui
-
-    local frame = Instance.new("Frame", gui)
-    frame.Size = UDim2.new(0, 180, 0, 60)
-    frame.Position = UDim2.new(0, 20, 0, 200)
-    frame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-    frame.BackgroundTransparency = 0.3
-    frame.BorderSizePixel = 0
-    frame.Active = true
-    frame.Draggable = true
-
-    Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 12)
-
-    local title = Instance.new("TextLabel", frame)
-    title.Size = UDim2.new(1, -10, 0, 20)
-    title.Position = UDim2.new(0, 10, 0, 5)
-    title.BackgroundTransparency = 1
-    title.Text = "Mahiru"
-    title.Font = Enum.Font.GothamBold
-    title.TextSize = 14
-    title.TextXAlignment = Enum.TextXAlignment.Left
-    title.TextColor3 = Color3.fromRGB(255, 170, 170)
-
-    local line = Instance.new("Frame", frame)
-    line.Size = UDim2.new(1, -20, 0, 1)
-    line.Position = UDim2.new(0, 10, 0, 28)
-    line.BackgroundColor3 = Color3.fromRGB(100, 100, 120)
-    line.BorderSizePixel = 0
-
-    local info = Instance.new("TextLabel", frame)
-    info.Size = UDim2.new(1, -10, 0, 25)
-    info.Position = UDim2.new(0, 10, 0, 32)
-    info.BackgroundTransparency = 1
-    info.Font = Enum.Font.GothamMedium
-    info.TextSize = 14
-    info.TextXAlignment = Enum.TextXAlignment.Left
-    info.Text = "Ping: -- | FPS: --"
-    
-    local watermark = Instance.new("TextLabel", frame)
-    watermark.Size = UDim2.new(0, 40, 0, 15)
-    watermark.Position = UDim2.new(1, -45, 0, 5)
-    watermark.BackgroundTransparency = 1
-    watermark.Text = "LangitDev"
-    watermark.Font = Enum.Font.GothamBold
-    watermark.TextSize = 10
-    watermark.TextColor3 = Color3.fromRGB(255, 100, 100)
-    
-    local closeBtn = Instance.new("TextButton", frame)
-    closeBtn.Size = UDim2.new(0, 20, 0, 20)
-    closeBtn.Position = UDim2.new(1, -25, 0, 5)
-    closeBtn.BackgroundTransparency = 0.8
-    closeBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
-    closeBtn.Text = "-"
-    closeBtn.TextColor3 = Color3.fromRGB(255, 150, 150)
-    closeBtn.Font = Enum.Font.GothamBold
-    closeBtn.TextSize = 12
-    closeBtn.AutoButtonColor = false
-    
-    Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 4)
-    
-    closeBtn.MouseButton1Click:Connect(function()
-        gui.Enabled = not gui.Enabled
-        closeBtn.Text = gui.Enabled and "X" or "▶"
-    end)
-    
-    closeBtn.MouseEnter:Connect(function()
-        closeBtn.BackgroundTransparency = 0.5
-    end)
-    
-    closeBtn.MouseLeave:Connect(function()
-        closeBtn.BackgroundTransparency = 0.8
-    end)
-    
-    local fps = 0
-    local frames = 0
-    local lastTime = os.clock()
-
-    local conn
-    conn = RunService.RenderStepped:Connect(function()
-        frames = frames + 1
-        local now = os.clock()
-
-        if now - lastTime >= 0.5 then  
-            fps = math.floor(frames / (now - lastTime))
-            frames = 0
-            lastTime = now
-
-            local ping = math.floor(
-                Stats.Network.ServerStatsItem["Data Ping"]:GetValue()
-            )
-            
-            local color
-            if ping < 100 and fps > 60 then
-                color = Color3.fromRGB(100, 255, 100)  
-                frame.BackgroundColor3 = Color3.fromRGB(30, 50, 30)
-            elseif ping < 200 and fps > 30 then
-                color = Color3.fromRGB(255, 255, 100)  
-                frame.BackgroundColor3 = Color3.fromRGB(50, 50, 30)
-            else
-                color = Color3.fromRGB(255, 100, 100) 
-                frame.BackgroundColor3 = Color3.fromRGB(50, 30, 30)
-            end
-
-            info.TextColor3 = color
-            info.Text = string.format("Ping: %dms | FPS: %d", ping, fps)
-            
-            
-            if ping < 100 then
-                watermark.TextColor3 = Color3.fromRGB(100, 255, 100)
-            elseif ping < 300 then
-                watermark.TextColor3 = Color3.fromRGB(255, 255, 100)
-            else
-                watermark.TextColor3 = Color3.fromRGB(255, 100, 100)
-            end
-        end
-    end)
-    
-    
-    local hotkeyConnection
-    hotkeyConnection = UserInputService.InputBegan:Connect(function(input)
-        if input.KeyCode == Enum.KeyCode.F4 then
-            gui.Enabled = not gui.Enabled
-            closeBtn.Text = gui.Enabled and "X" or "▶"
-        end
-    end)
-    
-    gui.Destroying:Once(function()
-        if conn then 
-            conn:Disconnect() 
-            conn = nil
-        end
-        if hotkeyConnection then
-            hotkeyConnection:Disconnect()
-            hotkeyConnection = nil
-        end
-        print("PingFPS successfully")
-    end)
-
-    print("PingFPS created successfully!")
-    return gui
-end
-
-
 function FormatNumber(num)
     if num >= 1000000 then
         return string.format("%.1fM", num / 1000000)
@@ -307,8 +146,6 @@ function FormatNumber(num)
     end
     return tostring(num)
 end
-
-
 
 function GetFishCount()
     local bagLabel = PlayerGui.Inventory.Main.Top.Options.Fish.Label.BagSize
@@ -405,7 +242,6 @@ function StartLegitFishing()
     end)
 end
 
-
 function StartInstantFishing()
     IsInstantFishing = true
     Remotes.RF_AutoFishing:InvokeServer(true)
@@ -433,67 +269,31 @@ function StartInstantFishing()
     end)
 end
 
-function StartBlatantFishingV3()
-    IsBlatantFishing = true
-    Remotes.RF_AutoFishing:InvokeServer(true)
-    
-    task.spawn(function()
-        while IsBlatantFishing do
-                pcall(function()
-                    Remotes.RF_Charge:InvokeServer(workspace:GetServerTimeNow())
-                end)
-                
-                pcall(function()
-                    Remotes.RF_Minigame:InvokeServer(-1, 0.999)
-                end)
-                
-                task.wait(V3_CancelDelay)
-                pcall(function()
-                    Remotes.RE_Fishing:FireServer()
-                end)
-            
-            task.wait(V3_CompleteDelay)
-        end
-    end)
-end
-
-function StartBlatantFishingV2()
-    IsBlatantFishing = true
-    Remotes.RF_AutoFishing:InvokeServer(true)
-    task.spawn(function()
-        while IsBlatantFishing do
-            pcall(function()
-                Remotes.RF_Cancel:InvokeServer()
-            end)
-            local _, _, power = Remotes.RF_Charge:InvokeServer(workspace:GetServerTimeNow())
-            Remotes.RF_Minigame:InvokeServer(-1, 0.999, power)
-            task.wait(BlatantBaitDelay)
-            Remotes.RE_Fishing:FireServer()
-            task.wait(BlatantCastDelay)
-        end
-    end)
-end
-
 function StartBlatantFishing()
     IsBlatantFishing = true
     Remotes.RF_AutoFishing:InvokeServer(true)
     
-    task.spawn(function() 
+    task.spawn(function()
         while IsBlatantFishing do
             task.spawn(function()
                 pcall(function()
+                    Remotes.RF_Cancel:InvokeServer()
+                end)
+                
+                pcall(function()
                     Remotes.RF_Charge:InvokeServer(workspace:GetServerTimeNow())
                 end)
+                
                 pcall(function()
                     Remotes.RF_Minigame:InvokeServer(-1, 0.999)
                 end)
-                task.wait(BlatantBaitDelay)
-                task.wait(V3_CompleteDelay)
                 
+                task.wait(BlatantFishingDelay)
                 pcall(function()
                     Remotes.RE_Fishing:FireServer()
                 end)
             end)
+            
             task.wait(BlatantReelDelay)
         end
     end)
@@ -526,37 +326,6 @@ function StartAutoSell()
     end)
 end
 
-local Lighting = game:GetService("Lighting")
-
-local function EnableFPSBooster()
-    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
-
-    for _,v in ipairs(workspace:GetDescendants()) do
-        if v:IsA("BasePart") then
-            v.Material = Enum.Material.Plastic
-            v.Reflectance = 0
-            v.CastShadow = false
-        elseif v:IsA("Texture") or v:IsA("Decal") then
-            v:Destroy()
-        elseif v:IsA("ParticleEmitter")
-        or v:IsA("Trail")
-        or v:IsA("Beam") then
-            v.Enabled = false
-        end
-    end
-
-    Lighting.GlobalShadows = false
-    Lighting.FogEnd = 9e9
-    Lighting.Brightness = 1
-    Lighting.EnvironmentDiffuseScale = 0
-    Lighting.EnvironmentSpecularScale = 0
-end
-local function DisableFPSBooster()
-    settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
-    Lighting.GlobalShadows = true
-end
-
-
 function SendFishWebhook(fishId, metadata)
     if not WebhookConfig.Enabled or not WebhookConfig.URL then return end
     
@@ -569,7 +338,7 @@ function SendFishWebhook(fishId, metadata)
     local price = fishInfo.SellPrice and "$" .. FormatNumber(fishInfo.SellPrice) or "N/A"
     
     local embed = {
-        username = "Mahiru Notification!",
+        username = "Meng Hub Notification!",
         avatar_url = "https://i.imgur.com/ly3iUKn.jpeg",
         embeds = {{
             description = string.format("Congratulations **%s**! You just caught a **%s** fish!", 
@@ -586,7 +355,7 @@ function SendFishWebhook(fishId, metadata)
                 {name = "💰 Sell Price", value = "```❯ " .. price .. "```"},
                 {name = "🕒 Caught At", value = "```❯ " .. os.date("%Y-%m-%d %H:%M:%S") .. "```"}
             },
-            footer = {text = "Powered By Mahiru", icon_url = "https://i.imgur.com/ly3iUKn.jpeg"},
+            footer = {text = "Powered by Mahiru", icon_url = "https://i.imgur.com/ly3iUKn.jpeg"},
             timestamp = os.date("!%Y-%m-%dT%H:%M:%S.000Z")
         }}
     }
@@ -623,15 +392,15 @@ end)
 
 local VirtualUserRef = cloneref(game:GetService("VirtualUser")) or game:GetService("VirtualUser")
 LocalPlayer.Idled:Connect(function()
-   VirtualUserRef:CaptureController()
-  VirtualUserRef:ClickButton2(Vector2.new())
+    VirtualUserRef:CaptureController()
+    VirtualUserRef:ClickButton2(Vector2.new())
 end)
 
-local MahiruUi = loadstring(game:HttpGet("https://raw.githubusercontent.com/LangitDeveloper/hh/main/mahiruui.lua"))()
+local MahiruUi = loadstring(game:HttpGet("https://raw.githubusercontent.com/zhidanptrsyh/Mahiru/refs/heads/main/main.lua"))()
 local Window = MahiruUi:CreateWindow({
-    Title = "Mahiru",
+    Title = "Mahiru - Fish It",
     Icon = "rbxassetid://132435516080103",
-    Author = "LangitDev",
+    Author = "Freemium",
     Folder = "Mahiru",
     Size = UDim2.fromOffset(380, 260),
     MinSize = Vector2.new(560, 350),
@@ -645,7 +414,14 @@ local Window = MahiruUi:CreateWindow({
     ScrollBarEnabled = false,
 })
 
-local ConfigManager = Window.ConfigManager:CreateConfig("mahiruconfig")
+Window:Tag({
+    Title = "v1.0.1",
+    Icon = "cone",
+    Color = Color3.fromHex("#FF88E3"),
+    Radius = 12,
+})
+
+local ConfigManager = Window.ConfigManager:CreateConfig("MengXHubConfig")
 
 local function CreateToggleButton()
     local screenGui = Instance.new("ScreenGui")
@@ -664,7 +440,7 @@ local function CreateToggleButton()
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 6)
     corner.Parent = button
-     
+    
     button.MouseButton1Click:Connect(function()
         Window:Toggle()
     end)
@@ -711,18 +487,18 @@ local TeleportTab = Window:Tab({Title = "Teleport", Icon = "map"})
 
 InfoTab:Paragraph({
     Title = "Mahiru Alert!",
-    Desc = "Welcome To Script Mahiru, By LangitDev",
+    Desc = "This script is still under development!\nThere is a possibility it may get detected if used in public servers!\nIf you have suggestions or found bugs, please report them to <font color=\"#00AAFF\">Discord Meng Hub</font>!\n<b>Use at your own risk!</b>",
     Color = "Green",
-    Image = "rbxassetid://12633176980",
+    Image = "rbxassetid://17313330026",
     ImageSize = 30,
 })
 
 InfoTab:Button({
     Title = "Need Help?",
-    Desc = "Click This To Copy Discord Link.\nJoin to <font color=\"#FF90E3\">Discord Mahiru</font>!",
+    Desc = "Click This To Copy Discord Link.\nJoin to <font color=\"#FF90E3\">Discord Meng Hub</font>!",
     Callback = function()
         if setclipboard then
-            setclipboard("discord.gg/mahiruscript")
+            setclipboard("discord.gg/Mahiru")
             MahiruUi:Notify({
                 Title = "Success",
                 Content = "Discord link copied to clipboard!",
@@ -810,42 +586,6 @@ local ThemeToggle = InterfaceSection:Toggle({
     end,
 })
 ConfigManager:Register("themeToggle", ThemeToggle)
-
-local PfpsSection = PlayerTab:Section({Title = "Tools Fps Booster"})
-
-local StatsGui
-
-
-local PerfomToggle = PfpsSection:Toggle({
-    Title = "Show Ping & FPS",
-    Default = false,
-    Callback = function(state)
-        if state then
-            StatsGui = CreatePingFPSGui()
-        else
-            if StatsGui then
-                StatsGui:Destroy()
-                StatsGui = nil
-            end
-        end
-    end
-})
-ConfigManager:Register("PerfomToggle", PerfomToggle)
-
-local FPSBoostToggle = PfpsSection:Toggle({
-    Title = "FPS Booster",
-    Default = false,
-    Callback = function(state)
-        if state then
-            EnableFPSBooster()
-        else
-            DisableFPSBooster()
-        end
-    end
-})
-
-ConfigManager:Register("FPSBoostToggle", FPSBoostToggle)
-
 
 local MovementSection = PlayerTab:Section({Title = "Movement"})
 local WalkSpeedSlider = MovementSection:Slider({
@@ -981,58 +721,27 @@ local NoAnimationToggle = ModesSection:Toggle({
     Title = "No Animations",
     Value = false,
     Callback = function(value)
-        IsNoAnimation = value
-        
-        if value then
-            if LocalPlayer.Character then
-                local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-                local animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
-                
-                if animator then
+        if LocalPlayer.Character then
+            local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            local animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
+            
+            if animator then
+                if value then
                     for _, track in ipairs(animator:GetPlayingAnimationTracks()) do
                         track:Stop(0)
                     end
                     
-                    if not NoAnimationConnection then
-                        NoAnimationConnection = animator.AnimationPlayed:Connect(function(track)
-                            task.defer(function()
-                                if IsNoAnimation then
-                                    pcall(function() 
-                                        track:Stop(0) 
-                                        track:Destroy()
-                                    end)
-                                end
-                            end)
+                    local connection = animator.AnimationPlayed:Connect(function(track)
+                        task.defer(function()
+                            pcall(function() track:Stop(0) end)
                         end)
-                    end
+                    end)
+                    
+                    IsNoAnimation = true
+                else
+                    IsNoAnimation = false
                 end
             end
-            
-            MahiruUi:Notify({
-                Title = "No Animation",
-                Content = "Animations disabled",
-                Duration = 2,
-                Icon = "square-slash",
-            })
-        else
-            if NoAnimationConnection then
-                NoAnimationConnection:Disconnect()
-                NoAnimationConnection = nil
-            end
-            
-            if LocalPlayer.Character then
-                local humanoid = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-                if humanoid then
-                    humanoid:ChangeState(Enum.HumanoidStateType.Running)
-                end
-            end
-            
-            MahiruUi:Notify({
-                Title = "No Animation",
-                Content = "Animations enabled",
-                Duration = 2,
-                Icon = "square-play",
-            })
         end
     end,
 })
@@ -1359,7 +1068,7 @@ end
 local function HideIdentity()
     if not IdentityElements.Title then return end
     
-    IdentityElements.Title.Text = "Mahiru"
+    IdentityElements.Title.Text = "Meng Hub"
     IdentityElements.Header.Text = OriginalIdentity.NewHeader or OriginalIdentity.Header
     IdentityElements.Level.Text = OriginalIdentity.NewLevel or OriginalIdentity.Level
     IdentityElements.Grad.Color = ColorSequence.new({
@@ -1385,7 +1094,7 @@ end
 local NameChangerInput = HideIdentSection:Input({
     Title = "Name Changer",
     Value = "",
-    Placeholder = "Mahiru",
+    Placeholder = "Meng Hub",
     Callback = function(value)
         OriginalIdentity.NewHeader = value
     end,
@@ -1590,7 +1299,7 @@ FishingTab:Toggle({
     end,
 })
 
-FishingTab:Section({Title = "Blatant V1"})
+FishingTab:Section({Title = "Blatant Features"})
 
 local BlatantReelInput = FishingTab:Input({
     Title = "Delay Reel",
@@ -1614,7 +1323,7 @@ local BlatantFishInput = FishingTab:Input({
     Callback = function(value)
         local num = tonumber(value)
         if num and num > 0 then
-            BlatantBaitDelay = num
+            BlatantFishingDelay = num
         end
     end,
 })
@@ -1634,8 +1343,6 @@ local BlatantFishingToggle = FishingTab:Toggle({
 })
 ConfigManager:Register("blatantToggle", BlatantFishingToggle)
 
-
-
 FishingTab:Button({
     Title = "Recovery Fishing",
     Callback = function()
@@ -1644,94 +1351,6 @@ FishingTab:Button({
         end)
     end,
 })
-
-FishingTab:Section({Title = "Blatant V2"})
-
-local BlatantBaitInput = FishingTab:Input({
-    Title = "Bait Delay",
-    Desc = "Delay sebelum charge (e.g. 0.05 = ultra fast)",
-    Value = "0.3",
-    Placeholder = "0.3",
-    Callback = function(value)
-        local num = tonumber(value)
-        if num and num >= 0 then
-            BlatantBaitDelay = num
-        end
-    end,
-})
-ConfigManager:Register("blatantBaitInput", BlatantBaitInput)
-
-local BlatantCastInput = FishingTab:Input({
-    Title = "Cast Delay", 
-    Desc = "Delay sebelum minigame (e.g. 0.1 = instant)",
-    Value = "0.70",
-    Placeholder = "0.70",
-    Callback = function(value)
-        local num = tonumber(value)
-        if num and num >= 0 then
-            BlatantCastDelay = num
-        end
-    end,
-})
-ConfigManager:Register("blatantCastInput", BlatantCastInput)
-
-local BlatantFishingV2Toggle = FishingTab:Toggle({
-    Title = "Blatant Fishing",
-    Value = false,
-    Callback = function(value)
-        if value then
-            StartBlatantFishingV2()
-        else
-            IsBlatantFishing = false
-            Remotes.RF_AutoFishing:InvokeServer(false)
-        end
-    end,
-})
-ConfigManager:Register("blatantV2Toggle", BlatantFishingV2Toggle)
-
-FishingTab:Section({Title = "Blatant V3"})
-
-local BlatantcancelInput = FishingTab:Input({
-    Title = "Cancel Delay",
-    Desc = "Delay sebelum charge (e.g. 0.05 = ultra fast)",
-    Value = "0.3",
-    Placeholder = "0.3",
-    Callback = function(value)
-        local num = tonumber(value)
-        if num and num >= 0 then
-            V3_CancelDelay = num
-        end
-    end,
-})
-ConfigManager:Register("blatantcancelInput", BlatantBaitInput)
-
-local BlatantCompleteInput = FishingTab:Input({
-    Title = "Complete Delay", 
-    Desc = "Delay sebelum minigame (e.g. 0.1 = instant)",
-    Value = "0.70",
-    Placeholder = "0.70",
-    Callback = function(value)
-        local num = tonumber(value)
-        if num and num >= 0 then
-            V3_CompleteDelay = num
-        end
-    end,
-})
-ConfigManager:Register("blatantCompleteInput", BlatantCastInput)
-
-local BlatantFishingV3Toggle = FishingTab:Toggle({
-    Title = "Blatant Fishing V3",
-    Value = false,
-    Callback = function(value)
-        if value then
-            StartBlatantFishingV3()
-        else
-            IsBlatantFishing = false
-            Remotes.RF_AutoFishing:InvokeServer(false)
-        end
-    end,
-})
-ConfigManager:Register("blatantV3Toggle", BlatantFishingV3Toggle)
 
 local SellSection = AutomaticTab:Section({Title = "Auto Sell"})
 
@@ -2107,19 +1726,19 @@ Click <b><font color="rgb(0,162,255)">Reset Position</font></b> to clear your sa
 })
 
 local function SavePosition(position)
-    if not isfolder("Mahiru") then
-        makefolder("Mahiru")
+    if not isfolder("Meng Hub") then
+        makefolder("Meng Hub")
     end
-    if not isfolder("Mahiru/FishIt") then
-        makefolder("Mahiru/FishIt")
+    if not isfolder("Meng Hub/FishIt") then
+        makefolder("Meng Hub/FishIt")
     end
-    writefile("Mahiru/FishIt/Position.json", HttpService:JSONEncode({position:GetComponents()}))
+    writefile("Meng Hub/FishIt/Position.json", HttpService:JSONEncode({position:GetComponents()}))
 end
 
 local function LoadPosition()
-    if isfile("Mahiru/FishIt/Position.json") then
+    if isfile("Meng Hub/FishIt/Position.json") then
         local success, data = pcall(function()
-            return HttpService:JSONDecode(readfile("Mahiru/FishIt/Position.json"))
+            return HttpService:JSONDecode(readfile("Meng Hub/FishIt/Position.json"))
         end)
         if success and type(data) == "table" then
             return CFrame.new(unpack(data))
@@ -2159,8 +1778,8 @@ SPSection:Button({
 SPSection:Button({
     Title = "Reset Position",
     Callback = function()
-        if isfile("Mahiru/FishIt/Position.json") then
-            delfile("Mahiru/FishIt/Position.json")
+        if isfile("Meng Hub/FishIt/Position.json") then
+            delfile("Meng Hub/FishIt/Position.json")
         end
         MahiruUi:Notify({
             Title = "Last position has been reset!",
@@ -2423,7 +2042,7 @@ WebhookTab:Button({
                 author = {name = "Webhook is connected :3"},
                 image = {url = "https://i.imgur.com/xl9yLMN.gif"},
             }},
-            username = "Mahiru Notification!",
+            username = "Meng Hub Notification!",
             avatar_url = "https://i.imgur.com/ly3iUKn.jpeg",
             attachments = {},
         }
@@ -3009,6 +2628,8 @@ local Locations = {
     "Ancient Jungle",
     "Ancient Jungle Outside",
     "Ancient Ruin",
+    "Classic Event",
+    "Classic Event River",
     "Coral Reefs SPOT 1",
     "Coral Reefs SPOT 2",
     "Coral Reefs SPOT 3",
@@ -3017,6 +2638,9 @@ local Locations = {
     "Crystaline Pessage",
     "Esotoric Deep",
     "Fishermand Island",
+    "Iron Cafe",
+    "Iron Cavern Left",
+    "Iron Cavern Right",
     "Kohana",
     "Kohana SPOT 1",
     "Kohana SPOT 2",
@@ -3031,14 +2655,15 @@ local Locations = {
     "Tropical Grove Cafe 2",
     "Tropical Grove Highground",
     "Underground Cellar",
-    "Weather Machine",
-    "Pirate Cove"
+    "Weather Machine"
 }
 
 local LocationCoordinates = {
     ["Ancient Jungle"] = Vector3.new(1272.5, 7.8, -191.5),
     ["Ancient Jungle Outside"] = Vector3.new(1488, 7.6, -392),
     ["Ancient Ruin"] = Vector3.new(6090, -585.9, 4634),
+    ["Classic Event"] = Vector3.new(1173, 4, 2839),
+    ["Classic Event River"] = Vector3.new(1439, 46, 2779),
     ["Coral Reefs SPOT 1"] = Vector3.new(-3031.9, 2.5, 2276.4),
     ["Coral Reefs SPOT 2"] = Vector3.new(-3270.9, 2.5, 2228.1),
     ["Coral Reefs SPOT 3"] = Vector3.new(-3136.1, 2.6, 2126.1),
@@ -3047,6 +2672,9 @@ local LocationCoordinates = {
     ["Crystaline Pessage"] = Vector3.new(6051, -538.9, 4386),
     ["Esotoric Deep"] = Vector3.new(3181, -1302.7, 1425),
     ["Fishermand Island"] = Vector3.new(33, 3.3, 2764),
+    ["Iron Cafe"] = Vector3.new(-8642, -547.5, 162),
+    ["Iron Cavern Left"] = Vector3.new(-8795, -585, 89),
+    ["Iron Cavern Right"] = Vector3.new(-8792, -585, 223),
     ["Kohana"] = Vector3.new(-684.1, 3, 800.8),
     ["Kohana SPOT 1"] = Vector3.new(-367.8, 6.8, 521.9),
     ["Kohana SPOT 2"] = Vector3.new(-624, 19.3, 419.4),
@@ -3062,7 +2690,6 @@ local LocationCoordinates = {
     ["Tropical Grove Highground"] = Vector3.new(-2139, 53.5, 3624),
     ["Underground Cellar"] = Vector3.new(2136, -91.2, -699),
     ["Weather Machine"] = Vector3.new(-1524.9, 2.9, 1915.6),
-    ["Pirate Cove"] = Vector3.new(3207.78, 9.10, 3546.13),
 }
 
 local LocationDropdown = LocationSection:Dropdown({
