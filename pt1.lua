@@ -627,7 +627,7 @@ LocalPlayer.Idled:Connect(function()
   VirtualUserRef:ClickButton2(Vector2.new())
 end)
 
-local MahiruUi = loadstring(game:HttpGet('https://raw.githubusercontent.com/Footagesus/WindUI/refs/heads/main/main_example.lua'))()
+local MahiruUi = loadstring(game:HttpGet('https://raw.githubusercontent.com/zhidanptrsyh/MengHub/refs/heads/main/main%20(1).lua'))()
 local Window = MahiruUi:CreateWindow({
     Title = "Mahiru",
     Icon = "rbxassetid://132435516080103",
