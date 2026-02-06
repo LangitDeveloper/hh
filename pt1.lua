@@ -39,6 +39,7 @@ local Remotes = {
     RE_ObtainedNewFishNotification = Net:WaitForChild("RE/ObtainedNewFishNotification"),
     RE_FishingMinigameEvent = Net:WaitForChild("RE/FishingMinigameChanged"),
     RF_Trade = Net:WaitForChild("RF/InitiateTrade"),
+    RF_AutoEnabled = Net:WaitForChild("RF/UpdateAutoFishingState"),
 }
 
 local Replion = require(ReplicatedStorage.Packages.Replion)
@@ -1618,6 +1619,7 @@ local BlatantFishingToggle = FishingTab:Toggle({
     Title = "Blatant Fishing",
     Value = false,
     Callback = function(value)
+    Remotes.RF_AutoEnabled:InvokeServer(value)
         if value then
             StartBlatantFishing()
         else
