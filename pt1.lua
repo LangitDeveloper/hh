@@ -517,66 +517,6 @@ function StartBlatantFishing()
     end)
 end
 
-local function FishCycle()
-    local t = tick()
-
-    task.spawn(function()
-        Remotes.RF_Charge:InvokeServer(t)
-    end)
-
-    task.spawn(function()
-        Remotes.RF_Request:InvokeServer(9, 0.99, t)
-    end)
-
-    task.delay(Engine.CompleteDelay, function()
-        Remotes.RF_Complete:InvokeServer()
-    end)
-end
-
-local function MainLoop()
-    Statss.Loop = 0
-
-    while Engine.Active do
-        FishCycle()
-        Statss.Loop += 1
-
-        if Statss.Loop >= Engine.RecoveryEvery then
-            task.spawn(function()
-                Remotes.RF_Cancel:InvokeServer()
-                task.wait(0.2)
-                Remotes.RF_Request:InvokeServer(9, 0.99, tick())
-            end)
-            Statss.Loop = 0
-        end
-
-        task.wait(Engine.Throttle)
-    end
-end
-
-
-Remotes.RE_Changed.OnClientEvent:Connect(function()
-    if not Engine.Active then return end
-
-    task.delay(Engine.CompleteDelay, function()
-        Remotes.RF_Complete:InvokeServer()
-    end)
-end)
-
-
-function StartEngine()
-    if Engine.Active then return end
-    Engine.Active = true
-    task.spawn(MainLoop)
-end
-
-function StopEngine()
-    if not Engine.Active then return end
-    Engine.Active = false
-    task.spawn(function()
-        Remotes.RF_Cancel:InvokeServer()
-    end)
-end
-
 
 function StartAutoSell()
     IsAutoSell = true
