@@ -9,7 +9,6 @@ local TeleportService = game:GetService("TeleportService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Stats = game:GetService("Stats")
-local CoreGui = game:GetService("CoreGui")
 
 local Net = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net
 local Remotes = {
@@ -40,7 +39,6 @@ local Remotes = {
     RE_ObtainedNewFishNotification = Net:WaitForChild("RE/ObtainedNewFishNotification"),
     RE_FishingMinigameEvent = Net:WaitForChild("RE/FishingMinigameChanged"),
     RF_Trade = Net:WaitForChild("RF/InitiateTrade"),
-    RE_Changed  = Net:WaitForChild("RE/FishingMinigameChanged"),
 }
 
 local Replion = require(ReplicatedStorage.Packages.Replion)
@@ -72,17 +70,6 @@ local IsLegitFishing = false
 local IsAutoShake = false
 local IsInstantFishing = false
 local IsBlatantFishing = false
-
-local Engine = {
-    Active         = false
-    CompleteDelay  = 0.08
-    Throttle       = 0.75
-    RecoveryEvery  = 7       
-}
-
-local Statss = {
-    Loop = 0
-}
 
 local IsBlatantV3 = false
 local CastDelay   = 0.3   
@@ -157,16 +144,6 @@ local BoatLookup = {}
 local SelectedLocation = nil
 local SelectedPlayer = nil
 local PlayerList = {}
-
-local MonitorModule = {}
-MonitorModule.GUI = nil
-
-local lastFrameTime = tick()
-local fpsHistory = {}
-local maxFPSHistory = 20
-local updateConnection
-local pingUpdateConnection
-local notificationConnection
 
 
 local function CreatePingFPSGui()
@@ -422,6 +399,7 @@ function StartLegitFishing()
     end)
 end
 
+
 function StartInstantFishing()
     IsInstantFishing = true
     Remotes.RF_AutoFishing:InvokeServer(true)
@@ -503,17 +481,17 @@ function StartBlatantFishing()
                 pcall(function()
                     Remotes.RF_Minigame:InvokeServer(-1, 0.999)
                 end)
+                task.wait(BlatantBaitDelay)
                 task.wait(CompleteDelay)
+                
                 pcall(function()
                     Remotes.RF_Fishing:FireServer()
-                    Remotes.RF_CatchFishCompleted:FireServer()
                 end)
             end)
             task.wait(BlatantReelDelay)
         end
     end)
 end
-
 
 function StartAutoSell()
     IsAutoSell = true
@@ -1616,7 +1594,7 @@ local BlatantReelInput = FishingTab:Input({
     Callback = function(value)
         local num = tonumber(value)
         if num and num > 0 then
-            CompleteDelay = num
+            BlatantReelDelay = num
         end
     end,
 })
@@ -1649,6 +1627,8 @@ local BlatantFishingToggle = FishingTab:Toggle({
     end,
 })
 ConfigManager:Register("blatantToggle", BlatantFishingToggle)
+
+
 
 FishingTab:Button({
     Title = "Recovery Fishing",
