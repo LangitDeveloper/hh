@@ -143,9 +143,6 @@ local SelectedLocation = nil
 local SelectedPlayer = nil
 local PlayerList = {}
 
-local RF_Complete_V4 = Remotes.RF_Fishing  
-local RE_Changed_V4 = Remotes.RE_FishingMinigameEvent  
-
 local function CreatePingFPSGui()
     local gui = Instance.new("ScreenGui")
     gui.Name = "MahiruPingFPS"
