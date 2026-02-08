@@ -145,376 +145,285 @@ local PlayerList = {}
 
 local function CreatePingFPSGui()
     local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "MahiruMonitor_" .. math.random(1, 999999)
+    screenGui.Name = "MahiruPingFPS"
     screenGui.ResetOnSpawn = false
     screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    screenGui.DisplayOrder = 2147483647
-    screenGui.Enabled = true
-    screenGui.IgnoreGuiInset = true
-    screenGui.Parent = CoreGui
+    screenGui.Parent = game.CoreGui
 
-    local container = Instance.new("Frame")
-    container.Name = "Container"
-    container.Size = UDim2.new(0, 200, 0, 100)
-    container.Position = UDim2.new(0, 20, 0, 200)
-    container.BackgroundColor3 = Color3.fromRGB(40, 10, 40)  
-    container.BackgroundTransparency = 0.15
-    container.BorderSizePixel = 0
-    container.Visible = true
-    container.ZIndex = 10000
-    container.Active = true
-    container.Parent = screenGui
-    
-    local containerCorner = Instance.new("UICorner")
-    containerCorner.CornerRadius = UDim.new(0, 12)
-    containerCorner.Parent = container
-    
-    local containerStroke = Instance.new("UIStroke")
-    containerStroke.Color = Color3.fromRGB(255, 105, 180)  
-    containerStroke.Thickness = 2
-    containerStroke.Transparency = 0.3
-    containerStroke.Parent = container
-    
-    local header = Instance.new("Frame")
-    header.Name = "Header"
-    header.Size = UDim2.new(1, 0, 0, 35)
-    header.BackgroundTransparency = 1
-    header.ZIndex = 10001
-    header.Parent = container
-    
-    local logoIcon = Instance.new("ImageLabel")
-    logoIcon.Name = "LogoIcon"
-    logoIcon.Size = UDim2.new(0, 24, 0, 24)
-    logoIcon.Position = UDim2.new(0, 8, 0, 5)
-    logoIcon.BackgroundTransparency = 1
-    logoIcon.Image = "rbxassetid://132435516080103"  
-    logoIcon.ScaleType = Enum.ScaleType.Fit
-    logoIcon.ImageColor3 = Color3.fromRGB(255, 105, 180)  
-    logoIcon.ZIndex = 10002
-    logoIcon.Parent = header
-    
-    local logoCorner = Instance.new("UICorner")
-    logoCorner.CornerRadius = UDim.new(0, 6)
-    logoCorner.Parent = logoIcon
-    
-    local titleLabel = Instance.new("TextLabel")
-    titleLabel.Name = "TitleLabel"
-    titleLabel.Size = UDim2.new(1, -40, 1, 0)
-    titleLabel.Position = UDim2.new(0, 36, 0, 0)
-    titleLabel.BackgroundTransparency = 1
-    titleLabel.Text = "MAHIRU MONITOR"
-    titleLabel.TextColor3 = Color3.fromRGB(255, 150, 200)  
-    titleLabel.TextSize = 13
-    titleLabel.Font = Enum.Font.GothamBold
-    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    titleLabel.ZIndex = 10002
-    titleLabel.Parent = header
-    
+    local frame = Instance.new("Frame")
+    frame.Parent = screenGui
+    frame.Size = UDim2.new(0, 220, 0, 100)
+    frame.Position = UDim2.new(0, 20, 0, 200)
+    frame.BackgroundColor3 = Color3.fromRGB(255, 105, 180) -- Pink
+    frame.BackgroundTransparency = 0.2
+    frame.BorderSizePixel = 0
+    frame.Active = true
+    frame.Draggable = true
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 10)
+    corner.Parent = frame
+
+    local glowStroke = Instance.new("UIStroke")
+    glowStroke.Color = Color3.fromRGB(255, 182, 193) -- Light pink
+    glowStroke.Thickness = 2
+    glowStroke.Transparency = 0.3
+    glowStroke.Parent = frame
+
+    -- Header dengan icon
+    local headerFrame = Instance.new("Frame")
+    headerFrame.Parent = frame
+    headerFrame.Size = UDim2.new(1, 0, 0, 32)
+    headerFrame.BackgroundTransparency = 1
+
+    local iconImage = Instance.new("ImageLabel")
+    iconImage.Parent = headerFrame
+    iconImage.Size = UDim2.new(0, 26, 0, 26)
+    iconImage.Position = UDim2.new(0, 8, 0, 3)
+    iconImage.BackgroundTransparency = 1
+    iconImage.Image = "rbxassetid://132435516080103"
+    iconImage.ImageColor3 = Color3.fromRGB(255, 255, 255)
+    iconImage.ScaleType = Enum.ScaleType.Fit
+
+    local titleText = Instance.new("TextLabel")
+    titleText.Parent = headerFrame
+    titleText.Size = UDim2.new(1, -40, 1, 0)
+    titleText.Position = UDim2.new(0, 40, 0, 0)
+    titleText.BackgroundTransparency = 1
+    titleText.Text = "Mahiru Monitor"
+    titleText.Font = Enum.Font.GothamBold
+    titleText.TextSize = 14
+    titleText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    titleText.TextXAlignment = Enum.TextXAlignment.Left
+
     local separator = Instance.new("Frame")
-    separator.Name = "Separator"
-    separator.Size = UDim2.new(1, -16, 0, 1)
-    separator.Position = UDim2.new(0, 8, 0, 35)
-    separator.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+    separator.Parent = frame
+    separator.Size = UDim2.new(1, -20, 0, 1)
+    separator.Position = UDim2.new(0, 10, 0, 34)
+    separator.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     separator.BackgroundTransparency = 0.5
     separator.BorderSizePixel = 0
-    separator.ZIndex = 10001
-    separator.Parent = container
-    
-    local content = Instance.new("Frame")
-    content.Name = "Content"
-    content.Size = UDim2.new(1, -16, 0, 60)
-    content.Position = UDim2.new(0, 8, 0, 40)
-    content.BackgroundTransparency = 1
-    content.ZIndex = 10001
-    content.Parent = container
-    
-    
+
+    -- Konten utama
+    local contentFrame = Instance.new("Frame")
+    contentFrame.Parent = frame
+    contentFrame.Size = UDim2.new(1, -20, 0, 60)
+    contentFrame.Position = UDim2.new(0, 10, 0, 38)
+    contentFrame.BackgroundTransparency = 1
+
+    -- Baris 1: Ping dan FPS
+    local row1 = Instance.new("Frame")
+    row1.Parent = contentFrame
+    row1.Size = UDim2.new(1, 0, 0, 25)
+    row1.BackgroundTransparency = 1
+
     local pingLabel = Instance.new("TextLabel")
     pingLabel.Name = "PingLabel"
-    pingLabel.Size = UDim2.new(0.5, -6, 0, 25)
-    pingLabel.Position = UDim2.new(0, 0, 0, 0)
+    pingLabel.Parent = row1
+    pingLabel.Size = UDim2.new(0.5, -5, 1, 0)
     pingLabel.BackgroundTransparency = 1
-    pingLabel.Text = "Ping: 0 ms"
-    pingLabel.TextColor3 = Color3.fromRGB(150, 200, 255)
+    pingLabel.Font = Enum.Font.GothamMedium
     pingLabel.TextSize = 13
-    pingLabel.Font = Enum.Font.GothamBold
-    pingLabel.TextXAlignment = Enum.TextXAlignment.Center
-    pingLabel.ZIndex = 10002
-    pingLabel.Parent = content
-    
-    local verticalSeparator = Instance.new("Frame")
-    verticalSeparator.Name = "VerticalSeparator"
-    verticalSeparator.Size = UDim2.new(0, 1, 0, 25)
-    verticalSeparator.Position = UDim2.new(0.5, 0, 0, 0)
-    verticalSeparator.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
-    verticalSeparator.BackgroundTransparency = 0.5
-    verticalSeparator.BorderSizePixel = 0
-    verticalSeparator.ZIndex = 10001
-    verticalSeparator.Parent = content
-    
-    
+    pingLabel.Text = "Ping: Loading..."
+    pingLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    pingLabel.TextXAlignment = Enum.TextXAlignment.Left
+
     local fpsLabel = Instance.new("TextLabel")
     fpsLabel.Name = "FPSLabel"
-    fpsLabel.Size = UDim2.new(0.5, -6, 0, 25)
-    fpsLabel.Position = UDim2.new(0.5, 6, 0, 0)
+    fpsLabel.Parent = row1
+    fpsLabel.Size = UDim2.new(0.5, -5, 1, 0)
+    fpsLabel.Position = UDim2.new(0.5, 5, 0, 0)
     fpsLabel.BackgroundTransparency = 1
-    fpsLabel.Text = "FPS: 60"
-    fpsLabel.TextColor3 = Color3.fromRGB(100, 255, 200)
+    fpsLabel.Font = Enum.Font.GothamMedium
     fpsLabel.TextSize = 13
-    fpsLabel.Font = Enum.Font.GothamBold
-    fpsLabel.TextXAlignment = Enum.TextXAlignment.Center
-    fpsLabel.ZIndex = 10002
-    fpsLabel.Parent = content
-    
-    local horizontalSeparator = Instance.new("Frame")
-    horizontalSeparator.Name = "HorizontalSeparator"
-    horizontalSeparator.Size = UDim2.new(1, 0, 0, 1)
-    horizontalSeparator.Position = UDim2.new(0, 0, 0, 30)
-    horizontalSeparator.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
-    horizontalSeparator.BackgroundTransparency = 0.5
-    horizontalSeparator.BorderSizePixel = 0
-    horizontalSeparator.ZIndex = 10001
-    horizontalSeparator.Parent = content
-    
-    
+    fpsLabel.Text = "FPS: Loading..."
+    fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    fpsLabel.TextXAlignment = Enum.TextXAlignment.Right
+
+    -- Baris 2: Notifikasi
+    local row2 = Instance.new("Frame")
+    row2.Parent = contentFrame
+    row2.Size = UDim2.new(1, 0, 0, 25)
+    row2.Position = UDim2.new(0, 0, 0, 30)
+    row2.BackgroundTransparency = 1
+
     local notifLabel = Instance.new("TextLabel")
     notifLabel.Name = "NotifLabel"
-    notifLabel.Size = UDim2.new(1, 0, 0, 25)
-    notifLabel.Position = UDim2.new(0, 0, 0, 35)
+    notifLabel.Parent = row2
+    notifLabel.Size = UDim2.new(1, 0, 1, 0)
     notifLabel.BackgroundTransparency = 1
-    notifLabel.Text = "Notifications: 0"
-    notifLabel.TextColor3 = Color3.fromRGB(255, 200, 150)  
+    notifLabel.Font = Enum.Font.GothamMedium
     notifLabel.TextSize = 13
-    notifLabel.Font = Enum.Font.GothamBold
+    notifLabel.Text = "Notification: 0"
+    notifLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     notifLabel.TextXAlignment = Enum.TextXAlignment.Center
-    notifLabel.ZIndex = 10002
-    notifLabel.Parent = content
-    
-    
-    local function updatePingColor(value)
-        local ping = tonumber(value)
-        if ping <= 50 then
-            pingLabel.TextColor3 = Color3.fromRGB(100, 255, 200)  
-        elseif ping <= 100 then
-            pingLabel.TextColor3 = Color3.fromRGB(150, 200, 255)  
-        elseif ping <= 150 then
-            pingLabel.TextColor3 = Color3.fromRGB(180, 140, 255)  
-        else
-            pingLabel.TextColor3 = Color3.fromRGB(255, 100, 150)  
-        end
-    end
-    
-    local function updateFPSColor(value)
-        local fps = tonumber(value)
-        if fps >= 55 then
-            fpsLabel.TextColor3 = Color3.fromRGB(100, 255, 200)  
-        elseif fps >= 40 then
-            fpsLabel.TextColor3 = Color3.fromRGB(150, 200, 255)  
-        elseif fps >= 25 then
-            fpsLabel.TextColor3 = Color3.fromRGB(180, 140, 255)  
-        else
-            fpsLabel.TextColor3 = Color3.fromRGB(255, 100, 150)  
-        end
-    end
-    
-    local function updateNotifColor(value)
-        local count = tonumber(value)
-        if count == 0 then
-            notifLabel.TextColor3 = Color3.fromRGB(150, 200, 255)  
-        elseif count <= 5 then
-            notifLabel.TextColor3 = Color3.fromRGB(255, 200, 100)  
-        elseif count <= 10 then
-            notifLabel.TextColor3 = Color3.fromRGB(255, 150, 100)  
-        else
-            notifLabel.TextColor3 = Color3.fromRGB(255, 100, 100)  
-        end
-    end
-    
-    local function getTotalNotifications()
+
+    -- Tombol close
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Parent = frame
+    closeBtn.Size = UDim2.new(0, 20, 0, 20)
+    closeBtn.Position = UDim2.new(1, -25, 0, 5)
+    closeBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    closeBtn.BackgroundTransparency = 0.8
+    closeBtn.Text = "×"
+    closeBtn.TextColor3 = Color3.fromRGB(255, 105, 180)
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.TextSize = 16
+    closeBtn.AutoButtonColor = false
+
+    local closeCorner = Instance.new("UICorner")
+    closeCorner.CornerRadius = UDim.new(0, 4)
+    closeCorner.Parent = closeBtn
+
+    closeBtn.MouseButton1Click:Connect(function()
+        screenGui:Destroy()
+        if updateConnection then updateConnection:Disconnect() end
+        if pingUpdateConnection then pingUpdateConnection:Disconnect() end
+        if notifUpdateConnection then notifUpdateConnection:Disconnect() end
+    end)
+
+    -- Fungsi untuk mendapatkan jumlah notifikasi
+    local function getNotificationCount()
         local success, count = pcall(function()
-            local textNotifications = PlayerGui:FindFirstChild("Text Notifications")
-            if textNotifications then
-                local frame = textNotifications:FindFirstChild("Frame")
+            local notifications = PlayerGui:FindFirstChild("Text Notifications")
+            if notifications then
+                local frame = notifications:FindFirstChild("Frame")
                 if frame then
-                    local notifCount = 0
-                    for _, child in ipairs(frame:GetChildren()) do
+                    local count = 0
+                    for _, child in pairs(frame:GetChildren()) do
                         if child.Name == "Tile" then
-                            notifCount = notifCount + 1
+                            count = count + 1
                         end
                     end
-                    return notifCount
+                    return count
                 end
             end
             return 0
         end)
         return success and count or 0
     end
+
+    -- Update FPS
+    local fpsHistory = {}
+    local lastTime = tick()
     
-    local function getRealPing()
-        local success, ping = pcall(function()
-            local networkStats = Stats:FindFirstChild("Network")
-            if networkStats then
-                local serverStats = networkStats:FindFirstChild("ServerStatsItem")
-                if serverStats then
-                    local dataPing = serverStats:FindFirstChild("Data Ping")
-                    if dataPing then
-                        local pingValue = dataPing:GetValue()
-                        return math.floor(pingValue)
-                    end
-                end
-            end
-            return math.floor(LocalPlayer:GetNetworkPing() * 1000)
-        end)
-        return success and ping or 0
-    end
-    
-    local function getFPS()
+    local function updateFPS()
         local currentTime = tick()
-        local deltaTime = currentTime - lastFrameTime
-        lastFrameTime = currentTime
+        local delta = currentTime - lastTime
+        lastTime = currentTime
         
-        local currentFPS = 0
-        if deltaTime > 0 then
-            currentFPS = 1 / deltaTime
-        end
-        
+        local currentFPS = 1 / delta
         table.insert(fpsHistory, currentFPS)
         
-        if #fpsHistory > maxFPSHistory then
+        if #fpsHistory > 30 then
             table.remove(fpsHistory, 1)
         end
         
-        local sum = 0
+        local total = 0
         for _, fps in ipairs(fpsHistory) do
-            sum = sum + fps
+            total = total + fps
         end
         
-        local averageFPS = sum / #fpsHistory
-        return math.floor(math.clamp(averageFPS, 0, 240))
+        local avgFPS = total / #fpsHistory
+        local roundedFPS = math.floor(avgFPS)
+        
+        fpsLabel.Text = "FPS: " .. roundedFPS
+        
+        -- Update warna FPS
+        if roundedFPS >= 60 then
+            fpsLabel.TextColor3 = Color3.fromRGB(100, 255, 100) -- Hijau
+        elseif roundedFPS >= 30 then
+            fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 100) -- Kuning
+        else
+            fpsLabel.TextColor3 = Color3.fromRGB(255, 100, 100) -- Merah
+        end
     end
-    
-    local dragging = false
-    local dragInput, dragStart, startPos
-    
-    container.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = container.Position
-            
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
+
+    -- Update Ping
+    local function updatePing()
+        local success, ping = pcall(function()
+            local networkStats = Stats.Network.ServerStatsItem["Data Ping"]
+            if networkStats then
+                return math.floor(networkStats:GetValue())
+            end
+            return math.floor(LocalPlayer:GetNetworkPing() * 1000)
+        end)
+        
+        local pingValue = success and ping or 0
+        pingLabel.Text = "Ping: " .. pingValue .. "ms"
+        
+        -- Update warna Ping
+        if pingValue <= 80 then
+            pingLabel.TextColor3 = Color3.fromRGB(100, 255, 100) -- Hijau
+        elseif pingValue <= 150 then
+            pingLabel.TextColor3 = Color3.fromRGB(255, 255, 100) -- Kuning
+        else
+            pingLabel.TextColor3 = Color3.fromRGB(255, 100, 100) -- Merah
+        end
+    end
+
+    -- Update Notifikasi
+    local function updateNotifications()
+        local count = getNotificationCount()
+        notifLabel.Text = "Notification: " .. count
+        -- Notifikasi tetap putih
+        notifLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    end
+
+    -- Setup connections
+    local updateConnection = RunService.RenderStepped:Connect(function()
+        if not screenGui or not screenGui.Parent then
+            updateConnection:Disconnect()
+            return
+        end
+        updateFPS()
+    end)
+
+    local lastPingUpdate = tick()
+    local pingUpdateConnection = RunService.Heartbeat:Connect(function()
+        if not screenGui or not screenGui.Parent then
+            pingUpdateConnection:Disconnect()
+            return
+        end
+        
+        local now = tick()
+        if now - lastPingUpdate >= 1 then -- Update setiap 1 detik
+            updatePing()
+            lastPingUpdate = now
         end
     end)
-    
-    container.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-            dragInput = input
+
+    local lastNotifUpdate = tick()
+    local notifUpdateConnection = RunService.Heartbeat:Connect(function()
+        if not screenGui or not screenGui.Parent then
+            notifUpdateConnection:Disconnect()
+            return
+        end
+        
+        local now = tick()
+        if now - lastNotifUpdate >= 2 then -- Update setiap 2 detik
+            updateNotifications()
+            lastNotifUpdate = now
         end
     end)
-    
-    UserInputService.InputChanged:Connect(function(input)
-        if input == dragInput and dragging then
-            local delta = input.Position - dragStart
-            container.Position = UDim2.new(
-                startPos.X.Scale,
-                startPos.X.Offset + delta.X,
-                startPos.Y.Scale,
-                startPos.Y.Offset + delta.Y
-            )
-        end
-    end)
-    
-    local closeBtn = Instance.new("TextButton", container)
-    closeBtn.Size = UDim2.new(0, 20, 0, 20)
-    closeBtn.Position = UDim2.new(1, -25, 0, 5)
-    closeBtn.BackgroundTransparency = 0.8
-    closeBtn.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
-    closeBtn.Text = "X"
-    closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    closeBtn.Font = Enum.Font.GothamBold
-    closeBtn.TextSize = 12
-    closeBtn.AutoButtonColor = false
-    closeBtn.ZIndex = 10002
-    
-    Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 4)
-    
-    closeBtn.MouseButton1Click:Connect(function()
-        screenGui:Destroy()
-        if updateConnection then updateConnection:Disconnect() end
-        if pingUpdateConnection then pingUpdateConnection:Disconnect() end
-        if notificationConnection then notificationConnection:Disconnect() end
-    end)
-    
-    closeBtn.MouseEnter:Connect(function()
-        closeBtn.BackgroundTransparency = 0.5
-    end)
-    
-    closeBtn.MouseLeave:Connect(function()
-        closeBtn.BackgroundTransparency = 0.8
-    end)
-    
+
+    -- Hotkey F4 untuk toggle
     local hotkeyConnection
     hotkeyConnection = UserInputService.InputBegan:Connect(function(input)
         if input.KeyCode == Enum.KeyCode.F4 then
             screenGui.Enabled = not screenGui.Enabled
         end
     end)
-    
-    updateConnection = RunService.RenderStepped:Connect(function()
-        if not screenGui or not screenGui.Parent then
-            if updateConnection then updateConnection:Disconnect() end
-            return
-        end
-        
-        local fps = getFPS()
-        fpsLabel.Text = "FPS: " .. tostring(fps)
-        updateFPSColor(fps)
-    end)
-    
-    local lastPingUpdate = 0
-    pingUpdateConnection = RunService.Heartbeat:Connect(function()
-        if not screenGui or not screenGui.Parent then
-            if pingUpdateConnection then pingUpdateConnection:Disconnect() end
-            return
-        end
-        
-        local currentTime = tick()
-        if currentTime - lastPingUpdate >= 0.5 then
-            local ping = getRealPing()
-            pingLabel.Text = "Ping: " .. ping .. " ms"
-            updatePingColor(ping)
-            lastPingUpdate = currentTime
-        end
-    end)
-    
-    local lastNotifUpdate = 0
-    notificationConnection = RunService.Heartbeat:Connect(function()
-        if not screenGui or not screenGui.Parent then
-            if notificationConnection then notificationConnection:Disconnect() end
-            return
-        end
-        
-        local currentTime = tick()
-        if currentTime - lastNotifUpdate >= 1 then
-            local notifCount = getTotalNotifications()
-            notifLabel.Text = "Notifications: " .. notifCount
-            updateNotifColor(notifCount)
-            lastNotifUpdate = currentTime
-        end
-    end)
-    
+
+    -- Cleanup
     screenGui.Destroying:Once(function()
         if updateConnection then updateConnection:Disconnect() end
         if pingUpdateConnection then pingUpdateConnection:Disconnect() end
-        if notificationConnection then notificationConnection:Disconnect() end
+        if notifUpdateConnection then notifUpdateConnection:Disconnect() end
         if hotkeyConnection then hotkeyConnection:Disconnect() end
     end)
-    
-    print("Mahiru Monitor created successfully!")
+
+    print("Mahiru Monitor Loaded!")
     return screenGui
 end
 
@@ -691,22 +600,20 @@ function StartBlatantFishing()
         if not IsBlatantFishing then return end
         if state == "FishCaught" then
             task.spawn(function()
+                task.wait(BlatantFishingDelay)
                 task.wait(CompleteDelay)
                 pcall(function()
                     Remotes.RF_Fishing:FireServer()
                 end)
             end)
         end
-    end)
-    
-    
+    end)    
     task.spawn(function()
         local loopCount = 0
         local recoveryEvery = 6  
         
         while IsBlatantFishing do
-            loopCount = loopCount + 1
-            
+            loopCount = loopCount + 1        
             task.spawn(function()
                
                 pcall(function()
@@ -718,7 +625,7 @@ function StartBlatantFishing()
                 end)
             end)
                  
-            task.wait(CancelDelay)
+            task.wait(BlatantReelDelay)
             
             
             task.spawn(function()
@@ -735,7 +642,7 @@ function StartBlatantFishing()
                 loopCount = 0
             end
           
-            task.wait(BlatantReelDelay)
+            task.wait(CancelDelay)
         end
     end)
 end
