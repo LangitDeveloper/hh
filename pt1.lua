@@ -80,13 +80,11 @@ local CompleteDelay = 0.8
 local CurrentFishCount = 0
 
 local IsBlatantV4 = false
-local BlatantV4Config = {
-    CompleteDelay = 0.12,
-    CancelDelay = 0.12,
-    Throttle = 0.8,
-    RecoveryEvery = 6
-}
-local LoopCount = 0
+local V4CompleteDelay = 0.12
+local V4CancelDelay = 0.12
+local V4Throttle = 0.8
+local V4RecoveryEvery = 6
+local V4LoopCount = 0
 
 local AutoSellMode = "Delay" 
 local AutoSellValue = 60
@@ -154,6 +152,9 @@ local BoatLookup = {}
 local SelectedLocation = nil
 local SelectedPlayer = nil
 local PlayerList = {}
+
+local RF_Complete_V4 = Remotes.RF_Fishing  
+local RE_Changed_V4 = Remotes.RE_FishingMinigameEvent  
 
 local function CreatePingFPSGui()
     local gui = Instance.new("ScreenGui")
@@ -439,95 +440,73 @@ end
 function StartBlatantFishingV4()
     IsBlatantFishing = true
     IsBlatantV4 = true
-    LoopCount = 0
+    V4LoopCount = 0
     
     Remotes.RF_AutoFishing:InvokeServer(true)
     
-    local changedConnection
-    if RE_Changed then
-        changedConnection = RE_Changed.OnClientEvent:Connect(function()
+    if RE_Changed_V4 then
+        RE_Changed_V4.OnClientEvent:Connect(function()
             if not IsBlatantV4 then return end
             
             task.spawn(function()
-                task.wait(BlatantV4Config.CompleteDelay)
-                pcall(function()
-                    RF_Complete:InvokeServer()
-                end)
-                task.wait(BlatantV4Config.CancelDelay)
-                pcall(function()
-                    Remotes.RF_Cancel:InvokeServer()
-                end)
+                task.wait(V4CompleteDelay)
+                RF_Complete_V4:InvokeServer()
+                task.wait(V4CancelDelay)
+                Remotes.RF_Cancel:InvokeServer()
             end)
         end)
     end
     
-  
-    task.spawn(function()
+    
+    task.spawn(function() 
         while IsBlatantV4 do
-            local t = tick()
-            
-            
             task.spawn(function()
-                pcall(function()
-                    Remotes.RF_Charge:InvokeServer(t)
+                local t = workspace:GetServerTimeNow()
+                
+             
+                task.spawn(function()
+                    pcall(function()
+                        Remotes.RF_Charge:InvokeServer(t)
+                    end)
                 end)
-            end)
-            
-            task.spawn(function()
-                pcall(function()
-                    Remotes.RF_Minigame:InvokeServer(9, 0.99, t)
+
+                task.spawn(function()
+                    pcall(function()
+                        Remotes.RF_Minigame:InvokeServer(-1, 0.999, t)
+                    end)
                 end)
-            end)
-            
-          
-            task.wait(BlatantV4Config.CompleteDelay)
-            task.spawn(function()
-                pcall(function()
-                    RF_Complete:InvokeServer()
+
+                
+                task.wait(V4CompleteDelay)
+                task.spawn(function()
+                    pcall(function()
+                        RF_Complete_V4:InvokeServer()
+                    end)
                 end)
-            end)
-            
-            
-            task.wait(BlatantV4Config.CancelDelay)
-            task.spawn(function()
-                pcall(function()
-                    Remotes.RF_Cancel:InvokeServer()
-                end)
-            end)
-            
-            LoopCount = LoopCount + 1
-            
-      
-            if LoopCount >= BlatantV4Config.RecoveryEvery then
+
+                
+                task.wait(V4CancelDelay)
                 task.spawn(function()
                     pcall(function()
                         Remotes.RF_Cancel:InvokeServer()
                     end)
                 end)
-                LoopCount = 0
+            end)
+            
+       
+            V4LoopCount = V4LoopCount + 1
+            if V4LoopCount >= V4RecoveryEvery then
+                pcall(function()
+                    Remotes.RF_Cancel:InvokeServer()
+                end)
+                V4LoopCount = 0
             end
             
-            task.wait(BlatantV4Config.Throttle)
-        end
-        
-      
-        if changedConnection then
-            changedConnection:Disconnect()
+          
+            task.wait(V4Throttle)
         end
     end)
 end
-
-function StopBlatantFishingV4()
-    IsBlatantV4 = false
-    LoopCount = 0
-    
-    task.spawn(function()
-        pcall(function()
-            Remotes.RF_Cancel:InvokeServer()
-        end)
-    end)
-end
-
 
 function StartBlatantFishingV3()
     IsBlatantFishing = true
@@ -1830,27 +1809,49 @@ local BlatantFishingV3Toggle = FishingTab:Toggle({
 ConfigManager:Register("blatantV3Toggle", BlatantFishingV3Toggle)
 
 FishingTab:Section({Title = "Blatant V4"})
+
 FishingTab:Toggle({
     Title = "Blatant V4",
     Value = false,
     Callback = function(v)
-        if v then StartV4() else StopV4() end
+        if v then StartBlatantFishingV4() else StopBlatantFishingV4() end
     end
 })
+
 FishingTab:Input({
     Title = "Complete Delay",
     Value = "0.12",
-    Callback = function(v) V4Complete = tonumber(v) or 0.12 end
+    Callback = function(v) 
+        local n = tonumber(v)
+        if n and n >= 0.01 then V4CompleteDelay = n end
+    end
 })
+
 FishingTab:Input({
     Title = "Cancel Delay", 
     Value = "0.12",
-    Callback = function(v) V4Cancel = tonumber(v) or 0.12 end
+    Callback = function(v) 
+        local n = tonumber(v)
+        if n and n >= 0.01 then V4CancelDelay = n end
+    end
 })
+
 FishingTab:Input({
     Title = "Throttle",
     Value = "0.8",
-    Callback = function(v) V4Throttle = tonumber(v) or 0.8 end
+    Callback = function(v) 
+        local n = tonumber(v)
+        if n and n >= 0.1 then V4Throttle = n end
+    end
+})
+
+FishingTab:Input({
+    Title = "Recovery Cycle",
+    Value = "6",
+    Callback = function(v) 
+        local n = tonumber(v)
+        if n and n >= 1 then V4RecoveryEvery = n end
+    end
 })
 
 local SellSection = AutomaticTab:Section({Title = "Auto Sell"})
