@@ -172,7 +172,8 @@ local pingUpdateConnection
 local notificationConnection
 
 function createMonitorGUI()
-    local parentGui = playerGui
+    local parentGui = PlayerGui  
+    
     local useCoreGui = pcall(function()
         local testGui = Instance.new("ScreenGui")
         testGui.Parent = CoreGui
@@ -184,7 +185,7 @@ function createMonitorGUI()
     end
     
     local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "NoxiusHubMonitor_" .. math.random(1, 999999)
+    screenGui.Name = "MahiruMonitor_" .. math.random(1, 999999)
     screenGui.ResetOnSpawn = false
     screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     screenGui.DisplayOrder = 2147483647
@@ -195,7 +196,7 @@ function createMonitorGUI()
     container.Name = "Container"
     container.Size = UDim2.new(0, 200, 0, 100)  
     container.Position = UDim2.new(0, 250, 0, 100)  
-    container.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    container.BackgroundColor3 = Color3.fromRGB(30, 30, 40)  
     container.BackgroundTransparency = 0.15
     container.BorderSizePixel = 0
     container.Visible = true
@@ -225,9 +226,9 @@ function createMonitorGUI()
     logoIcon.Size = UDim2.new(0, 24, 0, 24)
     logoIcon.Position = UDim2.new(0, 8, 0, 5)
     logoIcon.BackgroundTransparency = 1
-    logoIcon.Image = "rbxassetid://77194008928196"
+    logoIcon.Image = "rbxassetid://132435516080103"  
     logoIcon.ScaleType = Enum.ScaleType.Fit
-    logoIcon.ImageColor3 = Color3.fromRGB(100, 180, 255)
+    logoIcon.ImageColor3 = Color3.fromRGB(255, 170, 170)  
     logoIcon.ZIndex = 10002
     logoIcon.Parent = header
     
@@ -240,8 +241,8 @@ function createMonitorGUI()
     titleLabel.Size = UDim2.new(1, -40, 1, 0)
     titleLabel.Position = UDim2.new(0, 36, 0, 0)
     titleLabel.BackgroundTransparency = 1
-    titleLabel.Text = "TOR MONITOR KETUA"
-    titleLabel.TextColor3 = Color3.fromRGB(100, 180, 255)
+    titleLabel.Text = "MAHIRU MONITOR"
+    titleLabel.TextColor3 = Color3.fromRGB(255, 170, 170)
     titleLabel.TextSize = 13
     titleLabel.Font = Enum.Font.GothamBold
     titleLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -252,7 +253,7 @@ function createMonitorGUI()
     separator.Name = "Separator"
     separator.Size = UDim2.new(1, -16, 0, 1)
     separator.Position = UDim2.new(0, 8, 0, 35)
-    separator.BackgroundColor3 = Color3.fromRGB(50, 150, 255)
+    separator.BackgroundColor3 = Color3.fromRGB(255, 170, 170)  
     separator.BackgroundTransparency = 0.5
     separator.BorderSizePixel = 0
     separator.ZIndex = 10001
@@ -283,7 +284,7 @@ function createMonitorGUI()
     verticalSeparator.Name = "VerticalSeparator"
     verticalSeparator.Size = UDim2.new(0, 1, 0, 25)
     verticalSeparator.Position = UDim2.new(0.5, 0, 0, 0)
-    verticalSeparator.BackgroundColor3 = Color3.fromRGB(50, 150, 255)
+    verticalSeparator.BackgroundColor3 = Color3.fromRGB(255, 170, 170)  
     verticalSeparator.BackgroundTransparency = 0.5
     verticalSeparator.BorderSizePixel = 0
     verticalSeparator.ZIndex = 10001
@@ -306,7 +307,7 @@ function createMonitorGUI()
     horizontalSeparator.Name = "HorizontalSeparator"
     horizontalSeparator.Size = UDim2.new(1, 0, 0, 1)
     horizontalSeparator.Position = UDim2.new(0, 0, 0, 30)
-    horizontalSeparator.BackgroundColor3 = Color3.fromRGB(50, 150, 255)
+    horizontalSeparator.BackgroundColor3 = Color3.fromRGB(255, 170, 170)  
     horizontalSeparator.BackgroundTransparency = 0.5
     horizontalSeparator.BorderSizePixel = 0
     horizontalSeparator.ZIndex = 10001
@@ -396,7 +397,7 @@ function getRealPing()
                 end
             end
         end
-        return math.floor(player:GetNetworkPing() * 1000)
+        return math.floor(LocalPlayer:GetNetworkPing() * 1000)  
     end)
     return success and ping or 0
 end
@@ -428,7 +429,7 @@ end
 
 function getTotalNotifications()
     local success, count = pcall(function()
-        local textNotifications = playerGui:FindFirstChild("Text Notifications")
+        local textNotifications = PlayerGui:FindFirstChild("Text Notifications")  
         if textNotifications then
             local frame = textNotifications:FindFirstChild("Frame")
             if frame then
@@ -928,12 +929,6 @@ function StartBlatantFishing()
         end
     end)
 end
-
-local RF_Charge   = Net:WaitForChild("RF/ChargeFishingRod")
-local RF_Request  = Net:WaitForChild("RF/RequestFishingMinigameStarted")
-local RF_Cancel   = Net:WaitForChild("RF/CancelFishingInputs")
-local RF_Complete = Net:WaitForChild("RF/CatchFishCompleted")
-local RE_Changed  = Net:WaitForChild("RE/FishingMinigameChanged")
 
 local function FishCycle()
     local t = tick()
