@@ -533,7 +533,7 @@ function StartInstantFishing()
                     Remotes.RF_Minigame:InvokeServer(-1, 0.999, power)
                 end)
                 
-                task.wait(InstantFishingDelay)
+                task.wait(CompleteDelay)
                 pcall(function()
                     Remotes.RF_Fishing:FireServer()
                 end)
