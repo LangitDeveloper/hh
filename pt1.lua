@@ -615,7 +615,7 @@ function StartBlatantFishing()
             end)
         end)
         
-        task.wait(CancellDelay)
+        task.wait(BlatantBaitDelay)
         task.spawn(function()
             pcall(function()
                 Remotes.RF_Cancel:InvokeServer()
@@ -1761,7 +1761,7 @@ local BlatantReelInput = FishingTab:Input({
     Callback = function(value)
         local num = tonumber(value)
         if num and num > 0 then
-            BlatantReelDelay = num
+            CompleteDelay = num
         end
     end,
 })
@@ -1775,7 +1775,7 @@ local BlatantFishInput = FishingTab:Input({
     Callback = function(value)
         local num = tonumber(value)
         if num and num > 0 then
-            BlatantFishingDelay = num
+            BlatantBaitDelay = num
         end
     end,
 })
