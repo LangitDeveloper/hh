@@ -154,7 +154,7 @@ local function CreatePingFPSGui()
     frame.Parent = screenGui
     frame.Size = UDim2.new(0, 220, 0, 100)
     frame.Position = UDim2.new(0, 20, 0, 200)
-    frame.BackgroundColor3 = Color3.fromRGB(255, 105, 180) -- Pink
+    frame.BackgroundColor3 = Color3.fromRGB(30, 30, 40) 
     frame.BackgroundTransparency = 0.2
     frame.BorderSizePixel = 0
     frame.Active = true
@@ -165,12 +165,11 @@ local function CreatePingFPSGui()
     corner.Parent = frame
 
     local glowStroke = Instance.new("UIStroke")
-    glowStroke.Color = Color3.fromRGB(255, 182, 193) -- Light pink
+    glowStroke.Color = Color3.fromRGB(255, 182, 193) 
     glowStroke.Thickness = 2
     glowStroke.Transparency = 0.3
     glowStroke.Parent = frame
 
-    -- Header dengan icon
     local headerFrame = Instance.new("Frame")
     headerFrame.Parent = frame
     headerFrame.Size = UDim2.new(1, 0, 0, 32)
@@ -204,14 +203,12 @@ local function CreatePingFPSGui()
     separator.BackgroundTransparency = 0.5
     separator.BorderSizePixel = 0
 
-    -- Konten utama
     local contentFrame = Instance.new("Frame")
     contentFrame.Parent = frame
     contentFrame.Size = UDim2.new(1, -20, 0, 60)
     contentFrame.Position = UDim2.new(0, 10, 0, 38)
     contentFrame.BackgroundTransparency = 1
 
-    -- Baris 1: Ping dan FPS
     local row1 = Instance.new("Frame")
     row1.Parent = contentFrame
     row1.Size = UDim2.new(1, 0, 0, 25)
@@ -240,7 +237,6 @@ local function CreatePingFPSGui()
     fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     fpsLabel.TextXAlignment = Enum.TextXAlignment.Right
 
-    -- Baris 2: Notifikasi
     local row2 = Instance.new("Frame")
     row2.Parent = contentFrame
     row2.Size = UDim2.new(1, 0, 0, 25)
@@ -258,7 +254,6 @@ local function CreatePingFPSGui()
     notifLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     notifLabel.TextXAlignment = Enum.TextXAlignment.Center
 
-    -- Tombol close
     local closeBtn = Instance.new("TextButton")
     closeBtn.Parent = frame
     closeBtn.Size = UDim2.new(0, 20, 0, 20)
@@ -282,7 +277,7 @@ local function CreatePingFPSGui()
         if notifUpdateConnection then notifUpdateConnection:Disconnect() end
     end)
 
-    -- Fungsi untuk mendapatkan jumlah notifikasi
+    
     local function getNotificationCount()
         local success, count = pcall(function()
             local notifications = PlayerGui:FindFirstChild("Text Notifications")
@@ -303,7 +298,7 @@ local function CreatePingFPSGui()
         return success and count or 0
     end
 
-    -- Update FPS
+    
     local fpsHistory = {}
     local lastTime = tick()
     
@@ -329,17 +324,17 @@ local function CreatePingFPSGui()
         
         fpsLabel.Text = "FPS: " .. roundedFPS
         
-        -- Update warna FPS
+        
         if roundedFPS >= 60 then
-            fpsLabel.TextColor3 = Color3.fromRGB(100, 255, 100) -- Hijau
+            fpsLabel.TextColor3 = Color3.fromRGB(100, 255, 100) 
         elseif roundedFPS >= 30 then
-            fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 100) -- Kuning
+            fpsLabel.TextColor3 = Color3.fromRGB(255, 255, 100)
         else
-            fpsLabel.TextColor3 = Color3.fromRGB(255, 100, 100) -- Merah
+            fpsLabel.TextColor3 = Color3.fromRGB(255, 100, 100) 
         end
     end
 
-    -- Update Ping
+    
     local function updatePing()
         local success, ping = pcall(function()
             local networkStats = Stats.Network.ServerStatsItem["Data Ping"]
@@ -352,25 +347,25 @@ local function CreatePingFPSGui()
         local pingValue = success and ping or 0
         pingLabel.Text = "Ping: " .. pingValue .. "ms"
         
-        -- Update warna Ping
+        
         if pingValue <= 80 then
-            pingLabel.TextColor3 = Color3.fromRGB(100, 255, 100) -- Hijau
+            pingLabel.TextColor3 = Color3.fromRGB(100, 255, 100) 
         elseif pingValue <= 150 then
-            pingLabel.TextColor3 = Color3.fromRGB(255, 255, 100) -- Kuning
+            pingLabel.TextColor3 = Color3.fromRGB(255, 255, 100) 
         else
-            pingLabel.TextColor3 = Color3.fromRGB(255, 100, 100) -- Merah
+            pingLabel.TextColor3 = Color3.fromRGB(255, 100, 100) 
         end
     end
 
-    -- Update Notifikasi
+    
     local function updateNotifications()
         local count = getNotificationCount()
         notifLabel.Text = "Notification: " .. count
-        -- Notifikasi tetap putih
+        
         notifLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     end
 
-    -- Setup connections
+    
     local updateConnection = RunService.RenderStepped:Connect(function()
         if not screenGui or not screenGui.Parent then
             updateConnection:Disconnect()
@@ -387,7 +382,7 @@ local function CreatePingFPSGui()
         end
         
         local now = tick()
-        if now - lastPingUpdate >= 1 then -- Update setiap 1 detik
+        if now - lastPingUpdate >= 1 then 
             updatePing()
             lastPingUpdate = now
         end
@@ -401,13 +396,12 @@ local function CreatePingFPSGui()
         end
         
         local now = tick()
-        if now - lastNotifUpdate >= 2 then -- Update setiap 2 detik
+        if now - lastNotifUpdate >= 0.5 then 
             updateNotifications()
             lastNotifUpdate = now
         end
     end)
 
-    -- Hotkey F4 untuk toggle
     local hotkeyConnection
     hotkeyConnection = UserInputService.InputBegan:Connect(function(input)
         if input.KeyCode == Enum.KeyCode.F4 then
@@ -415,7 +409,6 @@ local function CreatePingFPSGui()
         end
     end)
 
-    -- Cleanup
     screenGui.Destroying:Once(function()
         if updateConnection then updateConnection:Disconnect() end
         if pingUpdateConnection then pingUpdateConnection:Disconnect() end
@@ -600,7 +593,7 @@ function StartBlatantFishing()
         if not IsBlatantFishing then return end
         if state == "FishCaught" then
             task.spawn(function()
-                task.wait(BlatantFishingDelay)
+                task.wait(BlatantBaitDelay)
                 task.wait(CompleteDelay)
                 pcall(function()
                     Remotes.RF_Fishing:FireServer()
@@ -625,16 +618,14 @@ function StartBlatantFishing()
                 end)
             end)
                  
-            task.wait(BlatantReelDelay)
-            
-            
+            task.wait(BlatantReelDelay)  
+                    
             task.spawn(function()
                 pcall(function()
                     Remotes.RF_Fishing:FireServer()
                 end)
             end)
-            
-            
+               
             if loopCount >= recoveryEvery then
                 pcall(function()
                     Remotes.RF_Cancel:InvokeServer()
