@@ -83,7 +83,7 @@ local Engine = {
     RecoveryEvery  = 7       
 }
 
-local Stats = {
+local Statss = {
     Loop = 0
 }
 
@@ -934,32 +934,32 @@ local function FishCycle()
     local t = tick()
 
     task.spawn(function()
-        RF_Charge:InvokeServer(t)
+        Remotes.RF_Charge:InvokeServer(t)
     end)
 
     task.spawn(function()
-        RF_Request:InvokeServer(9, 0.99, t)
+        Remotes.RF_Request:InvokeServer(9, 0.99, t)
     end)
 
     task.delay(Engine.CompleteDelay, function()
-        RF_Complete:InvokeServer()
+        Remotes.RF_Complete:InvokeServer()
     end)
 end
 
 local function MainLoop()
-    Stats.Loop = 0
+    Statss.Loop = 0
 
     while Engine.Active do
         FishCycle()
-        Stats.Loop += 1
+        Statss.Loop += 1
 
-        if Stats.Loop >= Engine.RecoveryEvery then
+        if Statss.Loop >= Engine.RecoveryEvery then
             task.spawn(function()
-                RF_Cancel:InvokeServer()
+                Remotes.RF_Cancel:InvokeServer()
                 task.wait(0.2)
-                RF_Request:InvokeServer(9, 0.99, tick())
+                Remotes.RF_Request:InvokeServer(9, 0.99, tick())
             end)
-            Stats.Loop = 0
+            Statss.Loop = 0
         end
 
         task.wait(Engine.Throttle)
@@ -967,11 +967,11 @@ local function MainLoop()
 end
 
 
-RE_Changed.OnClientEvent:Connect(function()
+Remotes.RE_Changed.OnClientEvent:Connect(function()
     if not Engine.Active then return end
 
     task.delay(Engine.CompleteDelay, function()
-        RF_Complete:InvokeServer()
+        Remotes.RF_Complete:InvokeServer()
     end)
 end)
 
@@ -986,7 +986,7 @@ function StopEngine()
     if not Engine.Active then return end
     Engine.Active = false
     task.spawn(function()
-        RF_Cancel:InvokeServer()
+        Remotes.RF_Cancel:InvokeServer()
     end)
 end
 
