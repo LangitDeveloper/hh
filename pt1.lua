@@ -437,77 +437,6 @@ function StartInstantFishing()
     end)
 end
 
-function StartBlatantFishingV4()
-    IsBlatantFishing = true
-    IsBlatantV4 = true
-    V4LoopCount = 0
-    
-    Remotes.RF_AutoFishing:InvokeServer(true)
-    
-    if RE_Changed_V4 then
-        RE_Changed_V4.OnClientEvent:Connect(function()
-            if not IsBlatantV4 then return end
-            
-            task.spawn(function()
-                task.wait(V4CompleteDelay)
-                RF_Complete_V4:InvokeServer()
-                task.wait(V4CancelDelay)
-                Remotes.RF_Cancel:InvokeServer()
-            end)
-        end)
-    end
-    
-    
-    task.spawn(function() 
-        while IsBlatantV4 do
-            task.spawn(function()
-                local t = workspace:GetServerTimeNow()
-                
-             
-                task.spawn(function()
-                    pcall(function()
-                        Remotes.RF_Charge:InvokeServer(t)
-                    end)
-                end)
-
-                task.spawn(function()
-                    pcall(function()
-                        Remotes.RF_Minigame:InvokeServer(-1, 0.999, t)
-                    end)
-                end)
-
-                
-                task.wait(V4CompleteDelay)
-                task.spawn(function()
-                    pcall(function()
-                        RF_Complete_V4:InvokeServer()
-                    end)
-                end)
-
-                
-                task.wait(V4CancelDelay)
-                task.spawn(function()
-                    pcall(function()
-                        Remotes.RF_Cancel:InvokeServer()
-                    end)
-                end)
-            end)
-            
-       
-            V4LoopCount = V4LoopCount + 1
-            if V4LoopCount >= V4RecoveryEvery then
-                pcall(function()
-                    Remotes.RF_Cancel:InvokeServer()
-                end)
-                V4LoopCount = 0
-            end
-            
-          
-            task.wait(V4Throttle)
-        end
-    end)
-end
-
 function StartBlatantFishingV3()
     IsBlatantFishing = true
     Remotes.RF_AutoFishing:InvokeServer(true)
@@ -550,30 +479,73 @@ function StartBlatantFishingV2()
 end
 
 function StartBlatantFishing()
+    if IsBlatantFishing then return end
     IsBlatantFishing = true
+    
+    -- Aktifkan auto fishing di server
     Remotes.RF_AutoFishing:InvokeServer(true)
     
-    task.spawn(function() 
-        while IsBlatantFishing do
+    -- Setup event listener untuk fishing state changed
+    Remotes.RE_Changed.OnClientEvent:Connect(function(state)
+        if not IsBlatantFishing then return end
+        
+        -- Jika ada fish caught, langsung complete
+        if state == "FishCaught" then
             task.spawn(function()
-                pcall(function()
-                    Remotes.RF_Charge:InvokeServer(workspace:GetServerTimeNow())
-                end)
-                pcall(function()
-                    Remotes.RF_Minigame:InvokeServer(-1, 0.999)
-                end)
-                task.wait(BlatantBaitDelay)
-                task.wait(CompleteDelay)
-                
+                task.wait(BlatantCompleteDelay or 0.8)
                 pcall(function()
                     Remotes.RF_Fishing:FireServer()
                 end)
             end)
+        end
+    end)
+    
+    -- Main fishing loop
+    task.spawn(function()
+        local loopCount = 0
+        local recoveryEvery = 6  -- Recovery setiap 6 loop
+        
+        while IsBlatantFishing do
+            loopCount = loopCount + 1
+            
+            -- Gunakan task.spawn untuk non-blocking operations
+            task.spawn(function()
+                -- Charge fishing rod
+                pcall(function()
+                    Remotes.RF_Charge:InvokeServer(workspace:GetServerTimeNow())
+                end)
+                
+                -- Request minigame dengan power tinggi
+                pcall(function()
+                    Remotes.RF_Minigame:InvokeServer(-1, 0.999)
+                end)
+            end)
+            
+            -- Tunggu sebelum complete (adjustable)
+            task.wait(BlatantFishingDelay)
+            
+            -- Auto complete
+            task.spawn(function()
+                pcall(function()
+                    Remotes.RF_Fishing:FireServer()
+                end)
+            end)
+            
+            
+            if loopCount >= recoveryEvery then
+                pcall(function()
+                    Remotes.RF_Cancel:InvokeServer()
+                end)
+                loopCount = 0
+            end
+            
+          
             task.wait(BlatantReelDelay)
         end
     end)
+    
+    print("Blatant Fishing V1 started!")
 end
-
 function StartAutoSell()
     IsAutoSell = true
     
@@ -1689,7 +1661,7 @@ local BlatantFishInput = FishingTab:Input({
     Callback = function(value)
         local num = tonumber(value)
         if num and num > 0 then
-            BlatantBaitDelay = num
+            BlatantFishingDelay = num
         end
     end,
 })
@@ -1807,58 +1779,6 @@ local BlatantFishingV3Toggle = FishingTab:Toggle({
     end,
 })
 ConfigManager:Register("blatantV3Toggle", BlatantFishingV3Toggle)
-
-FishingTab:Section({Title = "Blatant V4"})
-
-FishingTab:Toggle({
-    Title = "Blatant V4",
-    Value = false,
-    Callback = function(v)
-        if v then 
-            StartBlatantFishingV4() 
-        else 
-            IsBlatantFishing = false
-            IsBlatantV4 = false
-            Remotes.RF_AutoFishing:InvokeServer(false)
-        end
-    end
-})
-
-FishingTab:Input({
-    Title = "Complete Delay",
-    Value = "0.12",
-    Callback = function(v) 
-        local n = tonumber(v)
-        if n and n >= 0.01 then V4CompleteDelay = n end
-    end
-})
-
-FishingTab:Input({
-    Title = "Cancel Delay", 
-    Value = "0.12",
-    Callback = function(v) 
-        local n = tonumber(v)
-        if n and n >= 0.01 then V4CancelDelay = n end
-    end
-})
-
-FishingTab:Input({
-    Title = "Throttle",
-    Value = "0.8",
-    Callback = function(v) 
-        local n = tonumber(v)
-        if n and n >= 0.1 then V4Throttle = n end
-    end
-})
-
-FishingTab:Input({
-    Title = "Recovery Cycle",
-    Value = "6",
-    Callback = function(v) 
-        local n = tonumber(v)
-        if n and n >= 1 then V4RecoveryEvery = n end
-    end
-})
 
 local SellSection = AutomaticTab:Section({Title = "Auto Sell"})
 
