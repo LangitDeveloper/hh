@@ -77,15 +77,6 @@ local CancelDelay   = 3
 local CompleteDelay = 0.8    
 local CurrentFishCount = 0
 
-local Active         = false
-local Throttle       = 0.75
-local RecoveryEvery  = 7       
-
-local Statss = {
-    Loop = 0
-}
-
-
 local AutoSellMode = "Delay" 
 local AutoSellValue = 60
 local IsAutoSell = false
@@ -151,43 +142,6 @@ local BoatLookup = {}
 local SelectedLocation = nil
 local SelectedPlayer = nil
 local PlayerList = {}
-
-local function FishCycle()
-    local t = tick()
-
-    task.spawn(function()
-        Remotes.RF_Charge:InvokeServer(t)
-    end)
-
-    task.spawn(function()
-        Remotes.RF_Minigame:InvokeServer(9, 0.99, t)
-    end)
-
-    task.delay(CompleteDelay, function()
-        Remotes.RF_Fishing:InvokeServer()
-    end)
-end
-
-local function MainLoop()
-    Statss.Loop = 0
-
-    while Active do
-        FishCycle()
-        Statss.Loop += 1
-
-        if Statss.Loop >= RecoveryEvery then
-            task.spawn(function()
-                Remotes.RF_Cancel:InvokeServer()
-                task.wait(0.2)
-                Remotes.RF_Minigame:InvokeServer(9, 0.99, tick())
-            end)
-            Statss.Loop = 0
-        end
-
-        task.wait(Throttle)
-    end
-end
-
 
 local function CreatePingFPSGui()
     local screenGui = Instance.new("ScreenGui")
@@ -729,20 +683,6 @@ function StartBlatantFishingV2()
     end)
 end
 
-function StartEngine()
-    if Active then return end
-    Active = true
-    task.spawn(MainLoop)
-end
-
-function StopEngine()
-    if not Active then return end
-    Active = false
-    task.spawn(function()
-        Remotes.RF_Cancel:InvokeServer()
-    end)
-end
-
 function StartBlatantFishing()
     if IsBlatantFishing then return end
     IsBlatantFishing = true
@@ -751,7 +691,7 @@ function StartBlatantFishing()
         if not IsBlatantFishing then return end
         if state == "FishCaught" then
             task.spawn(function()
-                task.wait(BlatantFishingDelay)
+                task.wait(CompleteDelay)
                 pcall(function()
                     Remotes.RF_Fishing:FireServer()
                 end)
@@ -778,7 +718,7 @@ function StartBlatantFishing()
                 end)
             end)
                  
-            task.wait(BlatantReelDelay)
+            task.wait(CancelDelay)
             
             
             task.spawn(function()
@@ -795,7 +735,7 @@ function StartBlatantFishing()
                 loopCount = 0
             end
           
-            task.wait(CompleteDelay)
+            task.wait(BlatantReelDelay)
         end
     end)
 end
@@ -1901,7 +1841,7 @@ local BlatantReelInput = FishingTab:Input({
     Callback = function(value)
         local num = tonumber(value)
         if num and num > 0 then
-            BlatantReelDelay = num
+            CompleteDelay = num
         end
     end,
 })
@@ -1915,7 +1855,7 @@ local BlatantFishInput = FishingTab:Input({
     Callback = function(value)
         local num = tonumber(value)
         if num and num > 0 then
-            BlatantFishingDelay = num
+            CancelDelay = num
         end
     end,
 })
@@ -2033,47 +1973,6 @@ local BlatantFishingV3Toggle = FishingTab:Toggle({
     end,
 })
 ConfigManager:Register("blatantV3Toggle", BlatantFishingV3Toggle)
-
-FishingTab:Section({Title = "Blatant Beta"})
-
-FishingTab:Divider()
-
-local BlatantbetaToggle = FishingTab:Toggle({
-    Title = "Blatant Beta",
-    Default = false,
-    Callback = function(v)
-        if v then
-            StartEngine()
-        else
-            StopEngine()
-        end
-    end
-})
-ConfigManager:Register("blatantbetaToggle", BlatantbetaToggle
-
-local BlatantCompletedInput = FishingTab:Input({
-    Title = "Complete Delay",
-    Value = tostring(CompleteDelay),
-    Callback = function(v)
-        local n = tonumber(v)
-        if n and n >= 0.03 and n <= 0.3 then
-            CompleteDelay = n
-        end
-    end
-})
-ConfigManager:Register("blatantcompletedinput", BlatantCompletedInput
-
-local BlatantcycleInput = FishingTab:Input({
-    Title = "Throttle",
-    Value = tostring(Throttle),
-    Callback = function(v)
-        local n = tonumber(v)
-        if n and n >= 0.6 and n <= 2 then
-            Throttle = n
-        end
-    end
-})
-ConfigManager:Register("blatantcycleinput", BlatantcycleInput
 
 local SellSection = AutomaticTab:Section({Title = "Auto Sell"})
 
