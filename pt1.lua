@@ -76,6 +76,9 @@ local CastDelay   = 0.3
 local CancelDelay   = 3      
 local CompleteDelay = 0.8    
 local CurrentFishCount = 0
+local Throttle = 0.8
+local RecoveryEvery = 6
+local loopCount = 0
 
 local AutoSellMode = "Delay" 
 local AutoSellValue = 60
@@ -588,52 +591,70 @@ end
 function StartBlatantFishing()
     if IsBlatantFishing then return end
     IsBlatantFishing = true
-    Remotes.RF_AutoFishing:InvokeServer(true)
+    
+    local function FishCycle()
+        local t = workspace:GetServerTimeNow()
+        
+     
+        task.spawn(function()
+            pcall(function()
+                Remotes.RF_Charge:InvokeServer(t)
+            end)
+        end)
+        
+        task.spawn(function()
+            pcall(function()
+                Remotes.RF_Minigame:InvokeServer(9, 0.99, t)
+            end)
+        end)
+        
+        task.wait(CompleteDelay)
+        task.spawn(function()
+            pcall(function()
+                Remotes.RF_Fishing:FireServer()
+            end)
+        end)
+        
+        task.wait(CancelDelay)
+        task.spawn(function()
+            pcall(function()
+                Remotes.RF_Cancel:InvokeServer()
+            end)
+        end)
+    end
+    
+    task.spawn(function()
+        while IsBlatantFishing do
+            FishCycle()
+            loopCount = loopCount + 1
+            
+            if loopCount >= RecoveryEvery then
+                task.spawn(function()
+                    pcall(function()
+                        Remotes.RF_Cancel:InvokeServer()
+                    end)
+                end)
+                loopCount = 0
+            end
+            
+            task.wait(Throttle)
+        end
+    end)
+    
     Remotes.RE_FishingMinigameEvent.OnClientEvent:Connect(function(state)
         if not IsBlatantFishing then return end
+        
         if state == "FishCaught" then
             task.spawn(function()
-                task.wait(BlatantBaitDelay)
                 task.wait(CompleteDelay)
                 pcall(function()
                     Remotes.RF_Fishing:FireServer()
                 end)
-            end)
-        end
-    end)    
-    task.spawn(function()
-        local loopCount = 0
-        local recoveryEvery = 6  
-        
-        while IsBlatantFishing do
-            loopCount = loopCount + 1        
-            task.spawn(function()
-               
-                pcall(function()
-                    Remotes.RF_Charge:InvokeServer(workspace:GetServerTimeNow())
-                end)
-                
-                pcall(function()
-                    Remotes.RF_Minigame:InvokeServer(-1, 0.999)
-                end)
-            end)
-                 
-            task.wait(BlatantReelDelay)  
-                    
-            task.spawn(function()
-                pcall(function()
-                    Remotes.RF_Fishing:FireServer()
-                end)
-            end)
-               
-            if loopCount >= recoveryEvery then
+                task.wait(CancelDelay)
                 pcall(function()
                     Remotes.RF_Cancel:InvokeServer()
                 end)
-                loopCount = 0
-            end
-          
-            task.wait(CancelDelay)
+            end)
         end
     end)
 end
@@ -1681,7 +1702,7 @@ local InstantDelayInput = FishingTab:Input({
     Callback = function(value)
         local num = tonumber(value)
         if num and num > 0 then
-            InstantFishingDelay = num
+            CompleteDelay = num
         end
     end,
 })
