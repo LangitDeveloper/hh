@@ -3284,11 +3284,6 @@ PlayerSection:Button({
 Window:OnDestroy(function()
     ConfigManager:Save()
     
-    if IsBlatantV4 then
-        StopBlatantFishingV4()
-        BlatantV4Toggle:Set(false)
-    end
-    
     if LegitFishingToggle then LegitFishingToggle:Set(false) end
     if AutoShakeToggle then AutoShakeToggle:Set(false) end
     if InstantFishingToggle then InstantFishingToggle:Set(false) end
