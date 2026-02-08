@@ -1814,7 +1814,13 @@ FishingTab:Toggle({
     Title = "Blatant V4",
     Value = false,
     Callback = function(v)
-        if v then StartBlatantFishingV4() else StopBlatantFishingV4() end
+        if v then 
+            StartBlatantFishingV4() 
+        else 
+            IsBlatantFishing = false
+            IsBlatantV4 = false
+            Remotes.RF_AutoFishing:InvokeServer(false)
+        end
     end
 })
 
