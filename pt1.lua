@@ -40,9 +40,6 @@ local Remotes = {
     RE_ObtainedNewFishNotification = Net:WaitForChild("RE/ObtainedNewFishNotification"),
     RE_FishingMinigameEvent = Net:WaitForChild("RE/FishingMinigameChanged"),
     RF_Trade = Net:WaitForChild("RF/InitiateTrade"),
-    RF_AutoEnabled = Net:WaitForChild("RF/UpdateAutoFishingState"),
-    RF_Request  = Net:WaitForChild("RF/RequestFishingMinigameStarted"),
-    RF_Complete = Net:WaitForChild("RF/CatchFishCompleted"),
     RE_Changed  = Net:WaitForChild("RE/FishingMinigameChanged"),
 }
 
@@ -1749,48 +1746,6 @@ local BlatantFishingV3Toggle = FishingTab:Toggle({
     end,
 })
 ConfigManager:Register("blatantV3Toggle", BlatantFishingV3Toggle)
-
-FishingTab:Section({Title = "Blatant Fixed [ Beta ]"})
-
-FishingTab:Divider()
-
-FishingTab:Toggle({
-    Title = "Blatant Engine (FINAL FIX)",
-    Default = false,
-    Callback = function(v)
-        if v then
-            StartEngine()
-        else
-            StopEngine()
-        end
-    end
-})
-ConfigManager:Register("blatantV4Toggle", BlatantFishingV4Toggle)
-
-FishingTab:Input({
-    Title = "Complete Delay",
-    Value = tostring(Engine.CompleteDelay),
-    Callback = function(v)
-        local n = tonumber(v)
-        if n and n >= 0.03 and n <= 0.3 then
-            Engine.CompleteDelay = n
-        end
-    end
-})
-ConfigManager:Register("blatantcomplete", Blatantcomplete)
-
-
-FishingTab:Input({
-    Title = "Throttle",
-    Value = tostring(Engine.Throttle),
-    Callback = function(v)
-        local n = tonumber(v)
-        if n and n >= 0.6 and n <= 2 then
-            Engine.Throttle = n
-        end
-    end
-})
-ConfigManager:Register("blatantcycle", Blatantcycle)
 
 local SellSection = AutomaticTab:Section({Title = "Auto Sell"})
 
