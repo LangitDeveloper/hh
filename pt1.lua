@@ -9,6 +9,7 @@ local TeleportService = game:GetService("TeleportService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Stats = game:GetService("Stats")
+local CoreGui = game:GetService("CoreGui")
 
 local Net = ReplicatedStorage.Packages._Index["sleitnick_net@0.2.0"].net
 local Remotes = {
@@ -40,6 +41,9 @@ local Remotes = {
     RE_FishingMinigameEvent = Net:WaitForChild("RE/FishingMinigameChanged"),
     RF_Trade = Net:WaitForChild("RF/InitiateTrade"),
     RF_AutoEnabled = Net:WaitForChild("RF/UpdateAutoFishingState"),
+    RF_Request  = Net:WaitForChild("RF/RequestFishingMinigameStarted"),
+    RF_Complete = Net:WaitForChild("RF/CatchFishCompleted"),
+    RE_Changed  = Net:WaitForChild("RE/FishingMinigameChanged"),
 }
 
 local Replion = require(ReplicatedStorage.Packages.Replion)
@@ -71,6 +75,17 @@ local IsLegitFishing = false
 local IsAutoShake = false
 local IsInstantFishing = false
 local IsBlatantFishing = false
+
+local Engine = {
+    Active         = false,
+    CompleteDelay  = 0.08,   
+    Throttle       = 0.75,   
+    RecoveryEvery  = 7       
+}
+
+local Stats = {
+    Loop = 0
+}
 
 local IsBlatantV3 = false
 local CastDelay   = 0.3   
@@ -145,6 +160,429 @@ local BoatLookup = {}
 local SelectedLocation = nil
 local SelectedPlayer = nil
 local PlayerList = {}
+
+local MonitorModule = {}
+MonitorModule.GUI = nil
+
+local lastFrameTime = tick()
+local fpsHistory = {}
+local maxFPSHistory = 20
+local updateConnection
+local pingUpdateConnection
+local notificationConnection
+
+function createMonitorGUI()
+    local parentGui = playerGui
+    local useCoreGui = pcall(function()
+        local testGui = Instance.new("ScreenGui")
+        testGui.Parent = CoreGui
+        testGui:Destroy()
+    end)
+    
+    if useCoreGui then
+        parentGui = CoreGui
+    end
+    
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "NoxiusHubMonitor_" .. math.random(1, 999999)
+    screenGui.ResetOnSpawn = false
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    screenGui.DisplayOrder = 2147483647
+    screenGui.Enabled = true
+    screenGui.IgnoreGuiInset = true
+    
+    local container = Instance.new("Frame")
+    container.Name = "Container"
+    container.Size = UDim2.new(0, 200, 0, 100)  
+    container.Position = UDim2.new(0, 250, 0, 100)  
+    container.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    container.BackgroundTransparency = 0.15
+    container.BorderSizePixel = 0
+    container.Visible = true
+    container.ZIndex = 10000
+    container.Active = true
+    container.Parent = screenGui
+    
+    local containerCorner = Instance.new("UICorner")
+    containerCorner.CornerRadius = UDim.new(0, 10)
+    containerCorner.Parent = container
+    
+    local containerStroke = Instance.new("UIStroke")
+    containerStroke.Color = Color3.fromRGB(50, 150, 255)
+    containerStroke.Thickness = 2
+    containerStroke.Transparency = 0.3
+    containerStroke.Parent = container
+    
+    local header = Instance.new("Frame")
+    header.Name = "Header"
+    header.Size = UDim2.new(1, 0, 0, 35)
+    header.BackgroundTransparency = 1
+    header.ZIndex = 10001
+    header.Parent = container
+    
+    local logoIcon = Instance.new("ImageLabel")
+    logoIcon.Name = "LogoIcon"
+    logoIcon.Size = UDim2.new(0, 24, 0, 24)
+    logoIcon.Position = UDim2.new(0, 8, 0, 5)
+    logoIcon.BackgroundTransparency = 1
+    logoIcon.Image = "rbxassetid://77194008928196"
+    logoIcon.ScaleType = Enum.ScaleType.Fit
+    logoIcon.ImageColor3 = Color3.fromRGB(100, 180, 255)
+    logoIcon.ZIndex = 10002
+    logoIcon.Parent = header
+    
+    local logoCorner = Instance.new("UICorner")
+    logoCorner.CornerRadius = UDim.new(0, 6)
+    logoCorner.Parent = logoIcon
+    
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Name = "TitleLabel"
+    titleLabel.Size = UDim2.new(1, -40, 1, 0)
+    titleLabel.Position = UDim2.new(0, 36, 0, 0)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = "TOR MONITOR KETUA"
+    titleLabel.TextColor3 = Color3.fromRGB(100, 180, 255)
+    titleLabel.TextSize = 13
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.ZIndex = 10002
+    titleLabel.Parent = header
+    
+    local separator = Instance.new("Frame")
+    separator.Name = "Separator"
+    separator.Size = UDim2.new(1, -16, 0, 1)
+    separator.Position = UDim2.new(0, 8, 0, 35)
+    separator.BackgroundColor3 = Color3.fromRGB(50, 150, 255)
+    separator.BackgroundTransparency = 0.5
+    separator.BorderSizePixel = 0
+    separator.ZIndex = 10001
+    separator.Parent = container
+    
+    local content = Instance.new("Frame")
+    content.Name = "Content"
+    content.Size = UDim2.new(1, -16, 0, 60)  
+    content.Position = UDim2.new(0, 8, 0, 40)
+    content.BackgroundTransparency = 1
+    content.ZIndex = 10001
+    content.Parent = container
+    
+    local pingLabel = Instance.new("TextLabel")
+    pingLabel.Name = "PingLabel"
+    pingLabel.Size = UDim2.new(0.5, -6, 0, 25)
+    pingLabel.Position = UDim2.new(0, 0, 0, 0)
+    pingLabel.BackgroundTransparency = 1
+    pingLabel.Text = "Ping: 0 ms"
+    pingLabel.TextColor3 = Color3.fromRGB(150, 200, 255)
+    pingLabel.TextSize = 13
+    pingLabel.Font = Enum.Font.GothamBold
+    pingLabel.TextXAlignment = Enum.TextXAlignment.Center
+    pingLabel.ZIndex = 10002
+    pingLabel.Parent = content
+    
+    local verticalSeparator = Instance.new("Frame")
+    verticalSeparator.Name = "VerticalSeparator"
+    verticalSeparator.Size = UDim2.new(0, 1, 0, 25)
+    verticalSeparator.Position = UDim2.new(0.5, 0, 0, 0)
+    verticalSeparator.BackgroundColor3 = Color3.fromRGB(50, 150, 255)
+    verticalSeparator.BackgroundTransparency = 0.5
+    verticalSeparator.BorderSizePixel = 0
+    verticalSeparator.ZIndex = 10001
+    verticalSeparator.Parent = content
+    
+    local fpsLabel = Instance.new("TextLabel")
+    fpsLabel.Name = "FPSLabel"
+    fpsLabel.Size = UDim2.new(0.5, -6, 0, 25)
+    fpsLabel.Position = UDim2.new(0.5, 6, 0, 0)
+    fpsLabel.BackgroundTransparency = 1
+    fpsLabel.Text = "FPS: 60"
+    fpsLabel.TextColor3 = Color3.fromRGB(100, 255, 200)
+    fpsLabel.TextSize = 13
+    fpsLabel.Font = Enum.Font.GothamBold
+    fpsLabel.TextXAlignment = Enum.TextXAlignment.Center
+    fpsLabel.ZIndex = 10002
+    fpsLabel.Parent = content
+    
+    local horizontalSeparator = Instance.new("Frame")
+    horizontalSeparator.Name = "HorizontalSeparator"
+    horizontalSeparator.Size = UDim2.new(1, 0, 0, 1)
+    horizontalSeparator.Position = UDim2.new(0, 0, 0, 30)
+    horizontalSeparator.BackgroundColor3 = Color3.fromRGB(50, 150, 255)
+    horizontalSeparator.BackgroundTransparency = 0.5
+    horizontalSeparator.BorderSizePixel = 0
+    horizontalSeparator.ZIndex = 10001
+    horizontalSeparator.Parent = content
+    
+    local notifLabel = Instance.new("TextLabel")
+    notifLabel.Name = "NotifLabel"
+    notifLabel.Size = UDim2.new(1, 0, 0, 25)
+    notifLabel.Position = UDim2.new(0, 0, 0, 35)
+    notifLabel.BackgroundTransparency = 1
+    notifLabel.Text = "Notifications: 0"
+    notifLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+    notifLabel.TextSize = 13
+    notifLabel.Font = Enum.Font.GothamBold
+    notifLabel.TextXAlignment = Enum.TextXAlignment.Center
+    notifLabel.ZIndex = 10002
+    notifLabel.Parent = content
+    
+    local dragging = false
+    local dragInput, dragStart, startPos
+    local UserInputService = game:GetService("UserInputService")
+    
+    container.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = container.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+    
+    container.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            container.Position = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale,
+                startPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+    
+    screenGui.Parent = parentGui
+    
+    task.spawn(function()
+        while screenGui and screenGui.Parent do
+            task.wait(1)
+            if screenGui and screenGui.Parent then
+                screenGui.DisplayOrder = 2147483647
+            end
+        end
+    end)
+    
+    return {
+        ScreenGui = screenGui,
+        Container = container,
+        PingLabel = pingLabel,
+        FPSLabel = fpsLabel,
+        NotifLabel = notifLabel,
+        LogoIcon = logoIcon,
+        ParentType = useCoreGui and "CoreGui" or "PlayerGui"
+    }
+end
+
+function getRealPing()
+    local success, ping = pcall(function()
+        local networkStats = Stats:FindFirstChild("Network")
+        if networkStats then
+            local serverStats = networkStats:FindFirstChild("ServerStatsItem")
+            if serverStats then
+                local dataPing = serverStats:FindFirstChild("Data Ping")
+                if dataPing then
+                    local pingValue = dataPing:GetValue()
+                    return math.floor(pingValue)
+                end
+            end
+        end
+        return math.floor(player:GetNetworkPing() * 1000)
+    end)
+    return success and ping or 0
+end
+
+function getFPS()
+    local currentTime = tick()
+    local deltaTime = currentTime - lastFrameTime
+    lastFrameTime = currentTime
+    
+    local currentFPS = 0
+    if deltaTime > 0 then
+        currentFPS = 1 / deltaTime
+    end
+    
+    table.insert(fpsHistory, currentFPS)
+    
+    if #fpsHistory > maxFPSHistory then
+        table.remove(fpsHistory, 1)
+    end
+    
+    local sum = 0
+    for _, fps in ipairs(fpsHistory) do
+        sum = sum + fps
+    end
+    
+    local averageFPS = sum / #fpsHistory
+    return math.floor(math.clamp(averageFPS, 0, 240))
+end
+
+function getTotalNotifications()
+    local success, count = pcall(function()
+        local textNotifications = playerGui:FindFirstChild("Text Notifications")
+        if textNotifications then
+            local frame = textNotifications:FindFirstChild("Frame")
+            if frame then
+                local notifCount = 0
+                for _, child in ipairs(frame:GetChildren()) do
+                    if child.Name == "Tile" then
+                        notifCount = notifCount + 1
+                    end
+                end
+                return notifCount
+            end
+        end
+        return 0
+    end)
+    return success and count or 0
+end
+
+local function updatePingColor(pingLabel, value)
+    local ping = tonumber(value)
+    if ping <= 50 then
+        pingLabel.TextColor3 = Color3.fromRGB(100, 255, 200)
+    elseif ping <= 100 then
+        pingLabel.TextColor3 = Color3.fromRGB(150, 200, 255)
+    elseif ping <= 150 then
+        pingLabel.TextColor3 = Color3.fromRGB(180, 140, 255)
+    else
+        pingLabel.TextColor3 = Color3.fromRGB(255, 100, 150)
+    end
+end
+
+ function updateFPSColor(fpsLabel, value)
+    local fps = tonumber(value)
+    if fps >= 55 then
+        fpsLabel.TextColor3 = Color3.fromRGB(100, 255, 200)
+    elseif fps >= 40 then
+        fpsLabel.TextColor3 = Color3.fromRGB(150, 200, 255)
+    elseif fps >= 25 then
+        fpsLabel.TextColor3 = Color3.fromRGB(180, 140, 255)
+    else
+        fpsLabel.TextColor3 = Color3.fromRGB(255, 100, 150)
+    end
+end
+
+ function updateNotifColor(notifLabel, value)
+    local count = tonumber(value)
+    if count == 0 then
+        notifLabel.TextColor3 = Color3.fromRGB(150, 200, 255)
+    elseif count <= 5 then
+        notifLabel.TextColor3 = Color3.fromRGB(255, 200, 100)
+    elseif count <= 10 then
+        notifLabel.TextColor3 = Color3.fromRGB(255, 150, 100)
+    else
+        notifLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+    end
+end
+
+function MonitorModule:Show()
+    if self.GUI then
+        self.GUI.ScreenGui.Enabled = true
+        return
+    end
+    
+    self.GUI = createMonitorGUI()
+    print("[MahiruHub Monitor] Started in:", self.GUI.ParentType)
+    
+    updateConnection = RunService.RenderStepped:Connect(function()
+        if not self.GUI or not self.GUI.ScreenGui or not self.GUI.ScreenGui.Parent then
+            if updateConnection then
+                updateConnection:Disconnect()
+            end
+            return
+        end
+        
+        local fps = getFPS()
+        self.GUI.FPSLabel.Text = "FPS: " .. tostring(fps)
+        updateFPSColor(self.GUI.FPSLabel, fps)
+    end)
+    
+    local lastPingUpdate = 0
+    pingUpdateConnection = RunService.Heartbeat:Connect(function()
+        if not self.GUI or not self.GUI.ScreenGui or not self.GUI.ScreenGui.Parent then
+            if pingUpdateConnection then
+                pingUpdateConnection:Disconnect()
+            end
+            return
+        end
+        
+        local currentTime = tick()
+        if currentTime - lastPingUpdate >= 0.5 then
+            local ping = getRealPing()
+            self.GUI.PingLabel.Text = "Ping: " .. ping .. " ms"
+            updatePingColor(self.GUI.PingLabel, ping)
+            lastPingUpdate = currentTime
+        end
+    end)
+    
+    local lastNotifUpdate = 0
+    notificationConnection = RunService.Heartbeat:Connect(function()
+        if not self.GUI or not self.GUI.ScreenGui or not self.GUI.ScreenGui.Parent then
+            if notificationConnection then
+                notificationConnection:Disconnect()
+            end
+            return
+        end
+        
+        local currentTime = tick()
+        if currentTime - lastNotifUpdate >= 1 then  
+            local notifCount = getTotalNotifications()
+            self.GUI.NotifLabel.Text = "Notifications: " .. notifCount
+            updateNotifColor(self.GUI.NotifLabel, notifCount)
+            lastNotifUpdate = currentTime
+        end
+    end)
+end
+
+function MonitorModule:Hide()
+    if self.GUI and self.GUI.ScreenGui then
+        self.GUI.ScreenGui.Enabled = false
+    end
+end
+
+function MonitorModule:Toggle()
+    if self.GUI and self.GUI.ScreenGui then
+        self.GUI.ScreenGui.Enabled = not self.GUI.ScreenGui.Enabled
+    else
+        self:Show()
+    end
+end
+
+function MonitorModule:Destroy()
+    if updateConnection then
+        updateConnection:Disconnect()
+        updateConnection = nil
+    end
+    
+    if pingUpdateConnection then
+        pingUpdateConnection:Disconnect()
+        pingUpdateConnection = nil
+    end
+    
+    if notificationConnection then
+        notificationConnection:Disconnect()
+        notificationConnection = nil
+    end
+    
+    if self.GUI and self.GUI.ScreenGui then
+        self.GUI.ScreenGui:Destroy()
+        self.GUI = nil
+    end
+    
+    fpsHistory = {}
+end
+
+MonitorModule:Show()
 
 local function CreatePingFPSGui()
     local gui = Instance.new("ScreenGui")
@@ -483,12 +921,80 @@ function StartBlatantFishing()
                 task.wait(CompleteDelay)
                 pcall(function()
                     Remotes.RF_Fishing:FireServer()
+                    Remotes.RF_CatchFishCompleted:FireServer()
                 end)
             end)
             task.wait(BlatantReelDelay)
         end
     end)
 end
+
+local RF_Charge   = Net:WaitForChild("RF/ChargeFishingRod")
+local RF_Request  = Net:WaitForChild("RF/RequestFishingMinigameStarted")
+local RF_Cancel   = Net:WaitForChild("RF/CancelFishingInputs")
+local RF_Complete = Net:WaitForChild("RF/CatchFishCompleted")
+local RE_Changed  = Net:WaitForChild("RE/FishingMinigameChanged")
+
+local function FishCycle()
+    local t = tick()
+
+    task.spawn(function()
+        RF_Charge:InvokeServer(t)
+    end)
+
+    task.spawn(function()
+        RF_Request:InvokeServer(9, 0.99, t)
+    end)
+
+    task.delay(Engine.CompleteDelay, function()
+        RF_Complete:InvokeServer()
+    end)
+end
+
+local function MainLoop()
+    Stats.Loop = 0
+
+    while Engine.Active do
+        FishCycle()
+        Stats.Loop += 1
+
+        if Stats.Loop >= Engine.RecoveryEvery then
+            task.spawn(function()
+                RF_Cancel:InvokeServer()
+                task.wait(0.2)
+                RF_Request:InvokeServer(9, 0.99, tick())
+            end)
+            Stats.Loop = 0
+        end
+
+        task.wait(Engine.Throttle)
+    end
+end
+
+
+RE_Changed.OnClientEvent:Connect(function()
+    if not Engine.Active then return end
+
+    task.delay(Engine.CompleteDelay, function()
+        RF_Complete:InvokeServer()
+    end)
+end)
+
+
+function StartEngine()
+    if Engine.Active then return end
+    Engine.Active = true
+    task.spawn(MainLoop)
+end
+
+function StopEngine()
+    if not Engine.Active then return end
+    Engine.Active = false
+    task.spawn(function()
+        RF_Cancel:InvokeServer()
+    end)
+end
+
 
 function StartAutoSell()
     IsAutoSell = true
@@ -1625,8 +2131,6 @@ local BlatantFishingToggle = FishingTab:Toggle({
 })
 ConfigManager:Register("blatantToggle", BlatantFishingToggle)
 
-
-
 FishingTab:Button({
     Title = "Recovery Fishing",
     Callback = function()
@@ -1723,6 +2227,48 @@ local BlatantFishingV3Toggle = FishingTab:Toggle({
     end,
 })
 ConfigManager:Register("blatantV3Toggle", BlatantFishingV3Toggle)
+
+FishingTab:Section({Title = "Blatant Fixed [ Beta ]"})
+
+FishingTab:Divider()
+
+FishingTab:Toggle({
+    Title = "Blatant Engine (FINAL FIX)",
+    Default = false,
+    Callback = function(v)
+        if v then
+            StartEngine()
+        else
+            StopEngine()
+        end
+    end
+})
+ConfigManager:Register("blatantV4Toggle", BlatantFishingV4Toggle)
+
+FishingTab:Input({
+    Title = "Complete Delay",
+    Value = tostring(Engine.CompleteDelay),
+    Callback = function(v)
+        local n = tonumber(v)
+        if n and n >= 0.03 and n <= 0.3 then
+            Engine.CompleteDelay = n
+        end
+    end
+})
+ConfigManager:Register("blatantcomplete", Blatantcomplete)
+
+
+FishingTab:Input({
+    Title = "Throttle",
+    Value = tostring(Engine.Throttle),
+    Callback = function(v)
+        local n = tonumber(v)
+        if n and n >= 0.6 and n <= 2 then
+            Engine.Throttle = n
+        end
+    end
+})
+ConfigManager:Register("blatantcycle", Blatantcycle)
 
 local SellSection = AutomaticTab:Section({Title = "Auto Sell"})
 
