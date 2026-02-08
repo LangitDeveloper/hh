@@ -39,8 +39,6 @@ local Remotes = {
     RE_ObtainedNewFishNotification = Net:WaitForChild("RE/ObtainedNewFishNotification"),
     RE_FishingMinigameEvent = Net:WaitForChild("RE/FishingMinigameChanged"),
     RF_Trade = Net:WaitForChild("RF/InitiateTrade"),
-    RF_Complete = Net:WaitForChild("RF/CompleteFishing"),
-    RE_Changed = Net:WaitForChild("RE/FishingStateChanged"),
 }
 
 local Replion = require(ReplicatedStorage.Packages.Replion)
@@ -79,13 +77,6 @@ local CancelDelay   = 3
 local CompleteDelay = 0.8    
 local CurrentFishCount = 0
 
-local IsBlatantV4 = false
-local V4CompleteDelay = 0.12
-local V4CancelDelay = 0.12
-local V4Throttle = 0.8
-local V4RecoveryEvery = 6
-local V4LoopCount = 0
-
 local AutoSellMode = "Delay" 
 local AutoSellValue = 60
 local IsAutoSell = false
@@ -114,7 +105,6 @@ local IsMaxZoom = false
 local IsDisableVFX = false
 local IsDisableCutscene = false
 local IsDisableFishNotification = false
-
 
 local ESPEnabled = false
 local ESPObjects = {}
