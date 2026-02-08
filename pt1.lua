@@ -143,6 +143,16 @@ local SelectedLocation = nil
 local SelectedPlayer = nil
 local PlayerList = {}
 
+local MonitorModule = {}
+MonitorModule.GUI = nil
+
+local lastFrameTime = tick()
+local fpsHistory = {}
+local maxFPSHistory = 20
+local updateConnection
+local pingUpdateConnection
+local notificationConnection
+
 local function CreatePingFPSGui()
     local gui = Instance.new("ScreenGui")
     gui.Name = "MahiruPingFPS"
@@ -468,16 +478,12 @@ end
 function StartBlatantFishing()
     if IsBlatantFishing then return end
     IsBlatantFishing = true
-    
     Remotes.RF_AutoFishing:InvokeServer(true)
-    
     Remotes.RE_FishingMinigameEvent.OnClientEvent:Connect(function(state)
         if not IsBlatantFishing then return end
-        
-       
         if state == "FishCaught" then
             task.spawn(function()
-                task.wait(BlatantCompleteDelay or 0.8)
+                task.wait(CompleteDelay)
                 pcall(function()
                     Remotes.RF_Fishing:FireServer()
                 end)
@@ -492,7 +498,6 @@ function StartBlatantFishing()
         
         while IsBlatantFishing do
             loopCount = loopCount + 1
-            
             
             task.spawn(function()
                
@@ -523,7 +528,6 @@ function StartBlatantFishing()
                 end)
                 loopCount = 0
             end
-            
           
             task.wait(BlatantReelDelay)
         end
