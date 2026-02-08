@@ -597,6 +597,12 @@ function StartBlatantFishing()
                
         task.spawn(function()
             pcall(function()
+                Remotes.RF_Charge:InvokeServer(t)
+            end)
+        end)
+         
+        task.spawn(function()
+            pcall(function()
                 Remotes.RF_Minigame:InvokeServer(-1, 0.99, t)
             end)
         end)
@@ -609,10 +615,6 @@ function StartBlatantFishing()
         end)
         
         task.wait(CancelDelay)
-        task.spawn(function()
-            pcall(function()
-                Remotes.RF_Cancel:InvokeServer()
-            end)
         end)
     end
     
