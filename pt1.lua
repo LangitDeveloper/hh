@@ -143,15 +143,6 @@ local SelectedLocation = nil
 local SelectedPlayer = nil
 local PlayerList = {}
 
-local MonitorModule = {}
-MonitorModule.GUI = nil
-
-local lastFrameTime = tick()
-local fpsHistory = {}
-local maxFPSHistory = 20
-local updateConnection
-local pingUpdateConnection
-local notificationConnection
 
 local function CreatePingFPSGui()
     local gui = Instance.new("ScreenGui")
