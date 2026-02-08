@@ -77,12 +77,9 @@ local CancelDelay   = 3
 local CompleteDelay = 0.8    
 local CurrentFishCount = 0
 
-local Engine = {
-    Active         = false,
-    CompleteDelay  = 0.08,   
-    Throttle       = 0.75,   
-    RecoveryEvery  = 7       
-}
+local Active         = false
+local Throttle       = 0.75
+local RecoveryEvery  = 7       
 
 local Statss = {
     Loop = 0
@@ -166,7 +163,7 @@ local function FishCycle()
         Remotes.RF_Minigame:InvokeServer(9, 0.99, t)
     end)
 
-    task.delay(Engine.CompleteDelay, function()
+    task.delay(CompleteDelay, function()
         Remotes.RF_Fishing:InvokeServer()
     end)
 end
@@ -174,11 +171,11 @@ end
 local function MainLoop()
     Statss.Loop = 0
 
-    while Engine.Active do
+    while Active do
         FishCycle()
         Statss.Loop += 1
 
-        if Statss.Loop >= Engine.RecoveryEvery then
+        if Statss.Loop >= RecoveryEvery then
             task.spawn(function()
                 Remotes.RF_Cancel:InvokeServer()
                 task.wait(0.2)
@@ -187,7 +184,7 @@ local function MainLoop()
             Statss.Loop = 0
         end
 
-        task.wait(Engine.Throttle)
+        task.wait(Throttle)
     end
 end
 
@@ -733,14 +730,14 @@ function StartBlatantFishingV2()
 end
 
 function StartEngine()
-    if Engine.Active then return end
-    Engine.Active = true
+    if Active then return end
+    Active = true
     task.spawn(MainLoop)
 end
 
 function StopEngine()
-    if not Engine.Active then return end
-    Engine.Active = false
+    if not Active then return end
+    Active = false
     task.spawn(function()
         Remotes.RF_Cancel:InvokeServer()
     end)
@@ -2056,11 +2053,11 @@ ConfigManager:Register("blatantbetaToggle", BlatantbetaToggle
 
 local BlatantCompletedInput = FishingTab:Input({
     Title = "Complete Delay",
-    Value = tostring(Engine.CompleteDelay),
+    Value = tostring(CompleteDelay),
     Callback = function(v)
         local n = tonumber(v)
         if n and n >= 0.03 and n <= 0.3 then
-            Engine.CompleteDelay = n
+            CompleteDelay = n
         end
     end
 })
@@ -2068,11 +2065,11 @@ ConfigManager:Register("blatantcompletedinput", BlatantCompletedInput
 
 local BlatantcycleInput = FishingTab:Input({
     Title = "Throttle",
-    Value = tostring(Engine.Throttle),
+    Value = tostring(Throttle),
     Callback = function(v)
         local n = tonumber(v)
         if n and n >= 0.6 and n <= 2 then
-            Engine.Throttle = n
+            Throttle = n
         end
     end
 })
