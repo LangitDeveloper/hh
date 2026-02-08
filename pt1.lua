@@ -1830,138 +1830,28 @@ local BlatantFishingV3Toggle = FishingTab:Toggle({
 })
 ConfigManager:Register("blatantV3Toggle", BlatantFishingV3Toggle)
 
-local BlatantV4Section = FishingTab:Section({Title = "Blatant V4 (Final Engine)"})
-
-BlatantV4Section:Paragraph({
-    Title = "Blatant V4 Engine",
-    Desc = "Engine terbaru dengan pipeline optimal\nComplete & Cancel Delay yang dapat disesuaikan\nAuto recovery setiap 6 cycle untuk anti stuck",
-    Color = "Green",
-    Image = "rbxassetid://103247953194129",
-    ImageSize = 30,
-})
-
-local BlatantV4Toggle = BlatantV4Section:Toggle({
-    Title = "Blatant Fishing V4",
-    Desc = "Engine final dengan pipeline teroptimasi",
+FishingTab:Section({Title = "Blatant V4"})
+FishingTab:Toggle({
+    Title = "Blatant V4",
     Value = false,
-    Callback = function(value)
-        if value then
-            StartBlatantFishingV4()
-        else
-            StopBlatantFishingV4()
-            IsBlatantFishing = false
-            Remotes.RF_AutoFishing:InvokeServer(false)
-        end
-    end,
+    Callback = function(v)
+        if v then StartV4() else StopV4() end
+    end
 })
-ConfigManager:Register("blatantV4Toggle", BlatantV4Toggle)
-
-local CompleteDelayInput = BlatantV4Section:Input({
+FishingTab:Input({
     Title = "Complete Delay",
-    Desc = "Delay sebelum complete (default: 0.12)",
-    Value = tostring(BlatantV4Config.CompleteDelay),
-    Placeholder = "0.12",
-    Callback = function(value)
-        local num = tonumber(value)
-        if num and num >= 0.01 and num <= 1 then
-            BlatantV4Config.CompleteDelay = num
-        else
-            MahiruUi:Notify({
-                Title = "Invalid Value",
-                Content = "Masukkan angka antara 0.01 dan 1",
-                Duration = 2.5,
-                Icon = "circle-x",
-            })
-        end
-    end,
+    Value = "0.12",
+    Callback = function(v) V4Complete = tonumber(v) or 0.12 end
 })
-ConfigManager:Register("blatantV4CompleteInput", CompleteDelayInput)
-
-local CancelDelayInput = BlatantV4Section:Input({
-    Title = "Cancel Delay",
-    Desc = "Delay sebelum cancel (default: 0.12)",
-    Value = tostring(BlatantV4Config.CancelDelay),
-    Placeholder = "0.12",
-    Callback = function(value)
-        local num = tonumber(value)
-        if num and num >= 0.01 and num <= 1 then
-            BlatantV4Config.CancelDelay = num
-        else
-            MahiruUi:Notify({
-                Title = "Invalid Value",
-                Content = "Masukkan angka antara 0.01 dan 1",
-                Duration = 2.5,
-                Icon = "circle-x",
-            })
-        end
-    end,
+FishingTab:Input({
+    Title = "Cancel Delay", 
+    Value = "0.12",
+    Callback = function(v) V4Cancel = tonumber(v) or 0.12 end
 })
-ConfigManager:Register("blatantV4CancelInput", CancelDelayInput)
-
-local ThrottleInput = BlatantV4Section:Input({
-    Title = "Throttle Delay",
-    Desc = "Delay antar cycle (default: 0.8)",
-    Value = tostring(BlatantV4Config.Throttle),
-    Placeholder = "0.8",
-    Callback = function(value)
-        local num = tonumber(value)
-        if num and num >= 0.1 and num <= 2 then
-            BlatantV4Config.Throttle = num
-        else
-            MahiruUi:Notify({
-                Title = "Invalid Value",
-                Content = "Masukkan angka antara 0.1 dan 2",
-                Duration = 2.5,
-                Icon = "circle-x",
-            })
-        end
-    end,
-})
-ConfigManager:Register("blatantV4ThrottleInput", ThrottleInput)
-
-local RecoveryInput = BlatantV4Section:Input({
-    Title = "Recovery Cycle",
-    Desc = "Setiap berapa cycle dilakukan recovery (default: 6)",
-    Value = tostring(BlatantV4Config.RecoveryEvery),
-    Placeholder = "6",
-    Callback = function(value)
-        local num = tonumber(value)
-        if num and num >= 1 and num <= 20 then
-            BlatantV4Config.RecoveryEvery = num
-        else
-            MahiruUi:Notify({
-                Title = "Invalid Value",
-                Content = "Masukkan angka antara 1 dan 20",
-                Duration = 2.5,
-                Icon = "circle-x",
-            })
-        end
-    end,
-})
-ConfigManager:Register("blatantV4RecoveryInput", RecoveryInput)
-
-BlatantV4Section:Divider()
-
-BlatantV4Section:Button({
-    Title = "Reset to Default",
-    Callback = function()
-        BlatantV4Config.CompleteDelay = 0.12
-        BlatantV4Config.CancelDelay = 0.12
-        BlatantV4Config.Throttle = 0.8
-        BlatantV4Config.RecoveryEvery = 6
-        
-        CompleteDelayInput:Set("0.12")
-        CancelDelayInput:Set("0.12")
-        ThrottleInput:Set("0.8")
-        RecoveryInput:Set("6")
-        
-        MahiruUi:Notify({
-            Title = "Success",
-            Content = "Blatant V4 settings reset to default",
-            Duration = 2.5,
-            Icon = "laptop-minimal-check",
-        })
-    end,
+FishingTab:Input({
+    Title = "Throttle",
+    Value = "0.8",
+    Callback = function(v) V4Throttle = tonumber(v) or 0.8 end
 })
 
 local SellSection = AutomaticTab:Section({Title = "Auto Sell"})
