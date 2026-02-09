@@ -522,7 +522,7 @@ end
 
 function StartInstantFishing()
     IsInstantFishing = true
-    Remotes.RF_AutoFishing:InvokeServer(true)
+    Remotes.RF_AutoFishing:InvokeServer(false)
     
     task.spawn(function()
         while IsInstantFishing do
@@ -549,7 +549,7 @@ end
 
 function StartBlatantFishingV3()
     IsBlatantFishing = true
-    Remotes.RF_AutoFishing:InvokeServer(true)
+    Remotes.RF_AutoFishing:InvokeServer(false)
     
     task.spawn(function()
         while IsBlatantFishing do
@@ -573,7 +573,7 @@ end
 
 function StartBlatantFishingV2()
     IsBlatantFishing = true
-    Remotes.RF_AutoFishing:InvokeServer(true)
+    Remotes.RF_AutoFishing:InvokeServer(false)
     task.spawn(function()
         while IsBlatantFishing do
             pcall(function()
@@ -589,68 +589,31 @@ function StartBlatantFishingV2()
 end
 
 function StartBlatantFishing()
-    if IsBlatantFishing then return end
     IsBlatantFishing = true
-    
-    local function FishCycle()
-        local t = workspace:GetServerTimeNow()
-        
-     
-        task.spawn(function()
-            pcall(function()
-                Remotes.RF_Charge:InvokeServer(t)
-            end)
-        end)
-        
-        task.spawn(function()
-            pcall(function()
-                Remotes.RF_Minigame:InvokeServer(-1, 0.999, t)
-            end)
-        end)
-        
-        task.spawn(function()
-            pcall(function()
-                Remotes.RF_Fishing:FireServer()
-            end)
-        end)
-        
-        task.wait(CancelDelay)
-        task.spawn(function()
-            pcall(function()
-                Remotes.RF_Cancel:InvokeServer()
-            end)
-        end)
-    end
+    Remotes.RF_AutoFishing:InvokeServer(false)
     
     task.spawn(function()
         while IsBlatantFishing do
-            FishCycle()
-            loopCount = loopCount + 1
-            
-            if loopCount >= RecoveryEvery then
-                task.spawn(function()
-                    pcall(function()
-                        Remotes.RF_Cancel:InvokeServer()
-                    end)
-                end)
-                loopCount = 0
-            end
-            task.wait(CancelDelay)
-        end
-    end)
-    
-    Remotes.RE_FishingMinigameEvent.OnClientEvent:Connect(function(state)
-        if not IsBlatantFishing then return end
-        
-        if state == "FishCaught" then
             task.spawn(function()
-                pcall(function()
-                    Remotes.RF_Fishing:FireServer()
-                end)
                 pcall(function()
                     Remotes.RF_Cancel:InvokeServer()
                 end)
+                
+                pcall(function()
+                    Remotes.RF_Charge:InvokeServer(workspace:GetServerTimeNow())
+                end)
+                
+                pcall(function()
+                    Remotes.RF_Minigame:InvokeServer(-1, 0.999)
+                end)
+                
+                task.wait(CompleteDelay)
+                pcall(function()
+                    Remotes.RE_Fishing:FireServer()
+                end)
             end)
+            
+            task.wait(CancelDelay)
         end
     end)
 end
