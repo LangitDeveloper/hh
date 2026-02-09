@@ -616,11 +616,6 @@ function StartBlatantFishing()
         end)
         
         task.wait(CancelDelay)
-        task.spawn(function()
-            pcall(function()
-                Remotes.RF_Cancel:InvokeServer()
-            end)
-        end)
     end
     
     task.spawn(function()
