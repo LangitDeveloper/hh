@@ -608,7 +608,6 @@ function StartBlatantFishing()
             end)
         end)
         
-        task.wait(CompleteDelay)
         task.spawn(function()
             pcall(function()
                 Remotes.RF_Fishing:FireServer()
@@ -636,8 +635,7 @@ function StartBlatantFishing()
                 end)
                 loopCount = 0
             end
-            
-            task.wait(Throttle)
+            task.wait(CancelDelay)
         end
     end)
     
