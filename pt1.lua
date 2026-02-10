@@ -783,7 +783,7 @@ end)
 local MahiruUi = loadstring(game:HttpGet('https://raw.githubusercontent.com/zhidanptrsyh/MengHub/refs/heads/main/main%20(1).lua'))()
 local Window = MahiruUi:CreateWindow({
     Title = "Mahiru",
-    Icon = "rbxassetid://132435516080103",
+    Icon = "rbxassetid://92859841842468",
     Author = "LangitDev",
     Folder = "Mahiru",
     Size = UDim2.fromOffset(380, 260),
