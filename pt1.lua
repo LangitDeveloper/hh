@@ -519,30 +519,33 @@ function StartLegitFishing()
     end)
 end
 
-
 function StartInstantFishing()
+    if IsInstantFishing then return end
     IsInstantFishing = true
-    Remotes.RF_AutoFishing:InvokeServer(false)
+    
+    pcall(function()
+        Remotes.RF_AutoFishing:InvokeServer(false)
+    end)
     
     task.spawn(function()
         while IsInstantFishing do
-            local success, guid, power = pcall(function()
-                return Remotes.RF_Charge:InvokeServer(workspace:GetServerTimeNow())
+            pcall(function()
+                local serverTime = workspace:GetServerTimeNow()
+                local _, _, power = Remotes.RF_Charge:InvokeServer(serverTime)
+                
+                task.wait(0.1)
+                
+                Remotes.RF_Minigame:InvokeServer(-1, 0.99, power or 1.0)
+                
+                task.wait(CompleteDelay or 0.3)
+                
+                Remotes.RF_Fishing:FireServer()
+                
+                task.wait(0.2)
+                Remotes.RF_Cancel:InvokeServer()
             end)
             
-            if success and type(power) == "number" then
-                task.wait(0.3)
-                pcall(function()
-                    Remotes.RF_Minigame:InvokeServer(-1, 0.999, power)
-                end)
-                
-                task.wait(CompleteDelay)
-                pcall(function()
-                    Remotes.RF_Fishing:FireServer()
-                end)
-            end
-            
-            task.wait(0.05)
+            task.wait(InstantFishingDelay or 0.25)
         end
     end)
 end
@@ -595,11 +598,10 @@ function StartBlatantFishing()
     local function FishCycle()
         local t = workspace:GetServerTimeNow()
         
-     
         task.spawn(function()
-          pcall(function()
-            Remotes.RF_Cancel:InvokeServer()
-           end) 
+            pcall(function()
+                Remotes.RF_Cancel:InvokeServer()
+            end)
         end)
         
         task.spawn(function()
@@ -610,15 +612,22 @@ function StartBlatantFishing()
         
         task.spawn(function()
             pcall(function()
-               Remotes.RF_Minigame:InvokeServer(-1, 0.999)
+                Remotes.RF_Minigame:InvokeServer(-1, 0.98, t)
             end)
         end)
         
         task.wait(CompleteDelay)
         task.spawn(function()
             pcall(function()
-                    Remotes.RE_Fishing:FireServer()
-             end)
+                Remotes.RF_Fishing:FireServer()
+            end)
+        end)
+        
+        task.wait(CancelDelay)
+        task.spawn(function()
+            pcall(function()
+                Remotes.RF_Cancel:InvokeServer()
+            end)
         end)
     end
     
@@ -640,7 +649,7 @@ function StartBlatantFishing()
         end
     end)
     
-    Remotes.RE_FishingMinigameEvent.OnClientEvent:Connect(function(state)
+    Remotes.RF_Minigame.OnClientEvent:Connect(function(state)
         if not IsBlatantFishing then return end
         
         if state == "FishCaught" then
@@ -657,7 +666,6 @@ function StartBlatantFishing()
         end
     end)
 end
-
 
 
 
