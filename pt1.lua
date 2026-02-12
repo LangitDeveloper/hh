@@ -641,7 +641,7 @@ function StartBlatantFishing()
         end
     end)
     
-    Remotes.RE_FishingMinigameEvent.OnClientEvent:Connect(function(state)
+    Remotes.RF_Minigame.OnClientEvent:Connect(function(state)
         if not IsBlatantFishing then return end
         
         if state == "FishCaught" then
