@@ -595,12 +595,12 @@ function StartBlatantFishing()
     local function FishCycle()
         local t = workspace:GetServerTimeNow()
         
+     
         task.spawn(function()
-         pcall(function()
-         Remotes.RF_Cancel:InvokeServer()
-         end)
-         end)
-          
+            pcall(function()
+                Remotes.RF_Charge:InvokeServer(t)
+            end)
+        end)
         
         task.spawn(function()
             pcall(function()
@@ -616,6 +616,11 @@ function StartBlatantFishing()
         end)
         
         task.wait(CancelDelay)
+        task.spawn(function()
+            pcall(function()
+                Remotes.RF_Cancel:InvokeServer()
+            end)
+        end)
     end
     
     task.spawn(function()
@@ -626,7 +631,7 @@ function StartBlatantFishing()
             if loopCount >= RecoveryEvery then
                 task.spawn(function()
                     pcall(function()
-                        Remotes.RF_Cancel:InvokeServer()
+                        Remotes.RF_Fishing:InvokeServer()
                     end)
                 end)
                 loopCount = 0
@@ -645,10 +650,15 @@ function StartBlatantFishing()
                 pcall(function()
                     Remotes.RF_Fishing:FireServer()
                 end)
+                task.wait(CancelDelay)
+                pcall(function()
+                    Remotes.RF_Cancel:InvokeServer()
+                end)
             end)
         end
     end)
 end
+
 
 
 
