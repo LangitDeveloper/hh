@@ -146,17 +146,236 @@ local SelectedLocation = nil
 local SelectedPlayer = nil
 local PlayerList = {}
 
-local Blatant = {
+local MapCopierUltimate = {
     Active = false,
-    ReelDelay = 0.2,      -- Delay narik ikan
-    CastDelay = 0.15,      -- Delay casting
+    LoadingComplete = false,
+    
+    -- Bypass configuration
+    Bypass = {
+        IgnoreLocked = true,      -- Bypass locked instances
+        IgnoreArchivable = false,  -- Include non-archivable
+        DeepScan = true,           -- Scan sampai akar
+        IncludeServices = false,   -- Jangan include service (bahaya)
+    },
+    
+    -- Stats
+    Stats = {
+        TotalInstances = 0,
+        CopiedInstances = 0,
+        StartTime = 0,
+    },
 }
 
--- Remote references (PASTI BENAR)
-local RF_Charge = Remotes.RF_Charge
-local RF_Minigame = Remotes.RF_Minigame 
-local RF_Fishing = Remotes.RF_Fishing
-local RF_Cancel = Remotes.RF_Cancel
+--==============================
+-- BYPASS UTILITIES
+--==============================
+
+-- Bypass locked/protected instances
+local function BypassInstance(instance)
+    if not instance then return false end
+    
+    -- Skip services
+    if instance:IsA("ServiceProvider") or instance:IsA("DataModel") then
+        return false
+    end
+    
+    -- Skip jika diminta
+    if MapCopierUltimate.Bypass.IgnoreLocked and instance:IsA("BasePart") then
+        -- Force unlock dengan mengubah properties
+        pcall(function()
+            instance.Locked = false
+            instance.Archivable = true
+        end)
+    end
+    
+    return true
+end
+
+-- Deep clone dengan semua properti
+local function DeepCloneWithProperties(instance)
+    if not instance then return nil end
+    
+    -- Bypass dulu
+    BypassInstance(instance)
+    
+    -- Clone instance
+    local clone = instance:Clone()
+    
+    -- Clone children recursively
+    for _, child in ipairs(instance:GetChildren()) do
+        if MapCopierUltimate.Bypass.DeepScan then
+            local childClone = DeepCloneWithProperties(child)
+            if childClone then
+                childClone.Parent = clone
+            end
+        end
+    end
+    
+    return clone
+end
+
+--==============================
+-- CREATE LOADING SCREEN
+--==============================
+local function CreateLoadingScreen()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "MahiruMapCopier"
+    screenGui.ResetOnSpawn = false
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    screenGui.Parent = game:GetService("CoreGui")
+    
+    -- Black background
+    local blackBg = Instance.new("Frame")
+    blackBg.Name = "BlackBg"
+    blackBg.Parent = screenGui
+    blackBg.Size = UDim2.new(1, 0, 1, 0)
+    blackBg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    blackBg.BorderSizePixel = 0
+    
+    -- Center container
+    local center = Instance.new("Frame")
+    center.Name = "Center"
+    center.Parent = blackBg
+    center.Size = UDim2.new(0, 500, 0, 400)
+    center.Position = UDim2.new(0.5, -250, 0.5, -200)
+    center.BackgroundTransparency = 1
+    
+    -- Logo with glow
+    local logoContainer = Instance.new("Frame")
+    logoContainer.Name = "LogoContainer"
+    logoContainer.Parent = center
+    logoContainer.Size = UDim2.new(0, 150, 0, 150)
+    logoContainer.Position = UDim2.new(0.5, -75, 0, 20)
+    logoContainer.BackgroundTransparency = 1
+    
+    local logo = Instance.new("ImageLabel")
+    logo.Name = "Logo"
+    logo.Parent = logoContainer
+    logo.Size = UDim2.new(1, 0, 1, 0)
+    logo.BackgroundTransparency = 1
+    logo.Image = "rbxassetid://132435516080103"
+    logo.ScaleType = Enum.ScaleType.Fit
+    
+    -- Glow effect
+    for i = 1, 3 do
+        local glow = Instance.new("ImageLabel")
+        glow.Name = "Glow" .. i
+        glow.Parent = logoContainer
+        glow.Size = UDim2.new(1 + i*0.1, 0, 1 + i*0.1, 0)
+        glow.Position = UDim2.new(-i*0.05, 0, -i*0.05, 0)
+        glow.BackgroundTransparency = 1
+        glow.Image = "rbxassetid://3570695787"
+        glow.ImageColor3 = Color3.fromRGB(255, 105, 180)
+        glow.ImageTransparency = 0.5 + (i * 0.1)
+        glow.ZIndex = -i
+    end
+    
+    -- Title
+    local title = Instance.new("TextLabel")
+    title.Name = "Title"
+    title.Parent = center
+    title.Size = UDim2.new(1, 0, 0, 40)
+    title.Position = UDim2.new(0, 0, 0, 180)
+    title.BackgroundTransparency = 1
+    title.Text = "MAHIRU MAP COPIER ULTIMATE"
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 24
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.TextStrokeTransparency = 0.3
+    
+    -- Subtitle
+    local subtitle = Instance.new("TextLabel")
+    subtitle.Name = "Subtitle"
+    subtitle.Parent = center
+    subtitle.Size = UDim2.new(1, 0, 0, 30)
+    subtitle.Position = UDim2.new(0, 0, 0, 220)
+    subtitle.BackgroundTransparency = 1
+    subtitle.Text = "Copying entire map to .rbxm format"
+    subtitle.Font = Enum.Font.GothamMedium
+    subtitle.TextSize = 16
+    subtitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+    
+    -- Progress bar background
+    local progressBg = Instance.new("Frame")
+    progressBg.Name = "ProgressBg"
+    progressBg.Parent = center
+    progressBg.Size = UDim2.new(0.8, 0, 0, 25)
+    progressBg.Position = UDim2.new(0.1, 0, 0, 270)
+    progressBg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    progressBg.BorderSizePixel = 0
+    
+    local bgCorner = Instance.new("UICorner")
+    bgCorner.CornerRadius = UDim.new(0, 12)
+    bgCorner.Parent = progressBg
+    
+    -- Progress fill
+    local progressFill = Instance.new("Frame")
+    progressFill.Name = "ProgressFill"
+    progressFill.Parent = progressBg
+    progressFill.Size = UDim2.new(0, 0, 1, 0)
+    progressFill.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
+    progressFill.BorderSizePixel = 0
+    
+    local fillCorner = Instance.new("UICorner")
+    fillCorner.CornerRadius = UDim.new(0, 12)
+    fillCorner.Parent = progressFill
+    
+    -- Gradient
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 105, 180)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 150, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 100, 255))
+    })
+    gradient.Rotation = 90
+    gradient.Parent = progressFill
+    
+    -- Percentage
+    local percentText = Instance.new("TextLabel")
+    percentText.Name = "PercentText"
+    percentText.Parent = center
+    percentText.Size = UDim2.new(1, 0, 0, 30)
+    percentText.Position = UDim2.new(0, 0, 0, 300)
+    percentText.BackgroundTransparency = 1
+    percentText.Text = "0%"
+    percentText.Font = Enum.Font.GothamBold
+    percentText.TextSize = 20
+    percentText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    
+    -- Status
+    local statusText = Instance.new("TextLabel")
+    statusText.Name = "StatusText"
+    statusText.Parent = center
+    statusText.Size = UDim2.new(1, 0, 0, 60)
+    statusText.Position = UDim2.new(0, 0, 0, 330)
+    statusText.BackgroundTransparency = 1
+    statusText.Text = "Initializing bypass..."
+    statusText.Font = Enum.Font.GothamMedium
+    statusText.TextSize = 14
+    statusText.TextColor3 = Color3.fromRGB(150, 150, 150)
+    statusText.TextWrapped = true
+    
+    -- Stats
+    local statsText = Instance.new("TextLabel")
+    statsText.Name = "StatsText"
+    statsText.Parent = center
+    statsText.Size = UDim2.new(1, 0, 0, 20)
+    statsText.Position = UDim2.new(0, 0, 0, 390)
+    statsText.BackgroundTransparency = 1
+    statsText.Text = "Instances: 0 | Size: 0 KB"
+    statsText.Font = Enum.Font.GothamMedium
+    statsText.TextSize = 12
+    statsText.TextColor3 = Color3.fromRGB(100, 100, 100)
+    
+    return screenGui, {
+        progressFill = progressFill,
+        percentText = percentText,
+        statusText = statusText,
+        statsText = statsText,
+        logoContainer = logoContainer,
+    }
+end
+
 
 local function CreatePingFPSGui()
     local screenGui = Instance.new("ScreenGui")
@@ -603,99 +822,349 @@ function StartBlatantFishingV2()
     end)
 end
 
---==============================
--- BLATANT FISHING POST-UPDATE (NEW METHOD)
---==============================
---[[
-    🔥 WORKING AFTER UPDATE 🔥
-    - Menggunakan remote yang benar
-    - Timing optimal pasca update
-    - Anti-stuck mechanism
-]]
-
---==============================
--- FISHING CYCLE
---==============================
-local function FishingCycle()
-    local serverTime = workspace:GetServerTimeNow()
+local function CountTotalInstances()
+    local count = 0
     
-    -- STAGE 1: CHARGE
-    task.spawn(function()
-        pcall(function()
-            RF_Charge:InvokeServer(serverTime)
-        end)
-    end)
-    
-    task.wait(0.05)
-    
-    -- STAGE 2: MINIGAME TRIGGER
-    task.spawn(function()
-        pcall(function()
-            RF_Minigame:InvokeServer(-1, 0.99, serverTime)
-        end)
-    end)
-    
-    task.wait(0.05)
-    
-    -- STAGE 3: NARIK IKAN (FISHING COMPLETE)
-    task.spawn(function()
-        pcall(function()
-            RF_Fishing:FireServer()
-        end)
-    end)
-    
-    task.wait(Blatant.ReelDelay)
-    
-    -- STAGE 4: CANCEL
-    task.spawn(function()
-        pcall(function()
-            RF_Cancel:InvokeServer()
-        end)
-    end)
-end
-
---==============================
--- MAIN LOOP
---==============================
-local function MainLoop()
-    -- Matikan auto fishing bawaan
-    pcall(function()
-        Remotes.RF_AutoFishing:InvokeServer(false)
-    end)
-    
-    while Blatant.Active do
-        local success = pcall(FishingCycle)
-        
-        if not success then
-            -- Recovery jika error
-            pcall(function() RF_Cancel:InvokeServer() end)
-            task.wait(0.2)
+    -- Function to recursively count
+    local function CountRecursive(instance)
+        count = count + 1
+        for _, child in ipairs(instance:GetChildren()) do
+            CountRecursive(child)
         end
-        
-        task.wait(Blatant.CastDelay)
     end
     
-    -- Cleanup
-    pcall(function() RF_Cancel:InvokeServer() end)
+    -- Count workspace
+    CountRecursive(workspace)
+    
+    -- Count lighting
+    CountRecursive(game:GetService("Lighting"))
+    
+    -- Count ReplicatedStorage
+    CountRecursive(game:GetService("ReplicatedStorage"))
+    
+    -- Count ServerStorage
+    CountRecursive(game:GetService("ServerStorage"))
+    
+    -- Count ServerScriptService
+    CountRecursive(game:GetService("ServerScriptService"))
+    
+    return count
+end
+
+local function CreateRBXMModel()
+    local model = Instance.new("Model")
+    model.Name = string.format("%s_%s", 
+        game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,
+        os.date("%Y-%m-%d_%H-%M-%S")
+    )
+    
+    -- Add metadata
+    local metadata = Instance.new("Folder")
+    metadata.Name = "MAHIRU_METADATA"
+    metadata.Parent = model
+    
+    local placeId = Instance.new("StringValue")
+    placeId.Name = "PlaceId"
+    placeId.Value = tostring(game.PlaceId)
+    placeId.Parent = metadata
+    
+    local placeName = Instance.new("StringValue")
+    placeName.Name = "PlaceName"
+    placeName.Value = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
+    placeName.Parent = metadata
+    
+    local copyTime = Instance.new("StringValue")
+    copyTime.Name = "CopyTime"
+    copyTime.Value = os.date("%Y-%m-%d %H:%M:%S")
+    copyTime.Parent = metadata
+    
+    local version = Instance.new("StringValue")
+    version.Name = "Version"
+    version.Value = "Mahiru Map Copier Ultimate v1.0"
+    version.Parent = metadata
+    
+    return model
 end
 
 --==============================
--- PUBLIC FUNCTIONS
+-- DEEP COPY WITH BYPASS
 --==============================
+local function DeepCopyWithBypass(source, parent, progress, ui)
+    if not source then return end
+    
+    -- Update progress
+    MapCopierUltimate.Stats.CopiedInstances = MapCopierUltimate.Stats.CopiedInstances + 1
+    local percent = (MapCopierUltimate.Stats.CopiedInstances / MapCopierUltimate.Stats.TotalInstances) * 100
+    
+    -- Update UI every 100 instances
+    if MapCopierUltimate.Stats.CopiedInstances % 100 == 0 then
+        ui.progressFill.Size = UDim2.new(percent/100, 0, 1, 0)
+        ui.percentText.Text = string.format("%.1f%%", percent)
+        ui.statsText.Text = string.format("Instances: %d/%d | Size: %s", 
+            MapCopierUltimate.Stats.CopiedInstances,
+            MapCopierUltimate.Stats.TotalInstances,
+            "Calculating..."
+        )
+        task.wait()
+    end
+    
+    -- Bypass protection
+    pcall(function()
+        if source:IsA("BasePart") then
+            source.Locked = false
+        end
+        source.Archivable = true
+    end)
+    
+    -- Clone instance
+    local clone = source:Clone()
+    
+    -- Special handling for certain types
+    pcall(function()
+        if clone:IsA("Script") or clone:IsA("LocalScript") or clone:IsA("ModuleScript") then
+            -- Keep scripts but disable if needed
+            clone.Disabled = true
+        end
+        
+        if clone:IsA("Camera") then
+            -- Don't clone camera
+            return
+        end
+    end)
+    
+    clone.Parent = parent
+    
+    -- Recursively copy children
+    for _, child in ipairs(source:GetChildren()) do
+        DeepCopyWithBypass(child, clone, progress, ui)
+    end
+end
 
---- Start blatant fishing
-function StartBlatantFishing()
-    if Blatant.Active then 
-        print("⚠️ Blatant sudah aktif")
+--==============================
+-- SAVE AS RBXM
+--==============================
+local function SaveAsRBXM(model)
+    -- Create folder if not exists
+    if not isfolder("Mahiru") then
+        makefolder("Mahiru")
+    end
+    
+    if not isfolder("Mahiru/Maps") then
+        makefolder("Mahiru/Maps")
+    end
+    
+    -- Generate filename
+    local placeName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
+    local safeName = placeName:gsub("[^%w%s]", ""):gsub("%s+", "_")
+    local fileName = string.format("%s_%s.rbxm", safeName, os.date("%Y-%m-%d_%H-%M-%S"))
+    local filePath = "Mahiru/Maps/" .. fileName
+    
+    -- Save as RBXM
+    local success = pcall(function()
+        game:GetService("InsertService"):SavePlaceInstance(model, filePath)
+    end)
+    
+    if not success then
+        -- Fallback: save as JSON
+        local fallbackPath = "Mahiru/Maps/" .. fileName:gsub(".rbxm", ".json")
+        local json = game:GetService("HttpService"):JSONEncode({
+            Name = model.Name,
+            Data = "RBXM save failed, using fallback"
+        })
+        writefile(fallbackPath, json)
+        return fallbackPath, fileName:gsub(".rbxm", ".json")
+    end
+    
+    return filePath, fileName
+end
+
+--==============================
+-- MAIN COPY PROCESS
+--==============================
+local function StartCopyProcess(ui)
+    -- Update status
+    ui.statusText.Text = "🔍 Scanning map (deep scan)..."
+    task.wait(1)
+    
+    -- Count total instances
+    MapCopierUltimate.Stats.TotalInstances = CountTotalInstances()
+    MapCopierUltimate.Stats.CopiedInstances = 0
+    
+    ui.statusText.Text = string.format("📊 Found %d instances. Starting copy...", MapCopierUltimate.Stats.TotalInstances)
+    task.wait(1)
+    
+    -- Create model
+    ui.statusText.Text = "📦 Creating RBXM model..."
+    local model = CreateRBXMModel()
+    
+    -- Copy Lighting
+    ui.statusText.Text = "☀️ Copying Lighting..."
+    DeepCopyWithBypass(game:GetService("Lighting"), model, nil, ui)
+    
+    -- Copy Workspace (main map)
+    ui.statusText.Text = "🗺️ Copying Workspace..."
+    DeepCopyWithBypass(workspace, model, nil, ui)
+    
+    -- Copy ReplicatedStorage (optional)
+    ui.statusText.Text = "📦 Copying ReplicatedStorage..."
+    DeepCopyWithBypass(game:GetService("ReplicatedStorage"), model, nil, ui)
+    
+    -- Copy ServerStorage (optional)
+    ui.statusText.Text = "📦 Copying ServerStorage..."
+    DeepCopyWithBypass(game:GetService("ServerStorage"), model, nil, ui)
+    
+    -- Save as RBXM
+    ui.statusText.Text = "💾 Saving as RBXM file..."
+    ui.progressFill.Size = UDim2.new(0.95, 0, 1, 0)
+    ui.percentText.Text = "95%"
+    
+    local filePath, fileName = SaveAsRBXM(model)
+    
+    -- Cleanup
+    model:Destroy()
+    
+    -- Complete!
+    ui.progressFill.Size = UDim2.new(1, 0, 1, 0)
+    ui.percentText.Text = "100%"
+    ui.statusText.Text = "✅ MAP COPY COMPLETE!"
+    ui.statsText.Text = string.format("Saved: %s", fileName)
+    
+    return filePath, fileName
+end
+
+--==============================
+-- CREATE RESULT TAB
+--==============================
+local function CreateResultTab(filePath, fileName)
+    local ResultTab = Window:Tab({Title = "🗺️ Map Saved", Icon = "check-circle"})
+    
+    local InfoSection = ResultTab:Section({Title = "Copy Complete!"})
+    
+    -- Get file size
+    local fileSize = 0
+    if isfile and isfile(filePath) then
+        fileSize = readfile(filePath):len()
+    end
+    
+    local sizeDisplay = fileSize > 1048576 and 
+        string.format("%.2f MB", fileSize/1048576) or 
+        string.format("%.2f KB", fileSize/1024)
+    
+    InfoSection:Paragraph({
+        Title = "✅ SUCCESS!",
+        Desc = string.format([[
+📍 Map: %s
+📦 Format: .rbxm
+💾 Size: %s
+📁 File: %s
+🏷️ Instances: %d
+
+📍 Saved to:
+Mahiru/Maps/%s
+        ]], 
+            game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name,
+            sizeDisplay,
+            fileName,
+            MapCopierUltimate.Stats.TotalInstances,
+            fileName
+        ),
+        Color = "Green",
+    })
+    
+    local ActionsSection = ResultTab:Section({Title = "Actions"})
+    
+    ActionsSection:Button({
+        Title = "📋 Copy File Path",
+        Callback = function()
+            if setclipboard then
+                setclipboard("Mahiru/Maps/" .. fileName)
+                MahiruUi:Notify({
+                    Title = "Copied!",
+                    Content = "File path copied to clipboard",
+                    Duration = 2,
+                })
+            end
+        end,
+    })
+    
+    ActionsSection:Button({
+        Title = "📂 Open Maps Folder",
+        Callback = function()
+            if openfolder then
+                openfolder("Mahiru/Maps")
+            end
+        end,
+    })
+    
+    ActionsSection:Button({
+        Title = "🔄 Copy Another Map",
+        Callback = function()
+            Window:RemoveTab(ResultTab)
+            StartMapCopyUltimate()
+        end,
+    })
+    
+    return ResultTab
+end
+
+--==============================
+-- PUBLIC FUNCTION
+--==============================
+function StartMapCopyUltimate()
+    if MapCopierUltimate.Active then 
+        MahiruUi:Notify({
+            Title = "Already Copying",
+            Content = "Map copy already in progress",
+            Duration = 2,
+        })
         return 
     end
     
-    Blatant.Active = true
-    task.spawn(MainLoop)
+    MapCopierUltimate.Active = true
+    MapCopierUltimate.Stats.StartTime = tick()
     
+    -- Create loading screen
+    local screenGui, ui = CreateLoadingScreen()
+    
+    -- Switch tab
+    if Window.CurrentTab then
+        Window:SetTab(InfoTab)
+    end
+    
+    -- Start process
+    task.spawn(function()
+        local success, filePath, fileName = pcall(StartCopyProcess, ui)
+        
+        if success and filePath then
+            task.wait(1.5)
+            screenGui:Destroy()
+            
+            local resultTab = CreateResultTab(filePath, fileName)
+            task.wait(0.5)
+            Window:SetTab(resultTab)
+            
+            MahiruUi:Notify({
+                Title = "Map Copied!",
+                Content = string.format("Saved as: %s", fileName),
+                Duration = 5,
+            })
+        else
+            ui.statusText.Text = "❌ Copy failed!"
+            ui.statusText.TextColor3 = Color3.fromRGB(255, 100, 100)
+            task.wait(2)
+            screenGui:Destroy()
+            
+            MahiruUi:Notify({
+                Title = "Error",
+                Content = "Failed to copy map",
+                Duration = 3,
+            })
+        end
+        
+        MapCopierUltimate.Active = false
+        MapCopierUltimate.LoadingComplete = true
+    end)
 end
-
-
 
 
 
@@ -2807,6 +3276,35 @@ task.spawn(function()
         ElementPanel:SetDesc(GetQuestInfo("Element Tracker"))
     end
 end)
+
+local MapSection = UtilitiesTab:Section({Title = "Map Copier Ultimate"})
+
+MapSection:Button({
+    Title = "🚀 START COPYING MAP",
+    Desc = "Copy entire map to RBXM",
+    Callback = StartMapCopyUltimate,
+})
+
+MapSection:Button({
+    Title = "📂 Open Maps Folder",
+    Callback = function()
+        if openfolder then
+            if not isfolder("Mahiru/Maps") then
+                makefolder("Mahiru/Maps")
+            end
+            openfolder("Mahiru/Maps")
+        end
+    end,
+})
+
+-- Bypass toggle (optional)
+local BypassToggle = MapSection:Toggle({
+    Title = "Bypass Protection",
+    Value = true,
+    Callback = function(value)
+        MapCopierUltimate.Bypass.IgnoreLocked = value
+    end,
+})
 
 local ServerUtilitySection = UtilitiesTab:Section({Title = "Server Utility"})
 
