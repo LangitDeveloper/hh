@@ -146,6 +146,18 @@ local SelectedLocation = nil
 local SelectedPlayer = nil
 local PlayerList = {}
 
+local Blatant = {
+    Active = false,
+    ReelDelay = 0.2,      -- Delay narik ikan
+    CastDelay = 0.15,      -- Delay casting
+}
+
+-- Remote references (PASTI BENAR)
+local RF_Charge = Remotes.RF_Charge
+local RF_Minigame = Remotes.RF_Minigame 
+local RF_Fishing = Remotes.RF_Fishing
+local RF_Cancel = Remotes.RF_Cancel
+
 local function CreatePingFPSGui()
     local screenGui = Instance.new("ScreenGui")
     screenGui.Name = "MahiruPingFPS"
@@ -591,81 +603,99 @@ function StartBlatantFishingV2()
     end)
 end
 
-function StartBlatantFishing()
-    if IsBlatantFishing then return end
-    IsBlatantFishing = true
+--==============================
+-- BLATANT FISHING POST-UPDATE (NEW METHOD)
+--==============================
+--[[
+    🔥 WORKING AFTER UPDATE 🔥
+    - Menggunakan remote yang benar
+    - Timing optimal pasca update
+    - Anti-stuck mechanism
+]]
+
+--==============================
+-- FISHING CYCLE
+--==============================
+local function FishingCycle()
+    local serverTime = workspace:GetServerTimeNow()
     
-    local function FishCycle()
-        local t = workspace:GetServerTimeNow()
-        
-        task.spawn(function()
-            pcall(function()
-                Remotes.RF_Cancel:InvokeServer()
-            end)
-        end)
-        
-        task.spawn(function()
-            pcall(function()
-                Remotes.RF_Charge:InvokeServer(t)
-            end)
-        end)
-        
-        task.spawn(function()
-            pcall(function()
-                Remotes.RF_Minigame:InvokeServer(-1, 0.98, t)
-            end)
-        end)
-        
-        task.wait(CompleteDelay)
-        task.spawn(function()
-            pcall(function()
-                Remotes.RF_Fishing:FireServer()
-            end)
-        end)
-        
-        task.wait(CancelDelay)
-        task.spawn(function()
-            pcall(function()
-                Remotes.RF_Cancel:InvokeServer()
-            end)
-        end)
-    end
-    
+    -- STAGE 1: CHARGE
     task.spawn(function()
-        while IsBlatantFishing do
-            FishCycle()
-            loopCount = loopCount + 1
-            
-            if loopCount >= RecoveryEvery then
-                task.spawn(function()
-                    pcall(function()
-                        Remotes.RF_Fishing:InvokeServer()
-                    end)
-                end)
-                loopCount = 0
-            end
-            
-            task.wait(Throttle)
-        end
+        pcall(function()
+            RF_Charge:InvokeServer(serverTime)
+        end)
     end)
     
-    Remotes.RF_Minigame.OnClientEvent:Connect(function(state)
-        if not IsBlatantFishing then return end
-        
-        if state == "FishCaught" then
-            task.spawn(function()
-                task.wait(CompleteDelay)
-                pcall(function()
-                    Remotes.RF_Fishing:FireServer()
-                end)
-                task.wait(CancelDelay)
-                pcall(function()
-                    Remotes.RF_Cancel:InvokeServer()
-                end)
-            end)
-        end
+    task.wait(0.05)
+    
+    -- STAGE 2: MINIGAME TRIGGER
+    task.spawn(function()
+        pcall(function()
+            RF_Minigame:InvokeServer(-1, 0.99, serverTime)
+        end)
+    end)
+    
+    task.wait(0.05)
+    
+    -- STAGE 3: NARIK IKAN (FISHING COMPLETE)
+    task.spawn(function()
+        pcall(function()
+            RF_Fishing:FireServer()
+        end)
+    end)
+    
+    task.wait(Blatant.ReelDelay)
+    
+    -- STAGE 4: CANCEL
+    task.spawn(function()
+        pcall(function()
+            RF_Cancel:InvokeServer()
+        end)
     end)
 end
+
+--==============================
+-- MAIN LOOP
+--==============================
+local function MainLoop()
+    -- Matikan auto fishing bawaan
+    pcall(function()
+        Remotes.RF_AutoFishing:InvokeServer(false)
+    end)
+    
+    while Blatant.Active do
+        local success = pcall(FishingCycle)
+        
+        if not success then
+            -- Recovery jika error
+            pcall(function() RF_Cancel:InvokeServer() end)
+            task.wait(0.2)
+        end
+        
+        task.wait(Blatant.CastDelay)
+    end
+    
+    -- Cleanup
+    pcall(function() RF_Cancel:InvokeServer() end)
+end
+
+--==============================
+-- PUBLIC FUNCTIONS
+--==============================
+
+--- Start blatant fishing
+function StartBlatantFishing()
+    if Blatant.Active then 
+        print("⚠️ Blatant sudah aktif")
+        return 
+    end
+    
+    Blatant.Active = true
+    task.spawn(MainLoop)
+    
+end
+
+
 
 
 
