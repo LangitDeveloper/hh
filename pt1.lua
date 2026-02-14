@@ -649,6 +649,11 @@ function StartBlatantFishing()
             
             if loopCount >= RecoveryEvery then
                 task.spawn(function()
+                    pcall(function()
+                        Remotes.RF_Cancel:InvokeServer()
+                    end)
+                end)
+                task.spawn(function()
             pcall(function()
                 Remotes.RF_Fishing:InvokeServer()
             end)
@@ -677,7 +682,6 @@ function StartBlatantFishing()
         end
     end)
 end
-
 
 
 function StartAutoSell()
