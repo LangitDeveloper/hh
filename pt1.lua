@@ -595,7 +595,74 @@ function StartBlatantFishingV2()
 end
 
 
-
+function StartBlatantFishing()
+    if IsBlatantFishing then return end
+    IsBlatantFishing = true
+    
+    -- Aktifkan auto fishing di server
+    Remotes.RF_AutoFishing:InvokeServer(true)
+    
+    -- Setup event listener untuk fishing state changed
+    Remotes.RE_Changed.OnClientEvent:Connect(function(state)
+        if not IsBlatantFishing then return end
+        
+        -- Jika ada fish caught, langsung complete
+        if state == "FishCaught" then
+            task.spawn(function()
+                task.wait(BlatantCompleteDelay or 0.8)
+                pcall(function()
+                    Remotes.RF_Fishing:FireServer()
+                end)
+            end)
+        end
+    end)
+    
+    -- Main fishing loop
+    task.spawn(function()
+        local loopCount = 0
+        local recoveryEvery = 6  -- Recovery setiap 6 loop
+        
+        while IsBlatantFishing do
+            loopCount = loopCount + 1
+            
+            -- Gunakan task.spawn untuk non-blocking operations
+            task.spawn(function()
+                -- Charge fishing rod
+                pcall(function()
+                    Remotes.RF_Charge:InvokeServer(workspace:GetServerTimeNow())
+                end)
+                
+                -- Request minigame dengan power tinggi
+                pcall(function()
+                    Remotes.RF_Minigame:InvokeServer(-1, 0.999)
+                end)
+            end)
+            
+            -- Tunggu sebelum complete (adjustable)
+            task.wait(BlatantBaitDelay or 0.3)
+            
+            -- Auto complete
+            task.spawn(function()
+                pcall(function()
+                    Remotes.RF_Fishing:FireServer()
+                end)
+            end)
+            
+            -- Recovery mechanism untuk anti-stuck
+            if loopCount >= recoveryEvery then
+                pcall(function()
+                    Remotes.RF_Cancel:InvokeServer()
+                end)
+                loopCount = 0
+            end
+            
+            -- Delay antar loop (adjustable)
+            task.wait(BlatantReelDelay or 1.9)
+        end
+    end)
+    
+    print("Blatant Fishing V1 started!")
+end
 
 function StartAutoSell()
     IsAutoSell = true
