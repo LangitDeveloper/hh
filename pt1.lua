@@ -610,109 +610,74 @@ end
 function StartBlatantFishing()
     if IsBlatantFishing then return end
     IsBlatantFishing = true
-    BlatantNewCount = 0
     
-    
-    pcall(function()
-        Remotes.RF_AutoFishing:InvokeServer(false)
-    end)
-    
-  
-    local function BlatantNewCycle()
-        
-        pcall(function()
-            Remotes.RF_Cancel:InvokeServer()
-        end)
-        task.wait(0.05)
+    local function FishCycle()
+        local t = workspace:GetServerTimeNow()
         
      
-        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 1)
-        task.wait(0.05)
-        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 1)
-        
-        task.wait(BlatantNewDelay.CastToCharge)
-        
-       
-        local serverTime = workspace:GetServerTimeNow()
-        local success, _, power = pcall(function()
-            return Remotes.RF_Charge:InvokeServer(serverTime)
-        end)
-        
-        if not success then
-            return
-        end
-        
-        task.wait(BlatantNewDelay.ChargeToMinigame)
-        
-        
-        pcall(function()
-            Remotes.RF_Minigame:InvokeServer(-1, 0.999, power or 1.0)
-        end)
-        
-        task.wait(BlatantNewDelay.MinigameToComplete)
-        
-        
-        pcall(function()
-            Remotes.RF_Fishing:FireServer()
-        end)
-        
-        task.wait(BlatantNewDelay.CompleteToReel)
-        
-    
-        BlatantNewCount = BlatantNewCount + 1
-        if BlatantNewCount >= BlatantNewDelay.RecoveryEvery then
+        task.spawn(function()
             pcall(function()
-                Remotes.RF_Cancel:InvokeServer()
+                Remotes.RF_Charge:InvokeServer(t)
             end)
-            BlatantNewCount = 0
-            task.wait(BlatantNewDelay.RecoveryDelay)
-        end
+        end)
         
-        task.wait(BlatantNewDelay.ReelToNext)
+        task.spawn(function()
+            pcall(function()
+                Remotes.RF_Minigame:InvokeServer(9, 0.99, t)
+            end)
+        end)
+        
+        task.wait(BlatantFishingDelay)
+        task.spawn(function()
+            pcall(function()
+                Remotes.RF_Cancel:FireServer()
+            end)
+        end)
+        
+        task.wait(BlatantReelDelay)
+        task.spawn(function()
+            pcall(function()
+                Remotes.RF_Fishing:InvokeServer()
+            end)
+        end)
     end
     
-   
     task.spawn(function()
         while IsBlatantFishing do
-            local success = pcall(BlatantNewCycle)
-            if not success then
-             
-                pcall(function()
-                    Remotes.RF_Cancel:InvokeServer()
+            FishCycle()
+            loopCount = loopCount + 1
+            
+            if loopCount >= RecoveryEvery then
+                task.spawn(function()
+                    pcall(function()
+                        Remotes.RF_Cancel:InvokeServer()
+                    end)
                 end)
-                task.wait(0.5)
+                loopCount = 0
             end
+            
+            task.wait(Throttle)
         end
     end)
     
- 
-    if BlatantNewConnection then
-        BlatantNewConnection:Disconnect()
-    end
-    
-    BlatantNewConnection = Remotes.RE_FishingMinigameEvent.OnClientEvent:Connect(function(state)
+    Remotes.RE_FishingMinigameEvent.OnClientEvent:Connect(function(state)
         if not IsBlatantFishing then return end
         
         if state == "FishCaught" then
             task.spawn(function()
-                task.wait(0.2)
+                task.wait(CompleteDelay)
                 pcall(function()
                     Remotes.RF_Fishing:FireServer()
                 end)
-                task.wait(0.1)
+                task.wait(CancelDelay)
                 pcall(function()
                     Remotes.RF_Cancel:InvokeServer()
                 end)
             end)
-        elseif state == "Failed" or state == "Cancelled" then
-            -- Reset jika gagal
-            task.wait(0.1)
-            pcall(function()
-                Remotes.RF_Cancel:InvokeServer()
-            end)
         end
     end)
 end
+
 
 
 function StartAutoSell()
