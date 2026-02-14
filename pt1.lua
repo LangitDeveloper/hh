@@ -649,11 +649,6 @@ function StartBlatantFishing()
             
             if loopCount >= RecoveryEvery then
                 task.spawn(function()
-                    pcall(function()
-                        Remotes.RF_Cancel:InvokeServer()
-                    end)
-                end)
-                task.spawn(function()
             pcall(function()
                 Remotes.RF_Fishing:InvokeServer()
             end)
@@ -669,6 +664,12 @@ function StartBlatantFishing()
         if not IsBlatantFishing then return end
         
         if state == "FishCaught" then
+            task.spawn(function()
+                task.wait(CompleteDelay)
+                pcall(function()
+                    Remotes.RF_Cancel:FireServer()
+                end)
+                task.wait(CancelDelay)
                 pcall(function()
                     Remotes.RF_Fishing:InvokeServer()
                 end)
