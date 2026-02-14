@@ -705,6 +705,7 @@ function StartBlatantFishing()
                 end)
             end)
         elseif state == "Failed" or state == "Cancelled" then
+            -- Reset jika gagal
             task.wait(0.1)
             pcall(function()
                 Remotes.RF_Cancel:InvokeServer()
