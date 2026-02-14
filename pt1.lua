@@ -628,11 +628,6 @@ function StartBlatantFishing()
         end)
         
         task.wait(BlatantFishingDelay)
-        task.spawn(function()
-            pcall(function()
-                Remotes.RF_Cancel:FireServer()
-            end)
-        end)
         
         task.wait(BlatantReelDelay)
         task.spawn(function()
