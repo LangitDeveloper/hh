@@ -147,6 +147,18 @@ local SelectedLocation = nil
 local SelectedPlayer = nil
 local PlayerList = {}
 
+local BlatantNewDelay = {
+    CastToCharge = 0.1,      
+    ChargeToMinigame = 0.05,  
+    MinigameToComplete = 0.3,
+    CompleteToReel = 0.1,     
+    ReelToNext = 0.2,         
+    RecoveryDelay = 2,       
+    RecoveryEvery = 5       
+}
+
+local BlatantNewCount = 0
+local BlatantNewConnection = nil
 
 
 local function CreatePingFPSGui()
@@ -598,71 +610,109 @@ end
 function StartBlatantFishing()
     if IsBlatantFishing then return end
     IsBlatantFishing = true
+    BlatantNewCount = 0
     
-    -- Aktifkan auto fishing di server
-    Remotes.RF_AutoFishing:InvokeServer(true)
     
-    -- Setup event listener untuk fishing state changed
-    Remotes.RE_Changed.OnClientEvent:Connect(function(state)
-        if not IsBlatantFishing then return end
-        
-        -- Jika ada fish caught, langsung complete
-        if state == "FishCaught" then
-            task.spawn(function()
-                task.wait(BlatantCompleteDelay or 0.8)
-                pcall(function()
-                    Remotes.RF_Fishing:FireServer()
-                end)
-            end)
-        end
+    pcall(function()
+        Remotes.RF_AutoFishing:InvokeServer(false)
     end)
     
-    -- Main fishing loop
-    task.spawn(function()
-        local loopCount = 0
-        local recoveryEvery = 6  -- Recovery setiap 6 loop
+  
+    local function BlatantNewCycle()
         
+        pcall(function()
+            Remotes.RF_Cancel:InvokeServer()
+        end)
+        task.wait(0.05)
+        
+     
+        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 1)
+        task.wait(0.05)
+        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 1)
+        
+        task.wait(BlatantNewDelay.CastToCharge)
+        
+       
+        local serverTime = workspace:GetServerTimeNow()
+        local success, _, power = pcall(function()
+            return Remotes.RF_Charge:InvokeServer(serverTime)
+        end)
+        
+        if not success then
+            return
+        end
+        
+        task.wait(BlatantNewDelay.ChargeToMinigame)
+        
+        
+        pcall(function()
+            Remotes.RF_Minigame:InvokeServer(-1, 0.999, power or 1.0)
+        end)
+        
+        task.wait(BlatantNewDelay.MinigameToComplete)
+        
+        
+        pcall(function()
+            Remotes.RF_Fishing:FireServer()
+        end)
+        
+        task.wait(BlatantNewDelay.CompleteToReel)
+        
+    
+        BlatantNewCount = BlatantNewCount + 1
+        if BlatantNewCount >= BlatantNewDelay.RecoveryEvery then
+            pcall(function()
+                Remotes.RF_Cancel:InvokeServer()
+            end)
+            BlatantNewCount = 0
+            task.wait(BlatantNewDelay.RecoveryDelay)
+        end
+        
+        task.wait(BlatantNewDelay.ReelToNext)
+    end
+    
+   
+    task.spawn(function()
         while IsBlatantFishing do
-            loopCount = loopCount + 1
-            
-            -- Gunakan task.spawn untuk non-blocking operations
-            task.spawn(function()
-                -- Charge fishing rod
-                pcall(function()
-                    Remotes.RF_Charge:InvokeServer(workspace:GetServerTimeNow())
-                end)
-                
-                -- Request minigame dengan power tinggi
-                pcall(function()
-                    Remotes.RF_Minigame:InvokeServer(-1, 0.999)
-                end)
-            end)
-            
-            -- Tunggu sebelum complete (adjustable)
-            task.wait(BlatantBaitDelay or 0.3)
-            
-            -- Auto complete
-            task.spawn(function()
-                pcall(function()
-                    Remotes.RF_Fishing:FireServer()
-                end)
-            end)
-            
-            -- Recovery mechanism untuk anti-stuck
-            if loopCount >= recoveryEvery then
+            local success = pcall(BlatantNewCycle)
+            if not success then
+             
                 pcall(function()
                     Remotes.RF_Cancel:InvokeServer()
                 end)
-                loopCount = 0
+                task.wait(0.5)
             end
-            
-            -- Delay antar loop (adjustable)
-            task.wait(BlatantReelDelay or 1.9)
         end
     end)
     
-    print("Blatant Fishing V1 started!")
+ 
+    if BlatantNewConnection then
+        BlatantNewConnection:Disconnect()
+    end
+    
+    BlatantNewConnection = Remotes.RE_FishingMinigameEvent.OnClientEvent:Connect(function(state)
+        if not IsBlatantFishing then return end
+        
+        if state == "FishCaught" then
+            task.spawn(function()
+                task.wait(0.2)
+                pcall(function()
+                    Remotes.RF_Fishing:FireServer()
+                end)
+                task.wait(0.1)
+                pcall(function()
+                    Remotes.RF_Cancel:InvokeServer()
+                end)
+            end)
+        elseif state == "Failed" or state == "Cancelled" then
+            task.wait(0.1)
+            pcall(function()
+                Remotes.RF_Cancel:InvokeServer()
+            end)
+        end
+    end)
 end
+
 
 function StartAutoSell()
     IsAutoSell = true
