@@ -623,11 +623,22 @@ function StartBlatantFishing()
         
         task.spawn(function()
             pcall(function()
+                Remotes.RF_Fishing:InvokeServer()
+            end)
+        end)
+        
+        task.spawn(function()
+            pcall(function()
                 Remotes.RF_Minigame:InvokeServer(9, 0.99, t)
             end)
         end)
         
         task.wait(BlatantFishingDelay)
+        task.spawn(function()
+            pcall(function()
+                Remotes.RF_Cancel:FireServer()
+            end)
+        end)
         
         task.wait(BlatantReelDelay)
         task.spawn(function()
