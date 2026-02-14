@@ -147,170 +147,7 @@ local SelectedLocation = nil
 local SelectedPlayer = nil
 local PlayerList = {}
 
-StarterGui:SetCore("SendNotification", {
-    Title = "Mahiru",
-    Text = "Loading script...",
-    Duration = 1
-})
 
--- MEMBUAT LOADING SCREEN
-local function CreateLoadingScreen()
-    local screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "MahiruLoading"
-    screenGui.ResetOnSpawn = false
-    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    screenGui.Parent = game:GetService("CoreGui")
-    
-    -- Background hitam transparan
-    local background = Instance.new("Frame")
-    background.Parent = screenGui
-    background.Size = UDim2.new(1, 0, 1, 0)
-    background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    background.BackgroundTransparency = 0.3
-    background.BorderSizePixel = 0
-    
-    -- Kotak loading utama
-    local loadingFrame = Instance.new("Frame")
-    loadingFrame.Parent = screenGui
-    loadingFrame.Size = UDim2.new(0, 400, 0, 300)
-    loadingFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
-    loadingFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
-    loadingFrame.BackgroundTransparency = 0.1
-    loadingFrame.BorderSizePixel = 0
-    
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 15)
-    corner.Parent = loadingFrame
-    
-    -- Glow pinggir
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(255, 105, 180)
-    stroke.Thickness = 2
-    stroke.Transparency = 0.5
-    stroke.Parent = loadingFrame
-    
-    -- Logo Mahiru
-    local logo = Instance.new("ImageLabel")
-    logo.Parent = loadingFrame
-    logo.Size = UDim2.new(0, 120, 0, 120)
-    logo.Position = UDim2.new(0.5, -60, 0, 30)
-    logo.BackgroundTransparency = 1
-    logo.Image = "rbxassetid://132435516080103"
-    logo.ImageColor3 = Color3.fromRGB(255, 105, 180)
-    
-    -- Title
-    local title = Instance.new("TextLabel")
-    title.Parent = loadingFrame
-    title.Size = UDim2.new(1, 0, 0, 40)
-    title.Position = UDim2.new(0, 0, 0, 160)
-    title.BackgroundTransparency = 1
-    title.Text = "Mahiru"
-    title.Font = Enum.Font.GothamBold
-    title.TextSize = 32
-    title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    
-    -- Subtitle
-    local subtitle = Instance.new("TextLabel")
-    subtitle.Parent = loadingFrame
-    subtitle.Size = UDim2.new(1, 0, 0, 25)
-    subtitle.Position = UDim2.new(0, 0, 0, 200)
-    subtitle.BackgroundTransparency = 1
-    subtitle.Text = "Loading resources..."
-    subtitle.Font = Enum.Font.GothamMedium
-    subtitle.TextSize = 16
-    subtitle.TextColor3 = Color3.fromRGB(200, 200, 200)
-    
-    -- Background progress bar
-    local progressBg = Instance.new("Frame")
-    progressBg.Parent = loadingFrame
-    progressBg.Size = UDim2.new(0.8, 0, 0, 10)
-    progressBg.Position = UDim2.new(0.1, 0, 0, 240)
-    progressBg.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
-    progressBg.BackgroundTransparency = 0.3
-    progressBg.BorderSizePixel = 0
-    
-    local progressCorner = Instance.new("UICorner")
-    progressCorner.CornerRadius = UDim.new(1, 0)
-    progressCorner.Parent = progressBg
-    
-    -- Progress bar isi
-    local progressFill = Instance.new("Frame")
-    progressFill.Parent = progressBg
-    progressFill.Size = UDim2.new(0, 0, 1, 0)
-    progressFill.BackgroundColor3 = Color3.fromRGB(255, 105, 180)
-    progressFill.BorderSizePixel = 0
-    
-    local fillCorner = Instance.new("UICorner")
-    fillCorner.CornerRadius = UDim.new(1, 0)
-    fillCorner.Parent = progressFill
-    
-    -- Text persentase
-    local percentage = Instance.new("TextLabel")
-    percentage.Parent = loadingFrame
-    percentage.Size = UDim2.new(1, 0, 0, 30)
-    percentage.Position = UDim2.new(0, 0, 0, 255)
-    percentage.BackgroundTransparency = 1
-    percentage.Text = "0%"
-    percentage.Font = Enum.Font.GothamBold
-    percentage.TextSize = 18
-    percentage.TextColor3 = Color3.fromRGB(255, 105, 180)
-    
-    -- Status text
-    local status = Instance.new("TextLabel")
-    status.Parent = loadingFrame
-    status.Size = UDim2.new(1, 0, 0, 25)
-    status.Position = UDim2.new(0, 0, 0, 285)
-    status.BackgroundTransparency = 1
-    status.Text = "Initializing..."
-    status.Font = Enum.Font.GothamMedium
-    status.TextSize = 14
-    status.TextColor3 = Color3.fromRGB(150, 150, 150)
-    
-    return {
-        ScreenGui = screenGui,
-        ProgressFill = progressFill,
-        Percentage = percentage,
-        Status = status,
-        Subtitle = subtitle
-    }
-end
-
--- BUAT LOADING SCREEN
-local loading = CreateLoadingScreen()
-local progress = 0
-
--- FUNGSI UPDATE LOADING
-local function updateLoading(percent, statusText, subtitleText)
-    progress = percent
-    loading.ProgressFill.Size = UDim2.new(percent/100, 0, 1, 0)
-    loading.Percentage.Text = math.floor(percent) .. "%"
-    if statusText then
-        loading.Status.Text = statusText
-    end
-    if subtitleText then
-        loading.Subtitle.Text = subtitleText
-    end
-    task.wait(0.05)
-end
-
--- ============== LOADING SIMULASI ==============
-updateLoading(10, "Memulai...", "Menjalankan script Mahiru")
-task.wait(0.2)
-
-updateLoading(30, "Menyiapkan GUI...", "Loading interface")
-task.wait(0.2)
-
-updateLoading(50, "Memuat fitur...", "Mohon tunggu")
-task.wait(0.2)
-
-updateLoading(70, "Hampir selesai...", "Finalizing")
-task.wait(0.2)
-
-updateLoading(90, "Selesai!", "Welcome to Mahiru")
-task.wait(0.3)
-
-
-loading.ScreenGui:Destroy()
 
 local function CreatePingFPSGui()
     local screenGui = Instance.new("ScreenGui")
@@ -754,6 +591,83 @@ function StartBlatantFishingV2()
             Remotes.RF_Fishing:FireServer()
             task.wait(BlatantCastDelay)
         end
+    end)
+end
+
+function StartBlatantFishing()
+    if IsBlatantFishing then return end
+    IsBlatantFishing = true
+    
+    
+    pcall(function() 
+        Remotes.RF_AutoFishing:InvokeServer(false)
+        Remotes.RF_Cancel:InvokeServer()
+    end)
+    
+    
+    local connection
+    connection = Remotes.RE_FishingMinigameEvent.OnClientEvent:Connect(function(state)
+        if not IsBlatantFishing then 
+            if connection then connection:Disconnect() end
+            return 
+        end
+        
+        if state == "FishCaught" then
+         
+            task.spawn(function()
+                pcall(function()
+                    Remotes.RF_Fishing:FireServer()
+                end)
+            end)
+        end
+    end)
+    
+    task.spawn(function()
+        local loopCount = 0
+        local recoveryEvery = 6  
+        
+        while IsBlatantFishing do
+            loopCount = loopCount + 1
+            
+            task.spawn(function()
+                pcall(function()
+                    Remotes.RF_Charge:InvokeServer(workspace:GetServerTimeNow())
+                end)
+            end)
+            
+            task.spawn(function()
+                pcall(function()
+                    Remotes.RF_Minigame:InvokeServer(-1, 0.999)
+                end)
+            end)
+            
+           
+            task.wait(BlatantReelDelay or 0.3)  
+            
+         
+            task.spawn(function()
+                pcall(function()
+                    Remotes.RF_Fishing:FireServer()
+                end)
+            end)
+           
+            
+            if loopCount >= recoveryEvery then
+                task.spawn(function()
+                    pcall(function()
+                        Remotes.RF_Cancel:InvokeServer()
+                    end)
+                end)
+                loopCount = 0
+                task.wait(0.1) 
+            end
+          
+         
+            task.wait(CompleteDelay or 0.5)
+        end
+        
+        
+        if connection then connection:Disconnect() end
     end)
 end
 
