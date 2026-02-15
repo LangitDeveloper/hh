@@ -666,7 +666,7 @@ function StartBlatantFishing()
         
         task.spawn(function()
             pcall(function()
-                Remotes.RE_FishingMinigameEvent:InvokeServer(9, 0.99, t)
+                Remotes.RF_Minigame:InvokeServer(9, 0.99, t)
             end)
         end)
         
@@ -691,11 +691,7 @@ function StartBlatantFishing()
             loopCount = loopCount + 0.1
             
             if loopCount >= RecoveryEvery then
-                task.spawn(function()
-            pcall(function()
-                Remotes.RF_Fishing:InvokeServer()
-            end)
-        end)
+            FishCycle()
          loopCount = 0
        end
         end
