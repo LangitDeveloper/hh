@@ -701,10 +701,8 @@ function StartBlatantFishing()
                 Remotes.RF_Fishing:InvokeServer()
             end)
         end)
-         loopCount = 0
+         loopCount = 0.1
        end
-            
-            task.wait(Throttle)
         end
     end)
     
@@ -713,11 +711,9 @@ function StartBlatantFishing()
         
         if state == "FishCaught" then
             task.spawn(function()
-                task.wait(CompleteDelay)
                 pcall(function()
-                    Remotes.RF_Minigame:InvokeServer(9, 0.99, t)
+                    Remotes.RF_Cancel:InvokeServer()
                 end)
-                task.wait(CancelDelay)
                 pcall(function()
                     Remotes.RF_Fishing:InvokeServer()
                 end)
