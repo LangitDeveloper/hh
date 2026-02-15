@@ -670,11 +670,9 @@ function StartBlatantFishing()
         
         if state == "FishCaught" then
             task.spawn(function()
-                task.wait(CompleteDelay)
                 pcall(function()
                     Remotes.RF_Cancel:FireServer()
                 end)
-                task.wait(CancelDelay)
                 pcall(function()
                     Remotes.RF_Fishing:InvokeServer()
                 end)
