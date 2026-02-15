@@ -701,20 +701,6 @@ function StartBlatantFishing()
         end
     end)
     
-    Remotes.RE_FishingMinigameEvent.OnClientEvent:Connect(function(state)
-        if not IsBlatantFishing then return end
-        
-        if state == "CatchFishComplete" then
-            task.spawn(function()
-                pcall(function()
-                    Remotes.RF_Cancel:InvokeServer()
-                end)
-                pcall(function()
-                    Remotes.RF_Fishing:InvokeServer()
-                end)
-            end)
-        end
-    end)
 end
 
 
