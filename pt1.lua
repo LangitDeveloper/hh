@@ -658,15 +658,10 @@ function StartBlatantFishing()
         local t = workspace:GetServerTimeNow()
         
      
-        task.spawn(function()
-            pcall(function()
-                Remotes.RF_Charge:InvokeServer(t)
-            end)
-        end)
         
         task.spawn(function()
             pcall(function()
-                Remotes.RF_Minigame:InvokeServer(-9, 0.999, t)
+                Remotes.RF_Minigame:InvokeServer(-99, 0.999, t)
             end)
         end)
         
