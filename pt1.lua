@@ -666,18 +666,26 @@ function StartBlatantFishing()
         
         task.spawn(function()
             pcall(function()
-                Remotes.RF_Minigame:InvokeServer(-9, 0.999, t)
+                Remotes.RF_Fishing:InvokeServer()
             end)
         end)
         
-        task.wait(BlatantFishingDelay)
-        task.spawn(function()
+                task.spawn(function()
             pcall(function()
                 Remotes.RF_Cancel:FireServer()
             end)
         end)
         
+        
+        task.spawn(function()
+            pcall(function()
+                Remotes.RF_Minigame:InvokeServer(-9, 0.999, t)
+            end)
+        end)
+        
+        task.wait(BlatantFishingDelay)
         task.wait(BlatantReelDelay)
+        
     end
     
     task.spawn(function()
@@ -718,7 +726,6 @@ function StartBlatantFishing()
         end
     end)
 end
-
 
 
 function StartAutoSell()
