@@ -42,6 +42,19 @@ local Remotes = {
     RF_Trade = Net:WaitForChild("RF/InitiateTrade"),
 }
 
+local Config = {
+    BlatantMode = false,
+    ReelDelay = 0.1, 
+    FishingDelay = 0.2, 
+    ChargeTime = 0.3,
+    MultiCast = false,
+    CastAmount = 3, 
+    CastPower = 0.55, 
+    CastAngleMin = -0.8, 
+    CastAngleMax = 0.8,
+    InstantFish = false
+}
+
 local Replion = require(ReplicatedStorage.Packages.Replion)
 local FishingController = require(ReplicatedStorage.Controllers.FishingController)
 local ItemTradingController = require(ReplicatedStorage.Controllers.ItemTradingController)
@@ -85,6 +98,8 @@ local AutoSellMode = "Delay"
 local AutoSellValue = 60
 local IsAutoSell = false
 local LastSellTick = 0
+local MultiCast = false
+local CastAmount = 3
 
 local SelectedVictim = nil
 local FrozenPlayers = {}
@@ -651,71 +666,39 @@ end
 
 
 function StartBlatantFishing()
-    if IsBlatantFishing then return end
-    IsBlatantFishing = true
-    
-    local function FishCycle()
-        local t = workspace:GetServerTimeNow()
-        
-     
-        task.spawn(function()
-            pcall(function()
-                Remotes.RF_Charge:InvokeServer(t)
-            end)
-        end)
-        
-        task.spawn(function()
-            pcall(function()
-                Remotes.RF_Minigame:InvokeServer(-9, 0.999, t)
-            end)
-        end)
-        
-        task.wait(BlatantFishingDelay)
-        task.spawn(function()
-            pcall(function()
-                Remotes.RF_Fishing:FireServer()
-            end)
-        end)
-        
-        task.wait(BlatantReelDelay)
-        task.spawn(function()
-            pcall(function()
-                Remotes.RF_Cancel:InvokeServer()
-            end)
-        end)
-    end
-    
-    task.spawn(function()
-        while IsBlatantFishing do
-            FishCycle()
-            loopCount = loopCount + 0.1
-            
-            if loopCount >= RecoveryEvery then
-            FishCycle()
-         loopCount = 0.1
-         
-       end
-        end
-    end)
-    
-    Remotes.RE_FishingMinigameEvent.OnClientEvent:Connect(function(state)
-        if not IsBlatantFishing then return end
-        
-        if state == "FishCaught" then
-            task.spawn(function()
-                task.wait(CompleteDelay)
-                pcall(function()
-                    Remotes.RF_Cancel:InvokeServer()
+    pcall(function()
+        if MultiCast then
+            for i = 1, CastAmount do
+                task.spawn(function()
+                    pcall(function() Net["RF/ChargeFishingRod"]:InvokeServer() end)
+                    if Config.ChargeTime > 0 then task.wait(Config.ChargeTime) end
+                    local angle = Config.CastAngleMin + (math.random() * (Config.CastAngleMax - Config.CastAngleMin))
+                    pcall(function() Net["RF/RequestFishingMinigameStarted"]:InvokeServer(angle, Config.CastPower, os.clock()) end)
+                    if Config.ReelDelay > 0 then task.wait(Config.ReelDelay) end
+                    pcall(function() Net["RE/ShakeFish"]:FireServer() Net["RE/ShakeFish"]:FireServer() end)
+                    pcall(function() Net["RF/CatchFishCompleted"]:FireServer() Net["RF/CatchFishCompleted"]:FireServer() end)
+                    Stats.FishCaught = Stats.FishCaught + 1
                 end)
-                task.wait(CancelDelay)
-                pcall(function()
-                    Remotes.RF_Fishing:InvokeServer()
-                end)
-            end)
+            end
+            task.wait(Config.ChargeTime + Config.ReelDelay + 0.05)
+        elseif Config.InstantFish then
+            pcall(function() Net["RF/ChargeFishingRod"]:InvokeServer() end)
+            local angle = Config.CastAngleMin + (math.random() * (Config.CastAngleMax - Config.CastAngleMin))
+            pcall(function() Net["RF/RequestFishingMinigameStarted"]:InvokeServer(angle, Config.CastPower, os.clock()) end)
+            for i = 1, 3 do pcall(function() Net["RE/FishingCompleted"]:FireServer() Net["RE/ShakeFish"]:FireServer() end) end
+            Stats.FishCaught = Stats.FishCaught + 1
+        else
+            pcall(function() Net["RF/ChargeFishingRod"]:InvokeServer() end)
+            if Config.ChargeTime > 0 then task.wait(Config.ChargeTime) end
+            local angle = Config.CastAngleMin + (math.random() * (Config.CastAngleMax - Config.CastAngleMin))
+            pcall(function() Net["RF/RequestFishingMinigameStarted"]:InvokeServer(angle, Config.CastPower, os.clock()) end)
+            if Config.ReelDelay > 0 then task.wait(Config.ReelDelay) end
+            pcall(function() Net["RE/ShakeFish"]:FireServer() Net["RE/ShakeFish"]:FireServer() end)
+            pcall(function() Net["RE/FishingCompleted"]:FireServer() Net["RE/FishingCompleted"]:FireServer() end)
+            Stats.FishCaught = Stats.FishCaught + 1
         end
     end)
 end
-
 
 
 
